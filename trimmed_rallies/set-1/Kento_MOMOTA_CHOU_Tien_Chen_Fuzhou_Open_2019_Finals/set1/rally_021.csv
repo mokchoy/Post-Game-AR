@@ -1,6 +1,6 @@
-rally,ball_round,time,frame_num,roundscore_A,roundscore_B,player,server,type,aroundhead,backhand,hit_height,hit_area,hit_x,hit_y,landing_height,landing_area,landing_x,landing_y,lose_reason,win_reason,getpoint_player,flaw,player_location_area,player_location_x,player_location_y,opponent_location_area,opponent_location_x,opponent_location_y,db,source_time_seconds,clip_time_seconds,clip_frame_num
-21,1.0,0:21:10,31753.0,12,9,B,1,發短球,,1.0,2.0,,,,1.0,8,528.0,535.0,,,,,8,650.0,376.0,8,551.0,549.0,0,1270.120000,1.000000,25
-21,2.0,0:21:10,31759.0,12,9,A,2,推球,,1.0,2.0,8,528.0,535.0,1.0,8,527.0,332.0,,,,,8,545.0,541.0,8,635.0,364.0,0,1270.360000,1.240000,31
-21,3.0,0:21:11,31789.0,12,9,B,2,點扣,,,1.0,8,527.0,332.0,2.0,7,760.0,514.0,,,,,8,559.0,331.0,8,596.0,572.0,0,1271.560000,2.440000,61
-21,4.0,0:21:12,31808.0,12,9,A,2,推球,,1.0,2.0,7,760.0,514.0,1.0,9,552.0,326.0,,,,,8,744.0,561.0,9,560.0,322.0,0,1272.320000,3.200000,80
-21,5.0,0:21:13,31828.0,12,9,B,3,殺球,,,2.0,9,552.0,326.0,1.0,12,977.0,631.0,出界,對手出界,A,,8,625.0,339.0,8,666.0,572.0,0,1273.120000,4.000000,100
+rally,ball_round,time,frame_num,roundscore_A,roundscore_B,player,server,type,aroundhead,backhand,hit_height,hit_area,hit_x,hit_y,landing_height,landing_area,landing_x,landing_y,lose_reason,win_reason,getpoint_player,flaw,player_location_area,player_location_x,player_location_y,opponent_location_area,opponent_location_x,opponent_location_y,db,source_time_seconds,clip_time_seconds,clip_frame_num,clip_timestamp
+21,1.0,0:21:10,31753.0,12,9,B,1,發短球,,1.0,2.0,,,,1.0,8,528.0,535.0,,,,,8,650.0,376.0,8,551.0,549.0,0,1270.120000,1.000000,25,00:00:01.000
+21,2.0,0:21:10,31759.0,12,9,A,2,推球,,1.0,2.0,8,528.0,535.0,1.0,8,527.0,332.0,,,,,8,545.0,541.0,8,635.0,364.0,0,1270.360000,1.240000,31,00:00:01.240
+21,3.0,0:21:11,31789.0,12,9,B,2,點扣,,,1.0,8,527.0,332.0,2.0,7,760.0,514.0,,,,,8,559.0,331.0,8,596.0,572.0,0,1271.560000,2.440000,61,00:00:02.440
+21,4.0,0:21:12,31808.0,12,9,A,2,推球,,1.0,2.0,7,760.0,514.0,1.0,9,552.0,326.0,,,,,8,744.0,561.0,9,560.0,322.0,0,1272.320000,3.200000,80,00:00:03.200
+21,5.0,0:21:13,31828.0,12,9,B,3,殺球,,,2.0,9,552.0,326.0,1.0,12,977.0,631.0,出界,對手出界,A,,8,625.0,339.0,8,666.0,572.0,0,1273.120000,4.000000,100,00:00:04.000

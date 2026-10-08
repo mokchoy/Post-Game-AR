@@ -1,0 +1,2 @@
+rally_id,start_seconds,end_seconds,filename,dataset,match,game,original_rally_id,source_csv,first_hit_frame,last_hit_frame,annotation_fps,time_offset,export_start_seconds,export_end_seconds,review_flags
+1,458.840000,466.280000,set1/rally_001.mp4,set-1,Kento_MOMOTA_CHOU_Tien_Chen_Fuzhou_Open_2019_Finals,1,1,set1.csv,11496,11582,25,0,458.840000,466.280000,

@@ -12,6 +12,9 @@ import sys
 import tempfile
 from fractions import Fraction
 from pathlib import Path
+from time import perf_counter
+
+PROCESSING_STARTED = perf_counter()
 
 import torch
 from PIL import Image
@@ -33,7 +36,7 @@ ANNOTATION_FIELDS = CSV_FIELDS + (
     "export_start_seconds", "export_end_seconds", "review_flags",
 )
 ANNOTATION_ID_FIELDS = ("dataset", "match", "game", "original_rally_id")
-LABEL_FIELDS = ("source_time_seconds", "clip_time_seconds", "clip_frame_num")
+LABEL_FIELDS = ("source_time_seconds", "clip_time_seconds", "clip_frame_num", "clip_timestamp")
 GENERATED_CLIP = re.compile(r"^rally_\d{3,}\.mp4$")
 SAFE_COMPONENT = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
@@ -692,6 +695,13 @@ def nearest_clip_frame(source_seconds, source_origin, output_fps, frame_count):
     return frame
 
 
+def format_timestamp(seconds):
+    whole_seconds, milliseconds = divmod(round(seconds * 1000), 1000)
+    hours, remainder = divmod(whole_seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}.{milliseconds:03d}"
+
+
 def write_csv_new(path, intervals, overwrite=False, annotation=False):
     path = Path(path)
     fields = ANNOTATION_FIELDS if annotation else CSV_FIELDS
@@ -775,7 +785,9 @@ def write_annotation_labels(path, record, source_origin, clip_metadata, overwrit
                 labeled = dict(source_row)
                 labeled["source_time_seconds"] = f"{source_seconds:.6f}"
                 labeled["clip_frame_num"] = clip_frame
-                labeled["clip_time_seconds"] = f"{clip_frame / output_fps:.6f}"
+                clip_seconds = clip_frame / output_fps
+                labeled["clip_time_seconds"] = f"{clip_seconds:.6f}"
+                labeled["clip_timestamp"] = format_timestamp(clip_seconds)
                 writer.writerow(labeled)
         if temporary is not None:
             os.replace(temporary, path)
@@ -857,6 +869,12 @@ def export_clips(video, folder, intervals, metadata, overwrite, annotation=False
 
 
 def self_test():
+    assert format_timestamp(0) == "00:00:00.000"
+    assert format_timestamp(111 / 25) == "00:00:04.440"
+    assert format_timestamp(59.9996) == "00:01:00.000"
+    assert format_timestamp(3599.9996) == "01:00:00.000"
+    assert format_timestamp(3661.234) == "01:01:01.234"
+
     raw = [0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0]
     smoother, outputs = FiveSampleSmoother(), []
     offset = 1000.0
@@ -925,6 +943,16 @@ def self_test():
         assert by_key[("2", "7")]["filename"] == "set2/rally_007.mp4"
         assert by_key[("1", "11")]["filename"] == "set1/rally_011.mp4"
 
+        label_csv = Path(temporary) / "rally_007.csv"
+        write_annotation_labels(label_csv, by_key[("1", "7")], 6.0, {"fps": 25.0, "frames": 125})
+        with label_csv.open(encoding="utf-8", newline="") as stream:
+            labeled_rows = list(csv.DictReader(stream))
+        assert [row["clip_timestamp"] for row in labeled_rows] == ["00:00:01.000", "00:00:02.000"]
+        assert [row["clip_time_seconds"] for row in labeled_rows] == ["1.000000", "2.000000"]
+        assert [row["clip_frame_num"] for row in labeled_rows] == ["25", "50"]
+        for labeled, original in zip(labeled_rows, by_key[("1", "7")]["_annotation_rows"]):
+            assert all(labeled[field] == value for field, value in original.items())
+
         summary = Path(temporary) / "rallies.csv"
         write_csv_new(summary, records, annotation=True)
         reviewed = read_reviewed_csv(summary, 30.0, annotation=True)
@@ -943,7 +971,7 @@ def self_test():
         else:
             raise AssertionError("legacy interval validation allowed an overlap")
 
-    print("Self-test passed: smoothing/transient errors, buffered timestamps, EOF, legacy validation, annotation FPS/offset/padding, overlaps, repeated IDs/gaps, and reviewed identity restoration.")
+    print("Self-test passed: smoothing/transient errors, buffered timestamps, EOF, legacy validation, annotation FPS/offset/padding, overlaps, repeated IDs/gaps, reviewed identity restoration, and clip timestamp labels.")
 
 
 def parse_args():
@@ -1044,3 +1072,6 @@ if __name__ == "__main__":
     except (FileExistsError, FileNotFoundError, OSError, RuntimeError, ValueError, csv.Error) as error:
         print(f"Error: {error}", file=sys.stderr)
         raise SystemExit(2)
+    finally:
+        elapsed = perf_counter() - PROCESSING_STARTED
+        print(f"Elapsed processing time: {format_timestamp(elapsed)} ({elapsed:.3f} seconds)")

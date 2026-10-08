@@ -1,6 +1,6 @@
-rally,ball_round,time,frame_num,roundscore_A,roundscore_B,player,server,type,aroundhead,backhand,hit_height,hit_area,hit_x,hit_y,landing_height,landing_area,landing_x,landing_y,lose_reason,win_reason,getpoint_player,flaw,player_location_area,player_location_x,player_location_y,opponent_location_area,opponent_location_x,opponent_location_y,db,source_time_seconds,clip_time_seconds,clip_frame_num
-3,1.0,00:33:03,49590.0,1,2,B,1,發短球,,1.0,2.0,,,,2.0,7,735.0,399.0,,,,,8,618.0,555.0,8,697.0,366.0,0,1983.600000,1.000000,25
-3,2.0,00:33:04,49605.0,1,2,A,2,擋小球,,1.0,1.0,7,735.0,399.0,2.0,7,769.0,508.0,,,,,8,726.0,389.0,8,658.0,555.0,0,1984.200000,1.600000,40
-3,3.0,00:33:04,49623.0,1,2,B,2,放小球,,,1.0,7,769.0,508.0,2.0,2,797.0,419.0,,,,,7,746.0,509.0,8,691.0,374.0,0,1984.920000,2.320000,58
-3,4.0,00:33:05,49643.0,1,2,A,2,挑球,,,2.0,2,797.0,419.0,1.0,3,852.0,647.0,,,,,7,765.0,413.0,8,703.0,548.0,0,1985.720000,3.120000,78
-3,5.0,00:33:07,49676.0,1,2,B,3,後場抽平球,,,1.0,3,852.0,647.0,2.0,4,815.0,317.0,落點判斷失誤,對手落點判斷失誤,B,,9,795.0,643.0,8,682.0,361.0,0,1987.040000,4.440000,111
+rally,ball_round,time,frame_num,roundscore_A,roundscore_B,player,server,type,aroundhead,backhand,hit_height,hit_area,hit_x,hit_y,landing_height,landing_area,landing_x,landing_y,lose_reason,win_reason,getpoint_player,flaw,player_location_area,player_location_x,player_location_y,opponent_location_area,opponent_location_x,opponent_location_y,db,source_time_seconds,clip_time_seconds,clip_frame_num,clip_timestamp
+3,1.0,00:33:03,49590.0,1,2,B,1,發短球,,1.0,2.0,,,,2.0,7,735.0,399.0,,,,,8,618.0,555.0,8,697.0,366.0,0,1983.600000,1.000000,25,00:00:01.000
+3,2.0,00:33:04,49605.0,1,2,A,2,擋小球,,1.0,1.0,7,735.0,399.0,2.0,7,769.0,508.0,,,,,8,726.0,389.0,8,658.0,555.0,0,1984.200000,1.600000,40,00:00:01.600
+3,3.0,00:33:04,49623.0,1,2,B,2,放小球,,,1.0,7,769.0,508.0,2.0,2,797.0,419.0,,,,,7,746.0,509.0,8,691.0,374.0,0,1984.920000,2.320000,58,00:00:02.320
+3,4.0,00:33:05,49643.0,1,2,A,2,挑球,,,2.0,2,797.0,419.0,1.0,3,852.0,647.0,,,,,7,765.0,413.0,8,703.0,548.0,0,1985.720000,3.120000,78,00:00:03.120
+3,5.0,00:33:07,49676.0,1,2,B,3,後場抽平球,,,1.0,3,852.0,647.0,2.0,4,815.0,317.0,落點判斷失誤,對手落點判斷失誤,B,,9,795.0,643.0,8,682.0,361.0,0,1987.040000,4.440000,111,00:00:04.440
