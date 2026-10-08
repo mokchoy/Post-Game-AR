@@ -90,6 +90,7 @@ def run(camera_index=0):
             ok, frame = camera.read()
             if not ok:
                 raise RuntimeError("Webcam frame capture failed.")
+            frame = cv2.flip(frame, 1)
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             if len(tracker.corners) == 4 and tracker.previous is None:
                 tracker.initialise(gray)
