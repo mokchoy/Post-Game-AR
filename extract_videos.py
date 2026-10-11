@@ -3,24 +3,25 @@ import csv
 import yt_dlp
 
 urls = []
+seen = set()
 
-# Extract the first 5 URLs from match.csv
-with open('set-1/match.csv', mode='r', encoding='utf-8-sig') as file:
-    reader = csv.reader(file)
-    next(reader, None)  # Skip the header row
-    
-    for row in reader:
-        if row and row[12].strip():
-            urls.append(row[12].strip())
-            if len(urls) == 5:
-                break
+for csv_path in ("set-1/match.csv", "set-2/match.csv"):
+    with open(csv_path, mode="r", encoding="utf-8-sig", newline="") as file:
+        reader = csv.DictReader(file)
 
-print(urls)
+        if "url" not in (reader.fieldnames or []):
+            raise ValueError(f"{csv_path}: missing 'url' column")
+
+        for row in reader:
+            url = (row.get("url") or "").strip()
+            if url and url not in seen:
+                seen.add(url)
+                urls.append(url)
+
+print(f"Found {len(urls)} unique video links")
 
 # Define your local Google Drive path
-# Windows usually defaults to G:\My Drive\...
-# Mac usually defaults to /Users/Username/Google Drive/My Drive/...
-gdrive_path = r"G:\My Drive\Match_Downloads" 
+gdrive_path = r"G:\My Drive\Match_Downloads_2" 
 
 # Configure download settings
 ydl_opts = {
