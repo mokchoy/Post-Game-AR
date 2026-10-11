@@ -1,0 +1,6 @@
+rally,ball_round,time,frame_num,roundscore_A,roundscore_B,player,server,type,aroundhead,backhand,hit_height,hit_area,hit_x,hit_y,landing_height,landing_area,landing_x,landing_y,lose_reason,win_reason,getpoint_player,flaw,player_location_area,player_location_x,player_location_y,opponent_location_area,opponent_location_x,opponent_location_y,db,source_time_seconds,clip_time_seconds,clip_frame_num,clip_timestamp
+32,1.0,00:51:51,77788.0,14,18,A,1,發短球,,1.0,2.0,,,,2.0,8,700.0,533.0,,,,,8,625.0,384.0,8,697.0,568.0,0,3111.520000,1.000000,25,00:00:01.000
+32,2.0,00:51:52,77803.0,14,18,B,2,放小球,,,1.0,8,700.0,533.0,2.0,7,632.0,408.0,,,,,8,695.0,537.0,8,640.0,373.0,0,3112.120000,1.600000,40,00:00:01.600
+32,3.0,00:51:53,77827.0,14,18,A,2,挑球,,1.0,2.0,7,632.0,408.0,1.0,5,822.0,614.0,,,,,7,662.0,405.0,8,649.0,547.0,0,3113.080000,2.560000,64,00:00:02.560
+32,4.0,00:51:54,77859.0,14,18,B,2,殺球,,,1.0,5,822.0,614.0,2.0,8,752.0,359.0,,,,,9,769.0,634.0,8,673.0,354.0,0,3114.360000,3.840000,96,00:00:03.840
+32,5.0,00:51:54,77874.0,14,18,A,3,擋小球,,,1.0,8,752.0,359.0,2.0,7,525.0,452.0,未過網,對手未過網,B,,8,684.0,346.0,3,857.0,651.0,0,3114.960000,4.440000,111,00:00:04.440

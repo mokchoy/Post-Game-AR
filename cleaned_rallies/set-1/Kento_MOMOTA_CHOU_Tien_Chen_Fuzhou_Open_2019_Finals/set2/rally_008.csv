@@ -1,0 +1,2 @@
+rally,ball_round,time,frame_num,roundscore_A,roundscore_B,player,server,type,aroundhead,backhand,hit_height,hit_area,hit_x,hit_y,landing_height,landing_area,landing_x,landing_y,lose_reason,win_reason,getpoint_player,flaw,player_location_area,player_location_x,player_location_y,opponent_location_area,opponent_location_x,opponent_location_y,db,source_time_seconds,clip_time_seconds,clip_frame_num,clip_timestamp
+8,1.0,00:34:57,52449.0,3,5,B,3,發短球,,1.0,1.0,,,,,8,618.0,387.0,出界,對手出界,A,,8,618.0,557.0,8,708.0,366.0,0,2097.960000,1.000000,25,00:00:01.000

@@ -1,0 +1,6 @@
+rally,ball_round,time,frame_num,roundscore_A,roundscore_B,player,server,type,aroundhead,backhand,hit_height,hit_area,hit_x,hit_y,landing_height,landing_area,landing_x,landing_y,lose_reason,win_reason,getpoint_player,flaw,player_location_area,player_location_x,player_location_y,opponent_location_area,opponent_location_x,opponent_location_y,db,source_time_seconds,clip_time_seconds,clip_frame_num,clip_timestamp
+13,1.0,01:09:40,104518.0,8,5,B,1,發長球,,1.0,2.0,,,,1.0,4,485.0,636.0,,,,,8,658.0,375.0,8,565.0,563.0,0,4180.720000,0.080000,2,00:00:00.080
+13,2.0,01:09:41,104543.0,8,5,A,2,長球,,,2.0,4,485.0,636.0,1.0,8,710.0,342.0,,,,,9,537.0,635.0,8,631.0,365.0,0,4181.720000,1.080000,27,00:00:01.080
+13,3.0,01:09:42,104566.0,8,5,B,2,殺球,1.0,,1.0,8,710.0,342.0,2.0,8,517.0,578.0,,,,,8,679.0,330.0,8,633.0,610.0,0,4182.640000,2.000000,50,00:00:02.000
+13,4.0,01:09:43,104581.0,8,5,A,2,擋小球,,,1.0,8,517.0,578.0,2.0,1,515.0,415.0,,,,,8,609.0,597.0,9,678.0,318.0,0,4183.240000,2.600000,65,00:00:02.600
+13,5.0,01:09:44,104605.0,8,5,B,3,推球,,,1.0,1,515.0,415.0,2.0,13,809.0,680.0,出界,對手出界,A,,8,578.0,390.0,8,565.0,581.0,0,4184.200000,3.560000,89,00:00:03.560
