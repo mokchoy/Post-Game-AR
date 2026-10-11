@@ -36,7 +36,7 @@ REPORT_FIELDS = (
     "removed_leading_seconds", "removed_trailing_frames", "removed_trailing_seconds",
     "outcome", "review_flags",
 )
-SAFE_COMPONENT = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+SAFE_COMPONENT = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9._-]| +(?=[A-Za-z0-9._-]))*$")
 
 
 def executable(name):
@@ -780,6 +780,15 @@ def preflight_clean(clean_folder, records, overwrite):
 
 
 def self_test():
+    assert validate_component("Sudirman Cup 2019", "match") == "Sudirman Cup 2019"
+    assert validate_component("Sudirman  Cup 2019", "match") == "Sudirman  Cup 2019"
+    for value in ("..", "folder/name", "folder\\name", "bad:name", " leading", "trailing "):
+        try:
+            validate_component(value, "match")
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"unsafe path component was accepted: {value!r}")
     assert containing_scene([(0, 20)], [0, 10, 19], 20) == (0, 20)  # no cuts
     scenes = [(0, 10), (10, 50), (50, 60)]
     assert containing_scene(scenes, [20, 49], 60) == (10, 50)  # leading and trailing cuts
