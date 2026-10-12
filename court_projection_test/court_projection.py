@@ -53,6 +53,8 @@ OUTPUT_SIZE = (1440, 720)
 MIN_INTERSECTION_ANGLE_DEG = 1.0
 COURT_MARGIN_M = 2.0
 MAX_ONE_PIXEL_SHIFT_M = 1.0
+MAX_SHORT_GAP_FRAMES = 5
+INTERPOLATED_COLOR = (0, 165, 255)  # OpenCV BGR orange.
 
 POINT_KEYS = {
     ord("1"): "left_post_bottom",
@@ -484,6 +486,7 @@ def project_observations(observations: list[tuple[float, float] | None], strokes
                 "B": player_locations[stroke.index]["B"],
             },
             "observed": observed,
+            "estimated": None,
             "floor_pixel": None,
             "court_xy": None,
             "angle_deg": None,
@@ -528,8 +531,123 @@ def project_observations(observations: list[tuple[float, float] | None], strokes
                     row["floor_pixel"] = floor_pixel
                     row["court_xy"] = court_xy
             row["status"] = status
+        row["position_source"] = "tracked" if row["status"] == "available" else "unavailable"
         results.append(row)
     return results
+
+
+def fill_short_gaps(rows: list[dict], strokes: list[Stroke], vanishing_point: np.ndarray,
+                    geometry: CourtGeometry, fps: float, player_locations: list[dict]) -> tuple[list[dict], dict]:
+    """Test bracketed missing runs using only the original tracked anchors; accept whole gaps."""
+    candidates = [None] * len(rows)
+    gaps = []
+    counts = {"enabled": True, "max_gap_frames": MAX_SHORT_GAP_FRAMES,
+              "eligible_gaps": 0, "accepted_gaps": 0, "rejected_gaps": 0, "skipped_gaps": 0}
+    start = 0
+    while start < len(rows):
+        if rows[start]["status"] != "missing_detection":
+            start += 1
+            continue
+        end = start + 1
+        while end < len(rows) and rows[end]["status"] == "missing_detection":
+            end += 1
+        stroke = rows[start]["stroke"]
+        if (end - start > MAX_SHORT_GAP_FRAMES or start == 0 or end == len(rows)
+                or stroke is None
+                or any(row["stroke"] is not stroke for row in rows[start - 1:end + 1])
+                or any(rows[i]["position_source"] != "tracked" for i in (start - 1, end))):
+            counts["skipped_gaps"] += 1
+        else:
+            times = [rows[start - 1]["time_seconds"], rows[end]["time_seconds"]]
+            anchors = np.asarray([rows[start - 1]["observed"], rows[end]["observed"]])
+            query = [row["time_seconds"] for row in rows[start:end]]
+            pixels = np.column_stack([np.interp(query, times, anchors[:, axis]) for axis in (0, 1)])
+            candidates[start:end] = [tuple(pixel) for pixel in pixels]
+            gaps.append((start, end))
+        start = end
+    counts["eligible_gaps"] = len(gaps)
+    projected = project_observations(candidates, strokes, vanishing_point, geometry, fps, player_locations)
+    filled = [dict(row) for row in rows]
+    for start, end in gaps:
+        if all(row["status"] == "available" for row in projected[start:end]):
+            for frame in range(start, end):
+                filled[frame] = {**projected[frame], "observed": None,
+                                 "estimated": candidates[frame], "position_source": "interpolated"}
+            counts["accepted_gaps"] += 1
+        else:
+            counts["rejected_gaps"] += 1
+    return filled, counts
+
+
+def validate_short_gaps(observations: list[tuple[float, float] | None], strokes: list[Stroke],
+                        vanishing_point: np.ndarray, geometry: CourtGeometry, fps: float,
+                        player_locations: list[dict]) -> dict:
+    """Independently mask the first bracketed valid window per stroke/length before reconstruction."""
+    reference = project_observations(observations, strokes, vanishing_point, geometry, fps, player_locations)
+    trials, summaries = [], {}
+    for length in (1, 3, 5):
+        native_errors, court_errors, ab_errors = [], [], []
+        attempted = accepted = 0
+        for stroke in strokes[:-1]:  # The final landing time is unknown.
+            start = next((frame for frame in range(stroke.start_frame + 1, stroke.end_frame_exclusive - length)
+                          if all(row["position_source"] == "tracked"
+                                 for row in reference[frame - 1:frame + length + 1])), None)
+            trial = {"stroke_id": stroke.identifier, "window_frames": length,
+                     "start_frame": start, "accepted": False}
+            trials.append(trial)
+            if start is None:
+                continue
+            attempted += 1
+            masked = list(observations)
+            masked[start:start + length] = [None] * length
+            masked_rows = project_observations(masked, strokes, vanishing_point, geometry, fps, player_locations)
+            reconstructed, _ = fill_short_gaps(masked_rows, strokes, vanishing_point, geometry, fps, player_locations)
+            trial["accepted"] = all(row["position_source"] == "interpolated"
+                                    for row in reconstructed[start:start + length])
+            if not trial["accepted"]:
+                continue
+            accepted += 1
+            a_world = geometry.native_floor_to_world(stroke.a_native)
+            b_world = geometry.native_floor_to_world(stroke.b_native)
+            for frame in range(start, start + length):
+                native_errors.append(float(np.linalg.norm(
+                    np.asarray(reconstructed[frame]["estimated"]) - observations[frame])))
+                court_errors.append(float(np.linalg.norm(
+                    reconstructed[frame]["court_xy"] - reference[frame]["court_xy"])))
+                fraction = ((reference[frame]["time_seconds"] - stroke.start_frame / fps)
+                            / ((stroke.end_frame_exclusive - stroke.start_frame) / fps))
+                ab = a_world + fraction * (b_world - a_world)
+                ab_errors.append(float(np.linalg.norm(ab - reference[frame]["court_xy"])))
+        metrics = lambda errors: {
+            "mean_euclidean_error": float(np.mean(errors)) if errors else None,
+            "rmse": float(np.sqrt(np.mean(np.square(errors)))) if errors else None,
+        }
+        summaries[str(length)] = {
+            "attempted_windows": attempted, "accepted_windows": accepted,
+            "no_eligible_window_strokes": len(strokes) - 1 - attempted,
+            "accepted_frames": len(native_errors), "native_pixels": metrics(native_errors),
+            "interpolated_court_m": metrics(court_errors), "endpoint_ab_court_m": metrics(ab_errors),
+        }
+    return {
+        "reference": "Held-out TrackNet pixels and their projections, not independent ground truth",
+        "selection": "First interior valid window per stroke and length, with valid tracked anchors",
+        "baseline": "Constant speed in court metres between existing AB endpoints at contact frame/fps times",
+        "excluded_stroke_id": strokes[-1].identifier,
+        "by_window_frames": summaries, "trials": trials,
+    }
+
+
+def print_gap_validation(validation: dict) -> None:
+    for length, summary in validation["by_window_frames"].items():
+        def description(metrics: dict) -> str:
+            if metrics["rmse"] is None:
+                return "mean/RMSE n/a"
+            return f"mean {metrics['mean_euclidean_error']:.4f}, RMSE {metrics['rmse']:.4f}"
+        print(f"Held-out {length}-frame windows: attempted {summary['attempted_windows']}, "
+              f"accepted {summary['accepted_windows']} ({summary['accepted_frames']} frames); "
+              f"native px {description(summary['native_pixels'])}; "
+              f"court m interpolation {description(summary['interpolated_court_m'])}; "
+              f"AB {description(summary['endpoint_ab_court_m'])}")
 
 
 def write_ground_csv(path: Path, rows: list[dict]) -> None:
@@ -538,31 +656,34 @@ def write_ground_csv(path: Path, rows: list[dict]) -> None:
         writer.writerow((
             "frame", "time_seconds", "stroke_id", "observed_shuttle_x_native_px", "observed_shuttle_y_native_px",
             "inferred_floor_x_native_px", "inferred_floor_y_native_px", "court_x_m", "court_y_m", "status",
+            "estimated_shuttle_x_native_px", "estimated_shuttle_y_native_px", "position_source",
         ))
         for row in rows:
             observed = row["observed"]
             floor = row["floor_pixel"]
             court = row["court_xy"]
+            estimated = row["estimated"]
             observed_fields = tuple(f"{value:.3f}" for value in observed) if observed is not None else ("", "")
             floor_fields = tuple(f"{value:.3f}" for value in floor) if floor is not None else ("", "")
             court_fields = tuple(f"{value:.6f}" for value in court) if court is not None else ("", "")
+            estimated_fields = tuple(f"{value:.3f}" for value in estimated) if estimated is not None else ("", "")
             writer.writerow((
                 row["frame"], f"{row['time_seconds']:.6f}", row["stroke"].identifier if row["stroke"] else "",
                 *observed_fields, *floor_fields, *court_fields,
-                row["status"],
+                row["status"], *estimated_fields, row["position_source"],
             ))
 
 
-def trail_edges(rows: list[dict]) -> list[tuple[int, int, np.ndarray, np.ndarray]]:
+def trail_edges(rows: list[dict]) -> list[tuple[int, int, np.ndarray, np.ndarray, bool]]:
     edges = []
     previous = None
     for row in rows:
         if row["status"] != "available" or row["stroke"] is None:
             previous = None
             continue
-        current = (row["frame"], row["stroke"].index, row["court_xy"])
+        current = (row["frame"], row["stroke"].index, row["court_xy"], row["position_source"] == "interpolated")
         if previous is not None and current[0] == previous[0] + 1 and current[1] == previous[1]:
-            edges.append((current[0], current[1], previous[2], current[2]))
+            edges.append((current[0], current[1], previous[2], current[2], previous[3] or current[3]))
         previous = current
     return edges
 
@@ -596,14 +717,15 @@ def render_frame(source_frame: np.ndarray, row: dict, trail: list, court_lines: 
         cv2.circle(frame, b, 6, (255, 120, 0), -1)
         cv2.putText(frame, "A", (a[0] + 6, a[1] - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 70, 255), 2)
         cv2.putText(frame, "B", (b[0] + 6, b[1] - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 120, 0), 2)
-    observed = row["observed"]
-    if observed is not None:
-        point = tuple(np.rint(np.asarray(observed) * [video_width / FRAME_WIDTH, video_height / FRAME_HEIGHT]).astype(int))
-        cv2.circle(frame, point, 7, (0, 255, 255), -1)
+    interpolated = row["position_source"] == "interpolated"
+    pixel = row["estimated"] if interpolated else row["observed"]
+    if pixel is not None:
+        point = tuple(np.rint(np.asarray(pixel) * [video_width / FRAME_WIDTH, video_height / FRAME_HEIGHT]).astype(int))
+        cv2.circle(frame, point, 7, INTERPOLATED_COLOR if interpolated else (0, 255, 255), -1)
     if row["floor_pixel"] is not None:
         point = row["floor_pixel"] * [video_width / FRAME_WIDTH, video_height / FRAME_HEIGHT]
         if np.isfinite(point).all() and np.max(np.abs(point)) <= 1_000_000:
-            cv2.drawMarker(frame, tuple(np.rint(point).astype(int)), (0, 255, 0), cv2.MARKER_TILTED_CROSS, 18, 3)
+            cv2.drawMarker(frame, tuple(np.rint(point).astype(int)), INTERPOLATED_COLOR if interpolated else (0, 255, 0), cv2.MARKER_TILTED_CROSS, 18, 3)
     canvas[video_top:video_top + video_height, video_left:video_left + video_width] = frame
     stroke_label = stroke.identifier if stroke is not None else "before first hit"
     cv2.putText(canvas, f"SOURCE  |  frame {row['frame']:03d}/523  {row['time_seconds']:.2f}s  |  {stroke_label}",
@@ -612,6 +734,8 @@ def render_frame(source_frame: np.ndarray, row: dict, trail: list, court_lines: 
                 cv2.FONT_HERSHEY_SIMPLEX, 0.45, (220, 220, 220), 1)
     cv2.putText(canvas, f"projection status: {row['status']}", (16, 652), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                 (0, 255, 0) if row["status"] == "available" else (180, 180, 180), 1)
+    cv2.putText(canvas, "orange: interpolated shuttle, floor point and touching trail", (16, 680),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.45, INTERPOLATED_COLOR, 1)
 
     x0 = 960
     cv2.line(canvas, (x0, 0), (x0, OUTPUT_SIZE[1]), (90, 90, 90), 1)
@@ -626,12 +750,12 @@ def render_frame(source_frame: np.ndarray, row: dict, trail: list, court_lines: 
         pa, pb = court_panel_point(np.asarray(a), plot_rect), court_panel_point(np.asarray(b), plot_rect)
         if pa is not None and pb is not None:
             cv2.line(plot, pa, pb, color, 2 if a[1] == NET_Y_M else 1)
-    for end_frame, stroke_index, a, b in trail:
+    for end_frame, stroke_index, a, b, touches_fill in trail:
         if end_frame > row["frame"]:
             continue
         pa, pb = court_panel_point(a, plot_rect), court_panel_point(b, plot_rect)
         if pa is not None and pb is not None:
-            cv2.line(plot, pa, pb, stroke_color(stroke_index), 2)
+            cv2.line(plot, pa, pb, INTERPOLATED_COLOR if touches_fill else stroke_color(stroke_index), 2)
     player_marker_colors = {"A": (0, 70, 255), "B": (255, 120, 0)}
     for identity, xy in (row["player_locations"] or {}).items():
         point = court_panel_point(xy, plot_rect)
@@ -645,7 +769,7 @@ def render_frame(source_frame: np.ndarray, row: dict, trail: list, court_lines: 
     if row["court_xy"] is not None:
         point = court_panel_point(row["court_xy"], plot_rect)
         if point is not None:
-            cv2.circle(plot, point, 7, (255, 255, 255), -1)
+            cv2.circle(plot, point, 7, INTERPOLATED_COLOR if interpolated else (255, 255, 255), -1)
     if row["court_xy"] is not None:
         xy_text = f"x={row['court_xy'][0]:.2f} m  y={row['court_xy'][1]:.2f} m"
     else:
@@ -725,7 +849,7 @@ def render_h264_with_audio(video: Path, output: Path, rows: list[dict], fps: flo
 
 
 def run(video: Path, rally_csv: Path, homography_csv: Path, tracked_csv: Path, calibration_path: Path,
-        output_dir: Path) -> list[Path]:
+        output_dir: Path, fill_short_gaps_enabled: bool = False) -> list[Path]:
     video, rally_csv, homography_csv, metadata, hits, geometry = prepare_inputs(video, rally_csv, homography_csv)
     tracked_csv = resolved_repo_path(tracked_csv)
     if not tracked_csv.is_file():
@@ -737,11 +861,18 @@ def run(video: Path, rally_csv: Path, homography_csv: Path, tracked_csv: Path, c
     calibration = load_calibration(calibration_path, video, metadata, geometry)
     observations = load_tracked_detections(tracked_csv, metadata)
     strokes = prepare_strokes(hits, metadata["frame_count"])
+    vp = np.asarray(calibration["homogeneous_vertical_vanishing_point_native"], dtype=np.float64)
+    players = player_references(hits, geometry)
     rows = project_observations(
-        observations, strokes,
-        np.asarray(calibration["homogeneous_vertical_vanishing_point_native"], dtype=np.float64),
-        geometry, metadata["fps"], player_references(hits, geometry),
+        observations, strokes, vp, geometry, metadata["fps"], players,
     )
+    gap_counts = {"enabled": False, "max_gap_frames": MAX_SHORT_GAP_FRAMES,
+                  "eligible_gaps": 0, "accepted_gaps": 0, "rejected_gaps": 0, "skipped_gaps": 0}
+    validation = None
+    if fill_short_gaps_enabled:
+        rows, gap_counts = fill_short_gaps(rows, strokes, vp, geometry, metadata["fps"], players)
+        validation = validate_short_gaps(observations, strokes, vp, geometry, metadata["fps"], players)
+        print_gap_validation(validation)
     output_dir.mkdir(parents=True, exist_ok=True)
     stem = video.stem
     outputs = [
@@ -771,6 +902,8 @@ def run(video: Path, rally_csv: Path, homography_csv: Path, tracked_csv: Path, c
                 "AB_line_status": stroke.line_status,
                 "visible_detections": sum(row["observed"] is not None for row in subset),
                 "available_projections": sum(row["status"] == "available" for row in subset),
+                "tracked_projections": sum(row["position_source"] == "tracked" for row in subset),
+                "interpolated_projections": sum(row["position_source"] == "interpolated" for row in subset),
                 "status_counts": dict(Counter(row["status"] for row in subset)),
             }
         diagnostics = {
@@ -793,13 +926,18 @@ def run(video: Path, rally_csv: Path, homography_csv: Path, tracked_csv: Path, c
             },
             "availability": {
                 "frames": len(rows), "available": status_counts.get("available", 0),
+                "tracked_projections": sum(row["position_source"] == "tracked" for row in rows),
+                "interpolated_projections": sum(row["position_source"] == "interpolated" for row in rows),
                 "status_counts": dict(status_counts), "strokes": per_stroke,
             },
+            "short_gap_filling": gap_counts,
+            "held_out_validation": validation,
             "approximation_warnings": [
                 "Hit/landing annotations are approximate court footprints; only the first serve uses the hitter's player location as its starting footprint.",
                 "Each shuttle footprint assumes the shuttle lies in the vertical plane through that stroke's fixed AB floor line.",
                 "The final net-fault flight uses one approximate vertical plane from the last hit_x/y to landing_x/y and assumes the shuttle drops roughly beneath its net-contact position.",
-                "No landing time is estimated for the final stroke. Missing and invalid frames are not interpolated; court trails break at those frames and at stroke boundaries.",
+                "No landing time is estimated for the final stroke. Optional interpolation fills only short missing runs within a stroke; unavailable frames and stroke boundaries break trails.",
+                "Held-out TrackNet detections and projected positions are reference measurements, not independent ground truth for court footprints.",
             ],
             "output_video": output_video,
         }
@@ -815,6 +953,9 @@ def run(video: Path, rally_csv: Path, homography_csv: Path, tracked_csv: Path, c
     print(f"Diagnostics: {outputs[1]}")
     print(f"Projection video: {outputs[2]}")
     print(f"Available frames: {status_counts.get('available', 0)} / {len(rows)}; status counts: {dict(status_counts)}")
+    print(f"Tracked projections: {diagnostics['availability']['tracked_projections']}; "
+          f"interpolated projections: {diagnostics['availability']['interpolated_projections']}; "
+          f"short gaps: {gap_counts}")
     print(f"Video checks: {output_video}")
     return outputs
 
@@ -829,6 +970,8 @@ def build_parser() -> argparse.ArgumentParser:
         sub.add_argument("--homography-csv", type=Path, default=DEFAULT_HOMOGRAPHY)
         sub.add_argument("--calibration", type=Path, default=DEFAULT_CALIBRATION)
         if command == "run":
+            sub.add_argument("--fill-short-gaps", action="store_true",
+                             help="Fill up to five missing frames within a stroke and run held-out validation")
             sub.add_argument("--output-dir", type=Path, default=HERE)
             sub.add_argument("--tracked-csv", type=Path, default=DEFAULT_TRACKED_CSV)
     return parser
@@ -851,7 +994,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Calibration saved: {calibration_path}")
         else:
             output_dir = project_output_path(args.output_dir)
-            run(video, rally_csv, homography_csv, args.tracked_csv, calibration_path, output_dir)
+            run(video, rally_csv, homography_csv, args.tracked_csv, calibration_path, output_dir, args.fill_short_gaps)
     except Exception as error:
         print(f"court_projection: failed: {error}", file=sys.stderr)
         return 2
