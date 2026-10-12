@@ -1,0 +1,129 @@
+{
+  "format_version": 1,
+  "created_utc": "2026-10-12T10:53:09.408681+00:00",
+  "selection_method": "manual_opencv_clicks",
+  "source": {
+    "video": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\cleaned_rallies\\set-1\\Kento_MOMOTA_CHOU_Tien_Chen_Fuzhou_Open_2019_Finals\\set1\\rally_015.mp4",
+    "rally_csv": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\cleaned_rallies\\set-1\\Kento_MOMOTA_CHOU_Tien_Chen_Fuzhou_Open_2019_Finals\\set1\\rally_015.csv",
+    "homography_csv": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\set-1\\homography.csv",
+    "video_metadata": {
+      "width": 1920,
+      "height": 1080,
+      "fps": 25.0,
+      "frame_count": 524
+    }
+  },
+  "geometry": {
+    "homography_row_id": "1",
+    "homography_row_video": "Kento_MOMOTA_CHOU_Tien_Chen_Fuzhou_Open_2019_Finals",
+    "homography_annotation_to_dataset": [
+      [
+        1.0606627138451856,
+        0.3439667138673875,
+        -497.8978610611467
+      ],
+      [
+        0.011919581725440269,
+        4.586662980083068,
+        -1176.8442597836183
+      ],
+      [
+        4.8478780487874024e-06,
+        0.002012572611469505,
+        1.0
+      ]
+    ],
+    "dataset_to_metric": [
+      [
+        0.020333329601384512,
+        5.876173861456717e-11,
+        -0.5083331325006274
+      ],
+      [
+        -2.065330890242369e-09,
+        0.020303029179376115,
+        -3.0454540154735175
+      ],
+      [
+        -4.623875055083599e-10,
+        9.633072122516804e-12,
+        1.0
+      ]
+    ],
+    "corners_annotation": [
+      [
+        407.6,
+        308.6
+      ],
+      [
+        867.0,
+        307.4
+      ],
+      [
+        307.2,
+        671.2
+      ],
+      [
+        973.0,
+        669.4
+      ]
+    ],
+    "mapped_bounds_dataset": [
+      24.999992711905715,
+      149.99998270699095,
+      325.00000979994803,
+      809.9999761685905
+    ]
+  },
+  "scaling": {
+    "annotation_to_native_video": 1.5,
+    "preview_size": [
+      1280,
+      720
+    ],
+    "native_size": [
+      1920,
+      1080
+    ],
+    "preview_to_native": [
+      1.5,
+      1.5
+    ]
+  },
+  "post_points": {
+    "left_post_bottom": {
+      "frame_index": 0,
+      "pixel_native_px": [
+        556.5,
+        679.5
+      ]
+    },
+    "left_post_top": {
+      "frame_index": 0,
+      "pixel_native_px": [
+        552.0,
+        486.0
+      ]
+    },
+    "right_post_bottom": {
+      "frame_index": 0,
+      "pixel_native_px": [
+        1359.0,
+        678.0
+      ]
+    },
+    "right_post_top": {
+      "frame_index": 0,
+      "pixel_native_px": [
+        1360.5,
+        483.0
+      ]
+    }
+  },
+  "homogeneous_vertical_vanishing_point_native": [
+    1159.5260115606936,
+    26609.618497109826,
+    1.0
+  ],
+  "vertical_vanishing_point_kind": "finite"
+}

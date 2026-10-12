@@ -1,0 +1,30 @@
+# Generated rally datasets
+/cleaned_rallies/
+/trimmed_rallies/
+/trim_rallies/.v3-raw-*/
+
+# Videos and incomplete downloads
+*.mp4
+*.mkv
+*.avi
+*.mov
+*.webm
+*.m4v
+*.part
+*.ytdl
+
+# Model weights and binary data
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.h5
+*.hdf5
+*.npy
+*.npz
+*.pkl
+*.pickle
+
+# Python caches
+__pycache__/
+*.py[cod]

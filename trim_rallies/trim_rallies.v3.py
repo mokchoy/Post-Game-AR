@@ -1,4 +1,4 @@
-"""Batch annotation-led trimming for the set-1 roster and verified legacy files."""
+"""Batch annotation-led trimming with temporary raw clips and persistent cleaned outputs."""
 
 import argparse
 import contextlib
@@ -20,8 +20,7 @@ PROJECT = HERE.parent
 V2_SCRIPT = HERE / "trim_rallies_v2.py"
 MATCH_CSV = PROJECT / "set-1" / "match.csv"
 ANNOTATION_ROOT = PROJECT / "set-1"
-DEFAULT_VIDEOS_DIR = Path(r"G:\My Drive\Match_Downloads_2")
-DEFAULT_RAW_ROOT = PROJECT / "trimmed_rallies"
+DEFAULT_VIDEOS_DIR = Path(r"G:\My Drive\Match_Downloads_3")
 DEFAULT_CLEANED_ROOT = PROJECT / "cleaned_rallies"
 
 
@@ -163,10 +162,11 @@ def run_batch(args):
             print(f"[{index}/{len(entries)}] ID {match_id} SKIPPED; existing cleaned artifacts found ({len(artifacts)}; may be partial): {cleaned_folder}")
             skipped += 1
             continue
-        command = build_v2_command(video, folder, fps, args.raw_output_root, args.cleaned_output_root)
         print(f"[{index}/{len(entries)}] ID {match_id} annotation {fps} fps: {video.name}", flush=True)
         try:
-            result = subprocess.run(command, check=False)
+            with tempfile.TemporaryDirectory(prefix=".v3-raw-", dir=HERE) as raw_root:
+                command = build_v2_command(video, folder, fps, raw_root, args.cleaned_output_root)
+                result = subprocess.run(command, check=False)
         except OSError as exc:
             print(f"  MATCH FAILED: {exc}", file=sys.stderr)
             failed += 1
@@ -187,6 +187,7 @@ def run_batch(args):
 
 def check_batch(args):
     print("Read-only batch check (no outputs or video encoding)")
+    print("Raw clips will be temporary and deleted after each match; existing trimmed_rallies files are preserved and not reused.")
     mapping_problems = validate_mapping()
     for problem in mapping_problems:
         print(f"MAPPING ERROR: {problem}")
@@ -273,15 +274,6 @@ def check_batch(args):
         except OSError as exc:
             print(f"CLEANED OUTPUT ERROR: ID {match_id}: {exc}")
             diagnostics_failed = True
-        raw_dir = match_folder(args.raw_output_root, folder)
-        try:
-            raw_artifacts = generated_artifacts(raw_dir)
-            if raw_artifacts:
-                print(f"RAW OUTPUT PRESENT: ID {match_id}; v2 will validate/reuse existing artifacts ({len(raw_artifacts)}): {raw_dir}")
-        except OSError as exc:
-            print(f"RAW OUTPUT ERROR: ID {match_id}: {exc}")
-            diagnostics_failed = True
-
     print(
         f"Check totals: mapped completed={len(videos) - len(unknown)}, unknown completed={len(unknown)}, "
         f"missing mapped={len(missing)}, unfinished={len(unfinished)}, other video files={len(other_videos)}, "
@@ -304,9 +296,12 @@ def self_test():
 
     with tempfile.TemporaryDirectory(prefix=".v3-self-test-", dir=HERE) as temp:
         root = Path(temp)
-        videos_dir, raw_root, clean_root = root / "videos", root / "raw", root / "cleaned"
+        videos_dir, raw_root, clean_root = root / "videos", root / "trimmed_rallies", root / "cleaned"
         videos_dir.mkdir()
-        args = SimpleNamespace(videos_dir=videos_dir, raw_output_root=raw_root, cleaned_output_root=clean_root)
+        raw_root.mkdir()
+        existing_raw = raw_root / "rally_001.mp4"
+        existing_raw.write_bytes(b"existing raw clip")
+        args = SimpleNamespace(videos_dir=videos_dir, cleaned_output_root=clean_root)
 
         complete_name = next(name for name, value in VIDEO_MAP.items() if value[0] == 1)
         partial_name = next(name for name, value in VIDEO_MAP.items() if value[0] == 14)
@@ -346,15 +341,34 @@ def self_test():
         id4_name = next(name for name, value in VIDEO_MAP.items() if value[0] == 4)
         (videos_dir / f"{id4_name}.part").touch()
         (videos_dir / "Unknown match.mp4").touch()
-        mocked_results = [SimpleNamespace(returncode=2)] + [SimpleNamespace(returncode=0)] * (len(ordered) - 1)
-        with patch("subprocess.run", side_effect=mocked_results) as mocked, contextlib.redirect_stdout(io.StringIO()) as output, contextlib.redirect_stderr(io.StringIO()):
+        temp_raw_roots = []
+
+        def mock_v2_run(command, check):
+            assert not check
+            assert all(not path.exists() for path in temp_raw_roots)
+            temporary = Path(command[command.index("--raw-output-root") + 1])
+            assert temporary.is_dir() and temporary.parent == HERE and temporary != raw_root
+            temp_raw_roots.append(temporary)
+            (temporary / "rally_001.mp4").write_bytes(b"temporary raw clip")
+            if len(temp_raw_roots) == 2:
+                raise OSError("test launch failure")
+            if len(temp_raw_roots) > 2:
+                clean_root.mkdir(exist_ok=True)
+                (clean_root / f"match_{len(temp_raw_roots)}.mp4").write_bytes(b"cleaned clip")
+            return SimpleNamespace(returncode=2 if len(temp_raw_roots) == 1 else 0)
+
+        with patch("subprocess.run", side_effect=mock_v2_run) as mocked, contextlib.redirect_stdout(io.StringIO()) as output, contextlib.redirect_stderr(io.StringIO()):
             status = run_batch(args)
         assert status == 2 and mocked.call_count == len(ordered)
+        assert all(not path.exists() for path in temp_raw_roots)
+        assert existing_raw.read_bytes() == b"existing raw clip"
+        assert len(list(clean_root.glob("match_*.mp4"))) == len(ordered) - 2
+        assert "processed successfully=5" in output.getvalue() and "failed=2" in output.getvalue()
         assert f"UNFINISHED DOWNLOAD (ignored): {id4_name}.part" in output.getvalue()
         assert "UNKNOWN COMPLETED MP4 (unresolved): Unknown match.mp4" in output.getvalue()
         expected_calls = [
-            build_v2_command(videos_dir / name, folder, fps, raw_root, clean_root)
-            for name, (match_id, folder, fps) in ordered
+            build_v2_command(videos_dir / name, folder, fps, temporary, clean_root)
+            for (name, (match_id, folder, fps)), temporary in zip(ordered, temp_raw_roots)
         ]
         assert [call.args[0] for call in mocked.call_args_list] == expected_calls
         assert all(call.kwargs == {"check": False} for call in mocked.call_args_list)
@@ -380,14 +394,16 @@ def self_test():
         assert status == 2 and not mocked.called
         assert "PREREQUISITE MISSING: test missing scene detector" in output.getvalue()
         assert f"annotation folders checked={len(MATCHES)}" in output.getvalue()
+        assert "Raw clips will be temporary" in output.getvalue()
+        assert "RAW OUTPUT PRESENT" not in output.getvalue()
+        assert existing_raw.read_bytes() == b"existing raw clip"
 
-    print("Self-test passed: full roster/FPS, canonical and legacy names, ID 1/3 separation, duplicate-file preference, spaced paths, unfinished/unknown exclusion, complete/partial output skips, exact v2 arguments, continuation after failure, and read-only prerequisite reporting.")
+    print("Self-test passed: full roster/FPS, canonical and legacy names, ID 1/3 separation, duplicate-file preference, spaced paths, unfinished/unknown exclusion, complete/partial output skips, exact v2 arguments, temporary raw cleanup after success and failure, existing raw and cleaned output preservation, continuation after failure, and read-only prerequisite reporting.")
 
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--videos-dir", type=Path, default=DEFAULT_VIDEOS_DIR)
-    parser.add_argument("--raw-output-root", type=Path, default=DEFAULT_RAW_ROOT)
     parser.add_argument("--cleaned-output-root", type=Path, default=DEFAULT_CLEANED_ROOT)
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--check", action="store_true", help="read-only input, prerequisite, annotation, metadata, and collision diagnostics")

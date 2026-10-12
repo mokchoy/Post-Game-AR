@@ -1,0 +1,656 @@
+{
+  "inputs": {
+    "video": {
+      "path": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\cleaned_rallies\\set-1\\Kento_MOMOTA_CHOU_Tien_Chen_Fuzhou_Open_2019_Finals\\set1\\rally_015.mp4",
+      "size_bytes": 4577377,
+      "modified_ns": 1791693730320042500
+    },
+    "rally_csv": {
+      "path": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\cleaned_rallies\\set-1\\Kento_MOMOTA_CHOU_Tien_Chen_Fuzhou_Open_2019_Finals\\set1\\rally_015.csv",
+      "size_bytes": 3129,
+      "modified_ns": 1791693734272276000
+    },
+    "tracked_detections_csv": {
+      "path": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\monotrack_test\\run_001\\rally_015_tracked_pixels.csv",
+      "size_bytes": 11613,
+      "modified_ns": 1791797745579725200
+    },
+    "homography_csv": {
+      "path": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\set-1\\homography.csv",
+      "size_bytes": 13380,
+      "modified_ns": 1791254454204345500
+    },
+    "homography_row_id": "1",
+    "homography_row_video": "Kento_MOMOTA_CHOU_Tien_Chen_Fuzhou_Open_2019_Finals",
+    "video_metadata": {
+      "width": 1920,
+      "height": 1080,
+      "fps": 25.0,
+      "frame_count": 524
+    }
+  },
+  "calibration": {
+    "file": {
+      "path": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\court_projection_test\\calibration.json",
+      "size_bytes": 2723,
+      "modified_ns": 1791802389411277200
+    },
+    "selection_method": "manual_opencv_clicks",
+    "post_points": {
+      "left_post_bottom": {
+        "frame_index": 0,
+        "pixel_native_px": [
+          556.5,
+          679.5
+        ]
+      },
+      "left_post_top": {
+        "frame_index": 0,
+        "pixel_native_px": [
+          552.0,
+          486.0
+        ]
+      },
+      "right_post_bottom": {
+        "frame_index": 0,
+        "pixel_native_px": [
+          1359.0,
+          678.0
+        ]
+      },
+      "right_post_top": {
+        "frame_index": 0,
+        "pixel_native_px": [
+          1360.5,
+          483.0
+        ]
+      }
+    },
+    "homogeneous_vertical_vanishing_point_native": [
+      1159.5260115606936,
+      26609.618497109826,
+      1.0
+    ],
+    "vertical_vanishing_point_kind": "finite"
+  },
+  "scaling": {
+    "annotation_to_native_video": 1.5,
+    "video_size": [
+      1920,
+      1080
+    ]
+  },
+  "frame_timing": {
+    "fps": 25.0,
+    "time_seconds": "frame / fps"
+  },
+  "availability": {
+    "frames": 524,
+    "available": 326,
+    "status_counts": {
+      "missing_detection": 196,
+      "before_first_stroke": 2,
+      "available": 326
+    },
+    "strokes": {
+      "stroke_01": {
+        "start_frame_inclusive": 25,
+        "end_frame_exclusive": 37,
+        "A_annotation": [
+          655.0,
+          544.0
+        ],
+        "B_annotation": [
+          579.0,
+          393.0
+        ],
+        "B_source": "next_row_player_location",
+        "player_locations_court_m": {
+          "A": [
+            3.212835006184983,
+            9.787631778063002
+          ],
+          "B": [
+            2.4242380428664205,
+            3.1261261588021036
+          ]
+        },
+        "AB_line_status": "available",
+        "visible_detections": 5,
+        "available_projections": 5,
+        "status_counts": {
+          "missing_detection": 7,
+          "available": 5
+        }
+      },
+      "stroke_02": {
+        "start_frame_inclusive": 37,
+        "end_frame_exclusive": 63,
+        "A_annotation": [
+          579.0,
+          393.0
+        ],
+        "B_annotation": [
+          576.0,
+          623.0
+        ],
+        "B_source": "next_row_player_location",
+        "player_locations_court_m": {
+          "A": [
+            3.017289554899743,
+            10.040679627937504
+          ],
+          "B": [
+            2.341507783349801,
+            4.114980920976223
+          ]
+        },
+        "AB_line_status": "available",
+        "visible_detections": 22,
+        "available_projections": 22,
+        "status_counts": {
+          "available": 22,
+          "missing_detection": 4
+        }
+      },
+      "stroke_03": {
+        "start_frame_inclusive": 63,
+        "end_frame_exclusive": 90,
+        "A_annotation": [
+          576.0,
+          623.0
+        ],
+        "B_annotation": [
+          563.0,
+          344.0
+        ],
+        "B_source": "next_row_player_location",
+        "player_locations_court_m": {
+          "A": [
+            2.441121506350113,
+            12.137225363925204
+          ],
+          "B": [
+            2.842766498748976,
+            3.0377957535574267
+          ]
+        },
+        "AB_line_status": "available",
+        "visible_detections": 23,
+        "available_projections": 23,
+        "status_counts": {
+          "missing_detection": 4,
+          "available": 23
+        }
+      },
+      "stroke_04": {
+        "start_frame_inclusive": 90,
+        "end_frame_exclusive": 128,
+        "A_annotation": [
+          563.0,
+          344.0
+        ],
+        "B_annotation": [
+          494.0,
+          655.0
+        ],
+        "B_source": "next_row_player_location",
+        "player_locations_court_m": {
+          "A": [
+            2.8782818606191776,
+            11.373750463605932
+          ],
+          "B": [
+            2.1016846433943384,
+            1.8376394946727233
+          ]
+        },
+        "AB_line_status": "available",
+        "visible_detections": 22,
+        "available_projections": 22,
+        "status_counts": {
+          "available": 22,
+          "missing_detection": 16
+        }
+      },
+      "stroke_05": {
+        "start_frame_inclusive": 128,
+        "end_frame_exclusive": 150,
+        "A_annotation": [
+          494.0,
+          655.0
+        ],
+        "B_annotation": [
+          561.0,
+          381.0
+        ],
+        "B_source": "next_row_player_location",
+        "player_locations_court_m": {
+          "A": [
+            1.6941477076755254,
+            12.994032408010762
+          ],
+          "B": [
+            2.815812556345522,
+            2.4260588684585334
+          ]
+        },
+        "AB_line_status": "available",
+        "visible_detections": 19,
+        "available_projections": 19,
+        "status_counts": {
+          "available": 19,
+          "missing_detection": 3
+        }
+      },
+      "stroke_06": {
+        "start_frame_inclusive": 150,
+        "end_frame_exclusive": 178,
+        "A_annotation": [
+          561.0,
+          381.0
+        ],
+        "B_annotation": [
+          508.0,
+          516.0
+        ],
+        "B_source": "next_row_player_location",
+        "player_locations_court_m": {
+          "A": [
+            2.391632495605609,
+            11.514738563638522
+          ],
+          "B": [
+            2.1137296916114336,
+            3.579082022865339
+          ]
+        },
+        "AB_line_status": "available",
+        "visible_detections": 25,
+        "available_projections": 25,
+        "status_counts": {
+          "available": 25,
+          "missing_detection": 3
+        }
+      },
+      "stroke_07": {
+        "start_frame_inclusive": 178,
+        "end_frame_exclusive": 216,
+        "A_annotation": [
+          508.0,
+          516.0
+        ],
+        "B_annotation": [
+          537.0,
+          332.0
+        ],
+        "B_source": "next_row_player_location",
+        "player_locations_court_m": {
+          "A": [
+            1.6675718648983677,
+            8.851446532676732
+          ],
+          "B": [
+            2.3010424864862156,
+            3.1249138778647856
+          ]
+        },
+        "AB_line_status": "available",
+        "visible_detections": 21,
+        "available_projections": 21,
+        "status_counts": {
+          "available": 21,
+          "missing_detection": 17
+        }
+      },
+      "stroke_08": {
+        "start_frame_inclusive": 216,
+        "end_frame_exclusive": 244,
+        "A_annotation": [
+          537.0,
+          332.0
+        ],
+        "B_annotation": [
+          772.0,
+          637.0
+        ],
+        "B_source": "next_row_player_location",
+        "player_locations_court_m": {
+          "A": [
+            2.6573572907290197,
+            10.779039091807467
+          ],
+          "B": [
+            1.753761781810248,
+            1.2359893468573242
+          ]
+        },
+        "AB_line_status": "available",
+        "visible_detections": 23,
+        "available_projections": 23,
+        "status_counts": {
+          "available": 23,
+          "missing_detection": 5
+        }
+      },
+      "stroke_09": {
+        "start_frame_inclusive": 244,
+        "end_frame_exclusive": 262,
+        "A_annotation": [
+          772.0,
+          637.0
+        ],
+        "B_annotation": [
+          595.0,
+          366.0
+        ],
+        "B_source": "next_row_player_location",
+        "player_locations_court_m": {
+          "A": [
+            4.295699373618014,
+            12.534881884175812
+          ],
+          "B": [
+            3.0040654764617347,
+            2.139415619106563
+          ]
+        },
+        "AB_line_status": "available",
+        "visible_detections": 10,
+        "available_projections": 10,
+        "status_counts": {
+          "missing_detection": 8,
+          "available": 10
+        }
+      },
+      "stroke_10": {
+        "start_frame_inclusive": 262,
+        "end_frame_exclusive": 285,
+        "A_annotation": [
+          595.0,
+          366.0
+        ],
+        "B_annotation": [
+          520.0,
+          535.0
+        ],
+        "B_source": "next_row_player_location",
+        "player_locations_court_m": {
+          "A": [
+            3.7034361482293447,
+            12.063722584601269
+          ],
+          "B": [
+            2.52022089844841,
+            2.8951295687056318
+          ]
+        },
+        "AB_line_status": "available",
+        "visible_detections": 22,
+        "available_projections": 22,
+        "status_counts": {
+          "missing_detection": 1,
+          "available": 22
+        }
+      },
+      "stroke_11": {
+        "start_frame_inclusive": 285,
+        "end_frame_exclusive": 310,
+        "A_annotation": [
+          520.0,
+          535.0
+        ],
+        "B_annotation": [
+          510.0,
+          405.0
+        ],
+        "B_source": "next_row_player_location",
+        "player_locations_court_m": {
+          "A": [
+            1.8158739582968653,
+            9.484669825512198
+          ],
+          "B": [
+            2.2792305935661132,
+            2.563465507633614
+          ]
+        },
+        "AB_line_status": "available",
+        "visible_detections": 20,
+        "available_projections": 20,
+        "status_counts": {
+          "missing_detection": 5,
+          "available": 20
+        }
+      },
+      "stroke_12": {
+        "start_frame_inclusive": 310,
+        "end_frame_exclusive": 333,
+        "A_annotation": [
+          510.0,
+          405.0
+        ],
+        "B_annotation": [
+          499.0,
+          500.0
+        ],
+        "B_source": "next_row_player_location",
+        "player_locations_court_m": {
+          "A": [
+            2.278635252046943,
+            9.811891070106608
+          ],
+          "B": [
+            1.5316026669098797,
+            4.626788983272269
+          ]
+        },
+        "AB_line_status": "available",
+        "visible_detections": 20,
+        "available_projections": 20,
+        "status_counts": {
+          "available": 20,
+          "missing_detection": 3
+        }
+      },
+      "stroke_13": {
+        "start_frame_inclusive": 333,
+        "end_frame_exclusive": 370,
+        "A_annotation": [
+          499.0,
+          500.0
+        ],
+        "B_annotation": [
+          560.0,
+          333.0
+        ],
+        "B_source": "next_row_player_location",
+        "player_locations_court_m": {
+          "A": [
+            1.5501611796970673,
+            8.299580913268056
+          ],
+          "B": [
+            2.0832167843961424,
+            3.8474492062787027
+          ]
+        },
+        "AB_line_status": "available",
+        "visible_detections": 15,
+        "available_projections": 15,
+        "status_counts": {
+          "available": 15,
+          "missing_detection": 22
+        }
+      },
+      "stroke_14": {
+        "start_frame_inclusive": 370,
+        "end_frame_exclusive": 383,
+        "A_annotation": [
+          560.0,
+          333.0
+        ],
+        "B_annotation": [
+          600.0,
+          597.0
+        ],
+        "B_source": "next_row_player_location",
+        "player_locations_court_m": {
+          "A": [
+            2.6989725289258035,
+            10.989401321961791
+          ],
+          "B": [
+            2.051583074717221,
+            1.2895460579132343
+          ]
+        },
+        "AB_line_status": "available",
+        "visible_detections": 11,
+        "available_projections": 11,
+        "status_counts": {
+          "missing_detection": 2,
+          "available": 11
+        }
+      },
+      "stroke_15": {
+        "start_frame_inclusive": 383,
+        "end_frame_exclusive": 408,
+        "A_annotation": [
+          600.0,
+          597.0
+        ],
+        "B_annotation": [
+          551.0,
+          399.0
+        ],
+        "B_source": "next_row_player_location",
+        "player_locations_court_m": {
+          "A": [
+            2.66329036440993,
+            11.401112450524472
+          ],
+          "B": [
+            1.5308209229657006,
+            0.35610170874655483
+          ]
+        },
+        "AB_line_status": "available",
+        "visible_detections": 22,
+        "available_projections": 22,
+        "status_counts": {
+          "missing_detection": 3,
+          "available": 22
+        }
+      },
+      "stroke_16": {
+        "start_frame_inclusive": 408,
+        "end_frame_exclusive": 430,
+        "A_annotation": [
+          551.0,
+          399.0
+        ],
+        "B_annotation": [
+          571.0,
+          498.0
+        ],
+        "B_source": "next_row_player_location",
+        "player_locations_court_m": {
+          "A": [
+            2.324214693265569,
+            10.563537182742909
+          ],
+          "B": [
+            2.011476790541158,
+            4.373314321366028
+          ]
+        },
+        "AB_line_status": "available",
+        "visible_detections": 18,
+        "available_projections": 18,
+        "status_counts": {
+          "available": 18,
+          "missing_detection": 4
+        }
+      },
+      "stroke_17": {
+        "start_frame_inclusive": 430,
+        "end_frame_exclusive": 485,
+        "A_annotation": [
+          571.0,
+          498.0
+        ],
+        "B_annotation": [
+          556.0,
+          335.0
+        ],
+        "B_source": "next_row_player_location",
+        "player_locations_court_m": {
+          "A": [
+            2.3214164046200834,
+            8.236182110642865
+          ],
+          "B": [
+            2.2437581904978123,
+            4.026092131273856
+          ]
+        },
+        "AB_line_status": "available",
+        "visible_detections": 9,
+        "available_projections": 9,
+        "status_counts": {
+          "available": 9,
+          "missing_detection": 46
+        }
+      },
+      "stroke_18": {
+        "start_frame_inclusive": 485,
+        "end_frame_exclusive": 524,
+        "A_annotation": [
+          556.0,
+          335.0
+        ],
+        "B_annotation": [
+          680.0,
+          449.0
+        ],
+        "B_source": "final_row_landing_x_y",
+        "player_locations_court_m": {
+          "A": [
+            2.5346139931537452,
+            11.28344680517109
+          ],
+          "B": [
+            2.002365300304629,
+            1.3896788245811729
+          ]
+        },
+        "AB_line_status": "available",
+        "visible_detections": 19,
+        "available_projections": 19,
+        "status_counts": {
+          "missing_detection": 20,
+          "available": 19
+        }
+      }
+    }
+  },
+  "approximation_warnings": [
+    "Player-location annotations are treated as floor points; their foot-contact semantics and accuracy were not independently verified.",
+    "Each shuttle footprint assumes the shuttle lies in the vertical plane through that stroke's fixed AB floor line.",
+    "The final net-fault flight uses one approximate vertical plane from the last player location to landing_x/y and assumes the shuttle drops roughly beneath its net-contact position.",
+    "No landing time is estimated for the final stroke. Missing and invalid frames are not interpolated; court trails break at those frames and at stroke boundaries."
+  ],
+  "output_video": {
+    "codec": "h264",
+    "width": 1440,
+    "height": 720,
+    "fps": 25.0,
+    "frames": 524,
+    "duration_seconds": 20.96,
+    "source_audio_present": true,
+    "output_audio_present": true,
+    "audio_video_start_delta_seconds": 0.0,
+    "audio_video_duration_delta_seconds": 0.0
+  }
+}
