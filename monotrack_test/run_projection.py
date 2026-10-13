@@ -31,6 +31,7 @@ from reconstruction import (
     load_court_geometry,
     project_point,
     reconstruct_flight,
+    validate_pixel_loss,
 )
 
 
@@ -40,7 +41,7 @@ DEFAULT_VIDEO = REPO_ROOT / "cleaned_rallies/set-1/Kento_MOMOTA_CHOU_Tien_Chen_F
 DEFAULT_HITS = DEFAULT_VIDEO.with_suffix(".csv")
 DEFAULT_HOMOGRAPHY = REPO_ROOT / "set-1/homography.csv"
 DEFAULT_CHECKPOINT = REPO_ROOT / "TrackNetv2-pretrained/track.pt"
-EXPECTED_VIDEO = (1920, 1080, 25.0, 524)
+EXPECTED_VIDEO = (1920, 1080, 25.0)
 OUTPUT_SIZE = (1440, 720)
 
 
@@ -109,15 +110,15 @@ def load_annotations(csv_path: Path, frame_count: int, fps: float) -> list[dict]
         if not required.issubset(reader.fieldnames or []):
             raise ValueError(f"Rally CSV is missing columns: {sorted(required - set(reader.fieldnames or []))}")
         rows = list(reader)
-    if len(rows) != 18:
-        raise ValueError(f"This one-rally test expects 18 annotated hits; found {len(rows)}")
+    if not rows:
+        raise ValueError("Rally CSV must contain at least one annotated hit")
     hits = []
     for row_number, row in enumerate(rows, start=1):
         frame = int(row["clip_frame_num"])
         seconds = float(row["clip_time_seconds"])
         if not 0 <= frame < frame_count:
             raise ValueError(f"Hit row {row_number} points outside the video: frame {frame}")
-        if abs(frame_time_seconds(frame, fps) - seconds) > 0.01:
+        if not math.isfinite(seconds) or abs(frame_time_seconds(frame, fps) - seconds) > 0.01:
             raise ValueError(
                 f"Hit row {row_number} timing disagrees: frame {frame} at {fps:g} fps is "
                 f"{frame_time_seconds(frame, fps):.6f}s, CSV says {seconds:.6f}s"
@@ -143,9 +144,10 @@ def prepare_inputs(video_value: str | Path, hits_value: str | Path, homography_v
         if not path.is_file():
             raise FileNotFoundError(path)
     metadata = video_metadata(video)
-    observed = (metadata["width"], metadata["height"], metadata["fps"], metadata["frame_count"])
-    if observed != EXPECTED_VIDEO:
-        raise ValueError(f"Expected rally metadata {EXPECTED_VIDEO}; found {observed}")
+    observed = (metadata["width"], metadata["height"], metadata["fps"])
+    if (observed[:2] != EXPECTED_VIDEO[:2] or not math.isfinite(observed[2])
+            or abs(observed[2] - EXPECTED_VIDEO[2]) > 1e-6 or metadata["frame_count"] < 1):
+        raise ValueError(f"Expected 1920x1080 at 25 fps with a positive frame count; found {metadata}")
     hits = load_annotations(hits_csv, metadata["frame_count"], metadata["fps"])
     geometry = load_court_geometry(homography_csv, video.parent.parent.name)
     return video, hits_csv, homography_csv, metadata, hits, geometry
@@ -168,6 +170,7 @@ def draw_calibration_preview(
     selection: str | None,
     points: dict,
     frame_index: int,
+    frame_count: int,
     preview_scale: float,
 ) -> np.ndarray:
     image = frame.copy()
@@ -186,7 +189,7 @@ def draw_calibration_preview(
         color = (0, 255, 0) if key in ("left_post_top", "right_post_top") else (255, 0, 255)
         cv2.drawMarker(image, pixel, color, cv2.MARKER_CROSS, 18, 3)
         cv2.putText(image, key.replace("_", " "), (pixel[0] + 9, pixel[1] - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.55, color, 2)
-    status = f"frame {frame_index}/{EXPECTED_VIDEO[3] - 1} | selected: {selection or 'none'} | preview scale {preview_scale:.4f}"
+    status = f"frame {frame_index}/{frame_count - 1} | selected: {selection or 'none'} | preview scale {preview_scale:.4f}"
     help_line = "1/2: post tips  3: net contact  4: floor contact  a/d: frame  A/D: 25 frames  u: unknown event  q: save/quit"
     cv2.rectangle(image, (0, 0), (image.shape[1], 64), (0, 0, 0), -1)
     cv2.putText(image, status, (15, 26), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
@@ -217,13 +220,10 @@ def pick_calibration(video: Path, geometry: CourtGeometry, calibration_path: Pat
         if event != cv2.EVENT_LBUTTONDOWN or state["selection"] is None:
             return
         name = state["selection"]
-        if name in ("net_contact", "floor_contact"):
-            points[name] = None
-        else:
-            points[name] = {
-                "frame": int(state["frame"]),
-                "pixel_native": [float(x / scale_x), float(y / scale_y)],
-            }
+        points[name] = {
+            "frame": int(state["frame"]),
+            "pixel_native": [float(x / scale_x), float(y / scale_y)],
+        }
 
     cv2.setMouseCallback(window, on_mouse)
     try:
@@ -238,7 +238,8 @@ def pick_calibration(video: Path, geometry: CourtGeometry, calibration_path: Pat
                 state["image"] = source_frame
                 state["rendered_frame"] = state["frame"]
             preview = draw_calibration_preview(
-                state["image"], geometry, state["selection"], points, state["frame"], preview_scale
+                state["image"], geometry, state["selection"], points, state["frame"],
+                metadata["frame_count"], preview_scale,
             )
             cv2.imshow(window, preview)
             key = cv2.waitKeyEx(20)
@@ -480,8 +481,10 @@ def summarize_hit_observations(hits: list[dict], observations: list[tuple[int, i
 
 
 def fit_hit_flights(
-    hits: list[dict], players: list[dict], observations: list[tuple[int, int] | None], projection: np.ndarray, fps: float
+    hits: list[dict], players: list[dict], observations: list[tuple[int, int] | None], projection: np.ndarray,
+    fps: float, pixel_loss: str = "mse", huber_delta_px: float = 10.0,
 ):
+    pixel_loss, huber_delta_px = validate_pixel_loss(pixel_loss, huber_delta_px)
     references = []
     for index in range(len(hits) - 1):
         endpoints = players[index].get("endpoints", {})
@@ -519,8 +522,12 @@ def fit_hit_flights(
             fps=fps,
             start_fixed=start_fixed,
             phase=f"hit_{index + 1}_to_hit_{index + 2}",
+            pixel_loss=pixel_loss,
+            huber_delta_px=huber_delta_px,
         )
         detail.update({
+            "pixel_loss": pixel_loss,
+            "huber_delta_px": huber_delta_px,
             "start_reference_xy_m": start_ref.tolist(),
             "receive_reference_xy_m": receive_ref.tolist(),
             "start_reference_source": start_source,
@@ -555,8 +562,16 @@ def fit_terminal_tail(
     projection: np.ndarray,
     fps: float,
     last_path: np.ndarray | None,
+    pixel_loss: str = "mse",
+    huber_delta_px: float = 10.0,
 ):
-    details = {"extension": "piecewise flight assumptions beyond MonoTrack hit-to-hit reconstruction", "phases": []}
+    pixel_loss, huber_delta_px = validate_pixel_loss(pixel_loss, huber_delta_px)
+    details = {
+        "extension": "piecewise flight assumptions beyond MonoTrack hit-to-hit reconstruction",
+        "pixel_loss": pixel_loss,
+        "huber_delta_px": huber_delta_px,
+        "phases": [],
+    }
     terminal_events = calibration["terminal_events"]
     net_event = terminal_events["net_contact"]
     floor_event = terminal_events["floor_contact"]
@@ -599,9 +614,14 @@ def fit_terminal_tail(
         net_frame_valid and floor_point is not None and floor_frame is not None
         and net_frame < floor_frame < len(observations)
     )
-    details["event_order_status"] = "available" if floor_order_valid else "unidentifiable"
-    if not floor_order_valid:
-        details["event_order_reason"] = "expected last hit < net contact < floor contact < frame count"
+    direct_floor_order_valid = floor_point is not None and floor_frame is not None and last_hit_frame < floor_frame < len(observations)
+    active_order_valid = floor_order_valid if net_point is not None else direct_floor_order_valid
+    details["event_order_status"] = "available" if active_order_valid else "unidentifiable"
+    if not active_order_valid:
+        details["event_order_reason"] = (
+            "expected last hit < net contact < floor contact < frame count"
+            if net_point is not None else "expected last hit < floor contact < frame count"
+        )
 
     paths = []
     if net_point is None:
@@ -623,39 +643,71 @@ def fit_terminal_tail(
             start_fixed=start,
             end_fixed=net_point,
             phase="last_hit_to_net_contact",
+            pixel_loss=pixel_loss,
+            huber_delta_px=huber_delta_px,
         )
         details["phases"].append(detail)
         if first is not None:
             paths.append({"start_frame": last_hit_frame, "end_frame": net_frame, "trajectory": first, "phase": detail["phase"]})
 
-    if net_point is None or floor_point is None:
+    if net_point is not None and floor_point is not None:
+        if not floor_order_valid:
+            details["phases"].append({"phase": "net_contact_to_floor_contact", "status": "unidentifiable", "reason": details.get("event_order_reason", "terminal_event_order_unavailable")})
+        else:
+            second, detail = reconstruct_flight(
+                start_frame=net_frame,
+                end_frame=floor_frame,
+                observations=observations,
+                projection=projection,
+                start_reference_xy=net_point[:2],
+                receive_reference_xy=floor_point[:2],
+                fps=fps,
+                start_fixed=net_point,
+                end_fixed=floor_point,
+                phase="net_contact_to_floor_contact",
+                pixel_loss=pixel_loss,
+                huber_delta_px=huber_delta_px,
+            )
+            details["phases"].append(detail)
+            if second is not None:
+                paths.append({"start_frame": net_frame, "end_frame": floor_frame, "trajectory": second, "phase": detail["phase"]})
+                first_path = next((path["trajectory"] for path in paths if path["phase"] == "last_hit_to_net_contact"), None)
+                if first_path is not None:
+                    join_piecewise(first_path, second)
+    elif floor_point is None:
         details["phases"].append({"phase": "net_contact_to_floor_contact", "status": "unidentifiable", "reason": "terminal_contact_position_unavailable"})
-    elif not floor_order_valid:
-        details["phases"].append({"phase": "net_contact_to_floor_contact", "status": "unidentifiable", "reason": details.get("event_order_reason", "terminal_event_order_unavailable")})
     else:
-        second, detail = reconstruct_flight(
-            start_frame=net_frame,
-            end_frame=floor_frame,
-            observations=observations,
-            projection=projection,
-            start_reference_xy=net_point[:2],
-            receive_reference_xy=floor_point[:2],
-            fps=fps,
-            start_fixed=net_point,
-            end_fixed=floor_point,
-            phase="net_contact_to_floor_contact",
-        )
-        details["phases"].append(detail)
-        if second is not None:
-            paths.append({"start_frame": net_frame, "end_frame": floor_frame, "trajectory": second, "phase": detail["phase"]})
-            first_path = next((path["trajectory"] for path in paths if path["phase"] == "last_hit_to_net_contact"), None)
-            if first_path is not None:
-                join_piecewise(first_path, second)
+        if last_path is None:
+            details["phases"].append({"phase": "last_hit_to_floor_contact", "status": "unidentifiable", "reason": "last_hit_3d_position_unavailable"})
+        elif not direct_floor_order_valid:
+            details["phases"].append({"phase": "last_hit_to_floor_contact", "status": "unidentifiable", "reason": "floor_contact_must_follow_last_hit"})
+        else:
+            start = last_path[-1]
+            direct, detail = reconstruct_flight(
+                start_frame=last_hit_frame,
+                end_frame=floor_frame,
+                observations=observations,
+                projection=projection,
+                start_reference_xy=start[:2],
+                receive_reference_xy=floor_point[:2],
+                fps=fps,
+                start_fixed=start,
+                end_fixed=floor_point,
+                phase="last_hit_to_floor_contact",
+                pixel_loss=pixel_loss,
+                huber_delta_px=huber_delta_px,
+            )
+            details["phases"].append(detail)
+            if direct is not None:
+                paths.append({"start_frame": last_hit_frame, "end_frame": floor_frame, "trajectory": direct, "phase": detail["phase"]})
     details["piecewise_contact_position_shared"] = bool(
         net_point is not None
         and any(item["phase"] == "last_hit_to_net_contact" for item in paths)
         and any(item["phase"] == "net_contact_to_floor_contact" for item in paths)
     )
+    for phase_detail in details["phases"]:
+        phase_detail.setdefault("pixel_loss", pixel_loss)
+        phase_detail.setdefault("huber_delta_px", huber_delta_px)
     return paths, details, floor_point if floor_point is not None else None
 
 
@@ -795,7 +847,7 @@ def render_frame(
     else:
         text = "3D estimate unavailable at this frame"
     cv2.putText(canvas, text[:88], (18, 565), cv2.FONT_HERSHEY_SIMPLEX, 0.42, (255, 255, 255), 1)
-    cv2.putText(canvas, f"frame {frame_index:03d} / 523   t={frame_index / EXPECTED_VIDEO[2]:.2f}s", (18, 620), cv2.FONT_HERSHEY_SIMPLEX, 0.52, (255, 255, 255), 1)
+    cv2.putText(canvas, f"frame {frame_index:03d} / {len(observations) - 1}   t={frame_index / EXPECTED_VIDEO[2]:.2f}s", (18, 620), cv2.FONT_HERSHEY_SIMPLEX, 0.52, (255, 255, 255), 1)
 
     x0 = panel_width
     cv2.putText(canvas, "TOP-DOWN COURT  |  metres", (x0 + 18, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
@@ -948,6 +1000,7 @@ def shutil_which(name: str) -> str | None:
 
 
 def run_projection(args) -> None:
+    args.pixel_loss, args.huber_delta_px = validate_pixel_loss(args.pixel_loss, args.huber_delta_px)
     video, hits_csv, homography_csv, metadata, hits, geometry = prepare_inputs(
         args.video, args.rally_csv, args.homography_csv
     )
@@ -968,10 +1021,11 @@ def run_projection(args) -> None:
         observations, device = track_shuttle(video, metadata["frame_count"], repo_path(args.checkpoint))
         players = player_references(hits, geometry)
         coordinates, phases, segment_ids, paths, hit_diagnostics, last_path = fit_hit_flights(
-            hits, players, observations, projection, metadata["fps"]
+            hits, players, observations, projection, metadata["fps"], args.pixel_loss, args.huber_delta_px
         )
         tail_paths, tail_diagnostics, floor_point = fit_terminal_tail(
-            calibration, geometry, hits, observations, projection, metadata["fps"], last_path
+            calibration, geometry, hits, observations, projection, metadata["fps"], last_path,
+            args.pixel_loss, args.huber_delta_px,
         )
         assign_paths(coordinates, phases, segment_ids, tail_paths, tail=True)
         floor_event = calibration["terminal_events"]["floor_contact"]
@@ -995,6 +1049,8 @@ def run_projection(args) -> None:
             "homography_row_id": geometry.row_id,
             "input_metadata": metadata,
             "annotated_hits": len(hits),
+            "pixel_loss": args.pixel_loss,
+            "huber_delta_px": args.huber_delta_px,
             "hit_to_hit_segments_attempted": len(hit_diagnostics),
             "hit_to_hit_segments_available": sum(item["status"] == "available" for item in hit_diagnostics),
             "hit_track_neighborhood": summarize_hit_observations(hits, observations),
@@ -1034,6 +1090,8 @@ def build_parser() -> argparse.ArgumentParser:
         sub.add_argument("--output-dir", type=Path, default=HERE)
         if name == "run":
             sub.add_argument("--checkpoint", type=Path, default=DEFAULT_CHECKPOINT)
+            sub.add_argument("--pixel-loss", choices=("mse", "huber"), default="mse", help="Pixel residual loss")
+            sub.add_argument("--huber-delta-px", type=float, default=10.0, help="Huber threshold in cleaned-video pixels")
     return parser
 
 

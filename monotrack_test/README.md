@@ -1,6 +1,6 @@
 # One-rally MonoTrack projection test
 
-This Python 3.14 test uses only the selected cleaned `rally_015.mp4`, its annotation CSV, `set-1/homography.csv`, and the existing `TrackNetv2-pretrained/track.pt`. It validates the expected 1920×1080, 25 fps, 524-frame video and 18 hit rows before calibration or inference.
+This Python 3.14 tool uses a selected cleaned rally, its annotation CSV, `set-1/homography.csv`, and the existing `TrackNetv2-pretrained/track.pt`. It requires 1920×1080 at 25 fps, reads the actual frame count, and validates increasing hit frames and frame/FPS timing before calibration or inference. Fuzhou remains the default input for `run_projection.py`.
 
 ## Commands
 
@@ -42,11 +42,42 @@ The top-down panel shows only the current stroke's annotated floor endpoints as 
 
 The existing four court corners are reused. The program verifies that their stored homography maps them to approximately `(25,150)`, `(325,150)`, `(25,810)`, `(325,810)` in dataset coordinates, then derives a dataset-to-metre transform for the 6.1×13.4 m court. Player and floor-contact pixels are scaled by 1.5 to native video pixels and back to annotation coordinates before applying the floor transforms. The floor homography is never applied to airborne shuttle pixels.
 
-The camera matrix follows MonoTrack's six-point linear calibration using the four stored corners and the two manually selected 1.55 m post tips. Hit frames come from `clip_frame_num`; every `clip_time_seconds` is checked against frame/FPS timing. TrackNet visibility zero is stored as a missing pixel. Each of the 17 completed hit-to-hit segments uses the current row's `hit_x/y` and `landing_x/y`, transformed with the existing floor homography, as soft horizontal start/receive references. Only an absent first serve hit falls back to its player's location; any other missing, malformed, or nonfinite required endpoint raises a stroke-specific error before flight fitting. This rally's completed-stroke landing coordinates exactly equal the following hit coordinates, so they are used at the next hit time, not as a timed ground-contact measurement. A/B player identity is kept for display.
+The camera matrix follows MonoTrack's six-point linear calibration using the four stored corners and the two manually selected 1.55 m post tips. Hit frames come from `clip_frame_num`; every `clip_time_seconds` is checked against frame/FPS timing. TrackNet visibility zero is stored as a missing pixel. Completed hit-to-hit segments use the current row's `hit_x/y` and `landing_x/y`, transformed with the existing floor homography, as soft horizontal start/receive references. Only an absent first serve hit falls back to its player's location; any other missing, malformed, or nonfinite required endpoint raises a stroke-specific error before flight fitting. For the Fuzhou default rally, each completed-stroke landing coordinate equals the following hit coordinate, so it is used at the next hit time, not as a timed ground-contact measurement. A/B player identity is kept for display.
 
-The fit retains free height, existing soft-reference penalty weights, optimizer bounds, actual 25 fps timing (`fr_adjust=1.0`), and gravity plus quadratic drag in SLSQP. Existing continuity is preserved: a previous fitted 3D endpoint with hit reprojection error below 40 px fixes the next start, taking precedence over its soft reference. Per-flight diagnostics record `start_reference_xy_m`, `receive_reference_xy_m`, `start_reference_source`, and `receive_reference_source`, alongside existing reference-error and `start_fixed` fields. Sources are `current_row_hit_x_y`, `first_row_player_location`, and `current_row_landing_x_y`.
+The fit retains free height, existing soft-reference penalty weights, optimizer bounds, actual 25 fps timing (`fr_adjust=1.0`), and gravity plus quadratic drag in SLSQP. Existing continuity is preserved: a previous fitted 3D endpoint with hit reprojection error below 40 px fixes the next start, taking precedence over its soft reference. Each adjacent hit pair is fit as one flight. Per-flight diagnostics record `start_reference_xy_m`, `receive_reference_xy_m`, `start_reference_source`, and `receive_reference_source`, alongside existing reference-error and `start_fixed` fields. Sources are `current_row_hit_x_y`, `first_row_player_location`, and `current_row_landing_x_y`.
 
-The attempted net-fault tail is an extension to MonoTrack: last hit→net contact and net contact→floor contact are fit as separate flights, share the ray-derived net position, and may have different velocities. The net point comes from intersecting its native-pixel camera ray with `y=6.7 m`; the floor point comes from the existing floor homography. Missing manual events, insufficient visible detections, invalid event order, and failed optimizer phases remain unavailable.
+Fitting defaults to pixel MSE. Select `--pixel-loss huber --huber-delta-px 10` on `run_projection.py run` to use the scaled Huber loss; the delta is in cleaned-video pixels. The attempted net-fault tail remains an extension to MonoTrack: last hit→net contact and net contact→floor contact are fit as separate flights and share the ray-derived net position. If net contact is unidentified but floor contact is selected, the last hit→floor contact is fit directly with the fixed floor endpoint. The floor point comes from the existing floor homography and may lie outside the court. Missing contacts, insufficient visible detections, invalid event order, and failed optimizer phases remain unavailable.
+
+## Korea Open paired loss comparison
+
+Create a separate Korea calibration with the existing picker:
+
+```powershell
+py -3.14 -B monotrack_test\run_projection.py calibrate `
+  --video cleaned_rallies\set-1\Kento_MOMOTA_CHOU_Tien_Chen_KOREA_OPEN_2019_Final\set1\rally_002.mp4 `
+  --rally-csv cleaned_rallies\set-1\Kento_MOMOTA_CHOU_Tien_Chen_KOREA_OPEN_2019_Final\set1\rally_002.csv `
+  --homography-csv set-1\homography.csv `
+  --calibration monotrack_test\korea_calibration.json `
+  --output-dir monotrack_test
+```
+
+Select `1` and `2` and click the two net-post tips. Select `3` and press `u` to leave net contact unidentified. Use `D`/`A` to move 25 frames (one second at 25 fps) or `d`/`a` to move one frame; the displayed frame counter is zero-based. At first floor contact, select `4`, click the shuttle pixel, then press `q` to save. The calibration file is separate from the Fuzhou calibration and refuses overwrite.
+
+Run both losses from the same TrackNet predictions, annotations, and calibration. GT is used only for evaluation; `28` maps `GT frame 0` to cleaned frame `28`, and GT coordinates are scaled once by `1.5`:
+
+```powershell
+py -3.14 -B monotrack_test\compare_losses.py `
+  --video cleaned_rallies\set-1\Kento_MOMOTA_CHOU_Tien_Chen_KOREA_OPEN_2019_Final\set1\rally_002.mp4 `
+  --rally-csv cleaned_rallies\set-1\Kento_MOMOTA_CHOU_Tien_Chen_KOREA_OPEN_2019_Final\set1\rally_002.csv `
+  --homography-csv set-1\homography.csv `
+  --calibration monotrack_test\korea_calibration.json `
+  --gt-csv Professional\match5\csv\1_01_01_ball.csv `
+  --gt-frame-offset 28 `
+  --huber-delta-px 10 `
+  --output-dir monotrack_test\korea_loss_comparison_001
+```
+
+The default Huber threshold is 10 cleaned-video pixels. To override it, use (for example) `--huber-delta-px 5` and choose a different new output directory such as `monotrack_test\korea_loss_comparison_delta_5`. Existing output directories are refused. The report includes per-loss available-frame metrics and primary paired metrics on the shared visible-GT/valid-trajectory intersection. It excludes pre-hit padding, frames at/after manually selected floor contact, and invisible GT; missing estimates are reported as coverage gaps. Hit-to-hit baseline metrics and the final-flight extension metrics are separate. Fitting residuals against TrackNet are reported separately from GT errors.
 
 Annotated endpoints (and the serve player fallback) are fit references, so agreement with them is not independent accuracy evidence. Improvement over player-based references remains unverified. A plausible top-down path does not verify reconstructed height. The self-checks and synthetic tracker forward pass do not establish real-video tracking quality or physical trajectory accuracy. Reference-selection checks use a fitter spy without real-rally fitting; run `python -B monotrack_test/self_check.py --repo-root .` without `--checkpoint` for checks without tracker inference.
 

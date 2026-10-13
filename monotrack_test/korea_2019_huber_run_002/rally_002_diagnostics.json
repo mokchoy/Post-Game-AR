@@ -1,0 +1,1370 @@
+{
+  "input_video": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\cleaned_rallies\\set-1\\Kento_MOMOTA_CHOU_Tien_Chen_KOREA_OPEN_2019_Final\\set1\\rally_002.mp4",
+  "rally_csv": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\cleaned_rallies\\set-1\\Kento_MOMOTA_CHOU_Tien_Chen_KOREA_OPEN_2019_Final\\set1\\rally_002.csv",
+  "homography_csv": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\set-1\\homography.csv",
+  "homography_row_id": "3",
+  "input_metadata": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 25.0,
+    "frame_count": 790
+  },
+  "annotated_hits": 29,
+  "pixel_loss": "huber",
+  "huber_delta_px": 10.0,
+  "hit_to_hit_segments_attempted": 28,
+  "hit_to_hit_segments_available": 28,
+  "hit_track_neighborhood": [
+    {
+      "hit_frame": 25,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 25,
+      "frame_offset": 0,
+      "pixel_native": [
+        941,
+        528
+      ]
+    },
+    {
+      "hit_frame": 42,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 43,
+      "frame_offset": 1,
+      "pixel_native": [
+        1098,
+        352
+      ]
+    },
+    {
+      "hit_frame": 75,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 75,
+      "frame_offset": 0,
+      "pixel_native": [
+        1162,
+        405
+      ]
+    },
+    {
+      "hit_frame": 98,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 98,
+      "frame_offset": 0,
+      "pixel_native": [
+        825,
+        202
+      ]
+    },
+    {
+      "hit_frame": 114,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 113,
+      "frame_offset": 1,
+      "pixel_native": [
+        663,
+        678
+      ]
+    },
+    {
+      "hit_frame": 142,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 142,
+      "frame_offset": 0,
+      "pixel_native": [
+        693,
+        288
+      ]
+    },
+    {
+      "hit_frame": 158,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 158,
+      "frame_offset": 0,
+      "pixel_native": [
+        750,
+        536
+      ]
+    },
+    {
+      "hit_frame": 182,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 182,
+      "frame_offset": 0,
+      "pixel_native": [
+        1113,
+        476
+      ]
+    },
+    {
+      "hit_frame": 207,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 208,
+      "frame_offset": 1,
+      "pixel_native": [
+        1245,
+        551
+      ]
+    },
+    {
+      "hit_frame": 233,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 233,
+      "frame_offset": 0,
+      "pixel_native": [
+        1275,
+        450
+      ]
+    },
+    {
+      "hit_frame": 271,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 270,
+      "frame_offset": 1,
+      "pixel_native": [
+        1376,
+        483
+      ]
+    },
+    {
+      "hit_frame": 296,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 295,
+      "frame_offset": 1,
+      "pixel_native": [
+        1113,
+        202
+      ]
+    },
+    {
+      "hit_frame": 316,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 316,
+      "frame_offset": 0,
+      "pixel_native": [
+        622,
+        641
+      ]
+    },
+    {
+      "hit_frame": 340,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 340,
+      "frame_offset": 0,
+      "pixel_native": [
+        761,
+        427
+      ]
+    },
+    {
+      "hit_frame": 364,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 364,
+      "frame_offset": 0,
+      "pixel_native": [
+        1207,
+        558
+      ]
+    },
+    {
+      "hit_frame": 393,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 393,
+      "frame_offset": 0,
+      "pixel_native": [
+        1226,
+        311
+      ]
+    },
+    {
+      "hit_frame": 405,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 405,
+      "frame_offset": 0,
+      "pixel_native": [
+        1248,
+        465
+      ]
+    },
+    {
+      "hit_frame": 418,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 418,
+      "frame_offset": 0,
+      "pixel_native": [
+        1166,
+        352
+      ]
+    },
+    {
+      "hit_frame": 437,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 437,
+      "frame_offset": 0,
+      "pixel_native": [
+        1226,
+        528
+      ]
+    },
+    {
+      "hit_frame": 460,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 460,
+      "frame_offset": 0,
+      "pixel_native": [
+        1181,
+        202
+      ]
+    },
+    {
+      "hit_frame": 488,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 489,
+      "frame_offset": 1,
+      "pixel_native": [
+        1185,
+        543
+      ]
+    },
+    {
+      "hit_frame": 513,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 513,
+      "frame_offset": 0,
+      "pixel_native": [
+        1177,
+        423
+      ]
+    },
+    {
+      "hit_frame": 548,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 548,
+      "frame_offset": 0,
+      "pixel_native": [
+        1207,
+        450
+      ]
+    },
+    {
+      "hit_frame": 566,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 566,
+      "frame_offset": 0,
+      "pixel_native": [
+        727,
+        476
+      ]
+    },
+    {
+      "hit_frame": 592,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 592,
+      "frame_offset": 0,
+      "pixel_native": [
+        735,
+        491
+      ]
+    },
+    {
+      "hit_frame": 624,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 624,
+      "frame_offset": 0,
+      "pixel_native": [
+        1113,
+        273
+      ]
+    },
+    {
+      "hit_frame": 643,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 643,
+      "frame_offset": 0,
+      "pixel_native": [
+        1218,
+        648
+      ]
+    },
+    {
+      "hit_frame": 670,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 669,
+      "frame_offset": 1,
+      "pixel_native": [
+        1132,
+        528
+      ]
+    },
+    {
+      "hit_frame": 715,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 715,
+      "frame_offset": 0,
+      "pixel_native": [
+        641,
+        405
+      ]
+    }
+  ],
+  "tracker": {
+    "script": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\TrackNetv2-pretrained\\track_video.py",
+    "checkpoint": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\TrackNetv2-pretrained\\track.pt",
+    "device": "cuda"
+  },
+  "frame_timing": {
+    "authoritative": "clip_frame_num",
+    "fps": 25.0,
+    "fr_adjust": 1.0,
+    "frame_time": "frame / fps"
+  },
+  "camera_calibration_rmse_px": 0.27918620577305714,
+  "hit_to_hit_segments": [
+    {
+      "phase": "hit_1_to_hit_2",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 25,
+      "end_frame": 42,
+      "duration_seconds": 0.68,
+      "visible_detections": 12,
+      "missing_detections": 6,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 837.5209922706784,
+      "reprojection_rmse_px": 143.08824212314875,
+      "reprojection_median_px": 3.855369448328853,
+      "reprojection_max_px": 495.43576514166267,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.0023581379171578667,
+      "receive_reference_error_m": 0.045990136478472235,
+      "start_reference_xy_m": [
+        2.9269091313872444,
+        9.57202480725339
+      ],
+      "receive_reference_xy_m": [
+        3.962117104775408,
+        4.7920548959127816
+      ],
+      "start_reference_source": "first_row_player_location",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_2_to_hit_3",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 42,
+      "end_frame": 75,
+      "duration_seconds": 1.32,
+      "visible_detections": 33,
+      "missing_detections": 1,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 174.3556053688849,
+      "reprojection_rmse_px": 32.85915991868238,
+      "reprojection_median_px": 6.957455279563866,
+      "reprojection_max_px": 182.21390760861425,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.051902454113769106,
+      "receive_reference_error_m": 0.028096184228125366,
+      "start_reference_xy_m": [
+        3.962117104775408,
+        4.7920548959127816
+      ],
+      "receive_reference_xy_m": [
+        4.820840263839,
+        12.510581710872973
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 182.21390760861425
+    },
+    {
+      "phase": "hit_3_to_hit_4",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 75,
+      "end_frame": 98,
+      "duration_seconds": 0.92,
+      "visible_detections": 24,
+      "missing_detections": 0,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 101.98057440176042,
+      "reprojection_rmse_px": 8.032866479765898,
+      "reprojection_median_px": 2.622818016756405,
+      "reprojection_max_px": 26.464191709842883,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.4371014545509843,
+      "receive_reference_error_m": 0.047875988636312,
+      "start_reference_xy_m": [
+        4.820840263839,
+        12.510581710872973
+      ],
+      "receive_reference_xy_m": [
+        1.866841159422752,
+        0.63019159946361
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 10.429710560646557
+    },
+    {
+      "phase": "hit_4_to_hit_5",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 98,
+      "end_frame": 114,
+      "duration_seconds": 0.64,
+      "visible_detections": 16,
+      "missing_detections": 1,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 30.96001274227244,
+      "reprojection_rmse_px": 5.683718329414669,
+      "reprojection_median_px": 3.796190909021486,
+      "reprojection_max_px": 14.671882153546354,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.047875988636312,
+      "receive_reference_error_m": 0.010481313850030765,
+      "start_reference_xy_m": [
+        1.866841159422752,
+        0.63019159946361
+      ],
+      "receive_reference_xy_m": [
+        1.1011278507147657,
+        9.397684101045272
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_5_to_hit_6",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 114,
+      "end_frame": 142,
+      "duration_seconds": 1.12,
+      "visible_detections": 28,
+      "missing_detections": 1,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 31.89681253673985,
+      "reprojection_rmse_px": 5.069067736620391,
+      "reprojection_median_px": 3.583176010254636,
+      "reprojection_max_px": 10.540521754637748,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.05193163217193493,
+      "receive_reference_error_m": 0.13893412131171565,
+      "start_reference_xy_m": [
+        1.1011278507147657,
+        9.397684101045272
+      ],
+      "receive_reference_xy_m": [
+        0.6622385272603483,
+        0.4037373352977641
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 10.540521754637748
+    },
+    {
+      "phase": "hit_6_to_hit_7",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 142,
+      "end_frame": 158,
+      "duration_seconds": 0.64,
+      "visible_detections": 17,
+      "missing_detections": 0,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 106.29423143600656,
+      "reprojection_rmse_px": 15.571154120730858,
+      "reprojection_median_px": 6.5084769444585655,
+      "reprojection_max_px": 58.524359582349256,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.13893412131171565,
+      "receive_reference_error_m": 0.0913179064437451,
+      "start_reference_xy_m": [
+        0.6622385272603483,
+        0.4037373352977641
+      ],
+      "receive_reference_xy_m": [
+        1.3349264325306955,
+        9.209537934578258
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 58.524359582349256
+    },
+    {
+      "phase": "hit_7_to_hit_8",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 158,
+      "end_frame": 182,
+      "duration_seconds": 0.96,
+      "visible_detections": 19,
+      "missing_detections": 6,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 518.7030540519596,
+      "reprojection_rmse_px": 99.6544130881609,
+      "reprojection_median_px": 2.8909059093274023,
+      "reprojection_max_px": 432.285273244183,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.27448020635218096,
+      "receive_reference_error_m": 0.02088497000359727,
+      "start_reference_xy_m": [
+        1.3349264325306955,
+        9.209537934578258
+      ],
+      "receive_reference_xy_m": [
+        4.14888670998143,
+        4.8791717367078355
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 40.26239322148939
+    },
+    {
+      "phase": "hit_8_to_hit_9",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 182,
+      "end_frame": 207,
+      "duration_seconds": 1.0,
+      "visible_detections": 24,
+      "missing_detections": 2,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 21.916149255635236,
+      "reprojection_rmse_px": 4.356104917717076,
+      "reprojection_median_px": 3.0418517872034876,
+      "reprojection_max_px": 11.24719768575841,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.1005690737109565,
+      "receive_reference_error_m": 0.022746072192855134,
+      "start_reference_xy_m": [
+        4.14888670998143,
+        4.8791717367078355
+      ],
+      "receive_reference_xy_m": [
+        5.080739382622598,
+        7.612875735691462
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_9_to_hit_10",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 207,
+      "end_frame": 233,
+      "duration_seconds": 1.04,
+      "visible_detections": 25,
+      "missing_detections": 2,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 71.97335764615954,
+      "reprojection_rmse_px": 16.392497607044145,
+      "reprojection_median_px": 2.706049749034973,
+      "reprojection_max_px": 80.262993659845,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.026745567506489987,
+      "receive_reference_error_m": 0.04341058507014369,
+      "start_reference_xy_m": [
+        5.080739382622598,
+        7.612875735691462
+      ],
+      "receive_reference_xy_m": [
+        5.429452181400443,
+        5.683271310362508
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 80.262993659845
+    },
+    {
+      "phase": "hit_10_to_hit_11",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 233,
+      "end_frame": 271,
+      "duration_seconds": 1.52,
+      "visible_detections": 38,
+      "missing_detections": 1,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 218.97062000136555,
+      "reprojection_rmse_px": 16.18739600869001,
+      "reprojection_median_px": 14.250848257899978,
+      "reprojection_max_px": 33.91578523138881,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.23509710108197157,
+      "receive_reference_error_m": 0.18416665942325583,
+      "start_reference_xy_m": [
+        5.429452181400443,
+        5.683271310362508
+      ],
+      "receive_reference_xy_m": [
+        5.474659075149158,
+        12.576992958899595
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_11_to_hit_12",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 271,
+      "end_frame": 296,
+      "duration_seconds": 1.0,
+      "visible_detections": 24,
+      "missing_detections": 2,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 37.93225642140622,
+      "reprojection_rmse_px": 5.126891998305448,
+      "reprojection_median_px": 2.959735620320541,
+      "reprojection_max_px": 18.875967460162787,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.21234629120166035,
+      "receive_reference_error_m": 0.08788944403145944,
+      "start_reference_xy_m": [
+        5.474659075149158,
+        12.576992958899595
+      ],
+      "receive_reference_xy_m": [
+        4.522122463793506,
+        0.7843004551962568
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_12_to_hit_13",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 296,
+      "end_frame": 316,
+      "duration_seconds": 0.8,
+      "visible_detections": 20,
+      "missing_detections": 1,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 194.58931389682226,
+      "reprojection_rmse_px": 28.97415154010863,
+      "reprojection_median_px": 5.6340848972189175,
+      "reprojection_max_px": 123.15206809789454,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.1770982805326933,
+      "receive_reference_error_m": 0.07537573417477754,
+      "start_reference_xy_m": [
+        4.522122463793506,
+        0.7843004551962568
+      ],
+      "receive_reference_xy_m": [
+        0.8287541005276544,
+        9.552602716143092
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 123.15206809789454
+    },
+    {
+      "phase": "hit_13_to_hit_14",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 316,
+      "end_frame": 340,
+      "duration_seconds": 0.96,
+      "visible_detections": 25,
+      "missing_detections": 0,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 37.716317423465846,
+      "reprojection_rmse_px": 6.953831009504034,
+      "reprojection_median_px": 3.59287246111126,
+      "reprojection_max_px": 26.75329118435329,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.04517933729423568,
+      "receive_reference_error_m": 0.01002988675266864,
+      "start_reference_xy_m": [
+        0.8287541005276544,
+        9.552602716143092
+      ],
+      "receive_reference_xy_m": [
+        1.2758070308366682,
+        4.765476738775645
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 26.75329118435329
+    },
+    {
+      "phase": "hit_14_to_hit_15",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 340,
+      "end_frame": 364,
+      "duration_seconds": 0.96,
+      "visible_detections": 23,
+      "missing_detections": 2,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 153.83660260646644,
+      "reprojection_rmse_px": 20.54948178998306,
+      "reprojection_median_px": 7.230781912485696,
+      "reprojection_max_px": 85.90167197866411,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.01002988675266864,
+      "receive_reference_error_m": 0.05932653454777686,
+      "start_reference_xy_m": [
+        1.2758070308366682,
+        4.765476738775645
+      ],
+      "receive_reference_xy_m": [
+        4.806290356451047,
+        7.721390590486474
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 85.90167197866411
+    },
+    {
+      "phase": "hit_15_to_hit_16",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 364,
+      "end_frame": 393,
+      "duration_seconds": 1.16,
+      "visible_detections": 30,
+      "missing_detections": 0,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 153.70972610259898,
+      "reprojection_rmse_px": 34.831339222152806,
+      "reprojection_median_px": 3.085402712907083,
+      "reprojection_max_px": 188.01751562098107,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.018526473057082812,
+      "receive_reference_error_m": 0.00952729545884288,
+      "start_reference_xy_m": [
+        4.806290356451047,
+        7.721390590486474
+      ],
+      "receive_reference_xy_m": [
+        5.359733419969071,
+        0.6614328180498661
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 18.385958063105814
+    },
+    {
+      "phase": "hit_16_to_hit_17",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 393,
+      "end_frame": 405,
+      "duration_seconds": 0.48,
+      "visible_detections": 13,
+      "missing_detections": 0,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 216.8873777646146,
+      "reprojection_rmse_px": 28.497174284890942,
+      "reprojection_median_px": 7.957687991734069,
+      "reprojection_max_px": 97.43334224177818,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.00952729545884288,
+      "receive_reference_error_m": 0.03636250465906172,
+      "start_reference_xy_m": [
+        5.359733419969071,
+        0.6614328180498661
+      ],
+      "receive_reference_xy_m": [
+        5.1400063997404875,
+        9.920096200067569
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 97.43334224177818
+    },
+    {
+      "phase": "hit_17_to_hit_18",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 405,
+      "end_frame": 418,
+      "duration_seconds": 0.52,
+      "visible_detections": 14,
+      "missing_detections": 0,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 44.83601611729482,
+      "reprojection_rmse_px": 6.4426827682756915,
+      "reprojection_median_px": 3.13993690423555,
+      "reprojection_max_px": 21.405289070578533,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.19835848684358084,
+      "receive_reference_error_m": 0.07277194595136487,
+      "start_reference_xy_m": [
+        5.1400063997404875,
+        9.920096200067569
+      ],
+      "receive_reference_xy_m": [
+        4.8099428728478335,
+        1.9545913193059146
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 21.405289070578533
+    },
+    {
+      "phase": "hit_18_to_hit_19",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 418,
+      "end_frame": 437,
+      "duration_seconds": 0.76,
+      "visible_detections": 20,
+      "missing_detections": 0,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 223.1785455089772,
+      "reprojection_rmse_px": 26.60411647485728,
+      "reprojection_median_px": 10.362883559251582,
+      "reprojection_max_px": 106.63359577782714,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.07277194595136487,
+      "receive_reference_error_m": 0.07040542236157354,
+      "start_reference_xy_m": [
+        4.8099428728478335,
+        1.9545913193059146
+      ],
+      "receive_reference_xy_m": [
+        4.95539599347138,
+        8.544168889258511
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 106.63359577782714
+    },
+    {
+      "phase": "hit_19_to_hit_20",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 437,
+      "end_frame": 460,
+      "duration_seconds": 0.92,
+      "visible_detections": 22,
+      "missing_detections": 2,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 12.809183200433331,
+      "reprojection_rmse_px": 3.492538610923505,
+      "reprojection_median_px": 3.3998450935006703,
+      "reprojection_max_px": 5.5362467139862925,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.030786334126586296,
+      "receive_reference_error_m": 0.03485577557547769,
+      "start_reference_xy_m": [
+        4.95539599347138,
+        8.544168889258511
+      ],
+      "receive_reference_xy_m": [
+        5.054527366284231,
+        1.180858770429762
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 2.061031784376183
+    },
+    {
+      "phase": "hit_20_to_hit_21",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 460,
+      "end_frame": 488,
+      "duration_seconds": 1.12,
+      "visible_detections": 25,
+      "missing_detections": 4,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 13.242003997883371,
+      "reprojection_rmse_px": 3.63653104741315,
+      "reprojection_median_px": 2.840818585495608,
+      "reprojection_max_px": 8.596101582332578,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.03485577557547769,
+      "receive_reference_error_m": 0.007900877885082622,
+      "start_reference_xy_m": [
+        5.054527366284231,
+        1.180858770429762
+      ],
+      "receive_reference_xy_m": [
+        4.675756216043288,
+        7.933263920481758
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_21_to_hit_22",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 488,
+      "end_frame": 513,
+      "duration_seconds": 1.0,
+      "visible_detections": 25,
+      "missing_detections": 1,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 91.83940039261262,
+      "reprojection_rmse_px": 18.95031223204585,
+      "reprojection_median_px": 3.1102218988369583,
+      "reprojection_max_px": 91.85377486468353,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.06790986860995073,
+      "receive_reference_error_m": 0.0425796523810455,
+      "start_reference_xy_m": [
+        4.675756216043288,
+        7.933263920481758
+      ],
+      "receive_reference_xy_m": [
+        4.637529831558882,
+        5.853318240783903
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 91.85377486468353
+    },
+    {
+      "phase": "hit_22_to_hit_23",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 513,
+      "end_frame": 548,
+      "duration_seconds": 1.4,
+      "visible_detections": 36,
+      "missing_detections": 0,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 240.91715537863934,
+      "reprojection_rmse_px": 32.43086362047602,
+      "reprojection_median_px": 9.950025755624736,
+      "reprojection_max_px": 177.18675684126256,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.16032481346074345,
+      "receive_reference_error_m": 0.2143888066649159,
+      "start_reference_xy_m": [
+        4.637529831558882,
+        5.853318240783903
+      ],
+      "receive_reference_xy_m": [
+        5.278372333189741,
+        12.250336031292903
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 177.18675684126256
+    },
+    {
+      "phase": "hit_23_to_hit_24",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 548,
+      "end_frame": 566,
+      "duration_seconds": 0.72,
+      "visible_detections": 16,
+      "missing_detections": 3,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 166.30122152113958,
+      "reprojection_rmse_px": 19.171466403498645,
+      "reprojection_median_px": 3.0491071284785196,
+      "reprojection_max_px": 67.55030198519358,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.3841908271453329,
+      "receive_reference_error_m": 0.054603588086822086,
+      "start_reference_xy_m": [
+        5.278372333189741,
+        12.250336031292903
+      ],
+      "receive_reference_xy_m": [
+        1.2130005640568728,
+        3.6093566424799373
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 34.26803691051031
+    },
+    {
+      "phase": "hit_24_to_hit_25",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 566,
+      "end_frame": 592,
+      "duration_seconds": 1.04,
+      "visible_detections": 26,
+      "missing_detections": 1,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 297.26308992477095,
+      "reprojection_rmse_px": 33.044727663410754,
+      "reprojection_median_px": 12.272041613736178,
+      "reprojection_max_px": 145.57225539640777,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.054603588086822086,
+      "receive_reference_error_m": 0.09802353054781315,
+      "start_reference_xy_m": [
+        1.2130005640568728,
+        3.6093566424799373
+      ],
+      "receive_reference_xy_m": [
+        1.066778731015047,
+        7.884006767684389
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 145.57225539640777
+    },
+    {
+      "phase": "hit_25_to_hit_26",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 592,
+      "end_frame": 624,
+      "duration_seconds": 1.28,
+      "visible_detections": 33,
+      "missing_detections": 0,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 65.58072401696492,
+      "reprojection_rmse_px": 6.560410748740957,
+      "reprojection_median_px": 3.778305993470485,
+      "reprojection_max_px": 20.155578101041847,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.30642166915569147,
+      "receive_reference_error_m": 0.049654407126603475,
+      "start_reference_xy_m": [
+        1.066778731015047,
+        7.884006767684389
+      ],
+      "receive_reference_xy_m": [
+        4.345515514306188,
+        0.43409172901462145
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 20.155578101041847
+    },
+    {
+      "phase": "hit_26_to_hit_27",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 624,
+      "end_frame": 643,
+      "duration_seconds": 0.76,
+      "visible_detections": 20,
+      "missing_detections": 0,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 140.28197698882613,
+      "reprojection_rmse_px": 14.77387037359927,
+      "reprojection_median_px": 9.305882961879831,
+      "reprojection_max_px": 46.59903971721727,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.049654407126603475,
+      "receive_reference_error_m": 0.08973342836552826,
+      "start_reference_xy_m": [
+        4.345515514306188,
+        0.43409172901462145
+      ],
+      "receive_reference_xy_m": [
+        4.845913842663649,
+        8.774855480603385
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 46.59903971721727
+    },
+    {
+      "phase": "hit_27_to_hit_28",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 643,
+      "end_frame": 670,
+      "duration_seconds": 1.08,
+      "visible_detections": 27,
+      "missing_detections": 1,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 14.40786659290827,
+      "reprojection_rmse_px": 3.7540725644599298,
+      "reprojection_median_px": 2.6931314352593474,
+      "reprojection_max_px": 8.840426983219318,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.03197099223089369,
+      "receive_reference_error_m": 0.009565844221735417,
+      "start_reference_xy_m": [
+        4.845913842663649,
+        8.774855480603385
+      ],
+      "receive_reference_xy_m": [
+        4.4260286014779275,
+        5.268131853893429
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_28_to_hit_29",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 670,
+      "end_frame": 715,
+      "duration_seconds": 1.8,
+      "visible_detections": 19,
+      "missing_detections": 27,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 161.75045102203282,
+      "reprojection_rmse_px": 18.10335772778237,
+      "reprojection_median_px": 10.211426064620149,
+      "reprojection_max_px": 65.35125949258497,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.04049805427331953,
+      "receive_reference_error_m": 0.09290810209771402,
+      "start_reference_xy_m": [
+        4.4260286014779275,
+        5.268131853893429
+      ],
+      "receive_reference_xy_m": [
+        1.1533988934416624,
+        12.339857281523006
+      ],
+      "start_reference_source": "current_row_hit_x_y",
+      "receive_reference_source": "current_row_landing_x_y",
+      "hit_endpoint_reprojection_error_px": 65.35125949258497
+    }
+  ],
+  "terminal_extension": {
+    "extension": "piecewise flight assumptions beyond MonoTrack hit-to-hit reconstruction",
+    "pixel_loss": "huber",
+    "huber_delta_px": 10.0,
+    "phases": [
+      {
+        "phase": "last_hit_to_net_contact",
+        "status": "unidentifiable",
+        "reason": "net_contact_position_unavailable",
+        "pixel_loss": "huber",
+        "huber_delta_px": 10.0
+      },
+      {
+        "phase": "last_hit_to_floor_contact",
+        "pixel_loss": "huber",
+        "huber_delta_px": 10.0,
+        "start_frame": 715,
+        "end_frame": 731,
+        "duration_seconds": 0.64,
+        "visible_detections": 17,
+        "missing_detections": 0,
+        "start_fixed": true,
+        "end_fixed": true,
+        "status": "available",
+        "optimizer": "SLSQP",
+        "optimizer_success": true,
+        "optimizer_status": 0,
+        "optimizer_message": "Optimization terminated successfully",
+        "objective": 253.85772033681206,
+        "reprojection_rmse_px": 22.79443096753713,
+        "reprojection_median_px": 13.422213304692484,
+        "reprojection_max_px": 65.35125949258497,
+        "endpoint_constraint_error_m": 3.1975684269333753e-15,
+        "start_reference_error_m": 0.0,
+        "receive_reference_error_m": 2.222006751886933e-15
+      }
+    ],
+    "net_contact_status": "unidentifiable",
+    "net_contact_reason": "manual_net_contact_not_identified",
+    "floor_contact_world_m": [
+      0.21749443925113407,
+      2.5165534805111838,
+      0.0
+    ],
+    "floor_contact_status": "available",
+    "floor_contact_inside_court": true,
+    "event_order_status": "available",
+    "piecewise_contact_position_shared": false
+  },
+  "output_video": {
+    "codec": "h264",
+    "width": 1440,
+    "height": 720,
+    "fps": 25.0,
+    "frames": 790,
+    "duration_seconds": 31.6,
+    "source_audio_present": true,
+    "output_audio_present": true,
+    "audio_video_start_delta_seconds": 0.0,
+    "audio_video_duration_delta_seconds": 0.0
+  },
+  "interpretation": "Annotated hit/landing positions are soft horizontal fit references; only the missing first serve hit uses its player's location. A carried fitted 3D endpoint takes precedence at the next start. Agreement with these priors is not independent accuracy evidence, and a plausible top-down path does not verify reconstructed height.",
+  "mono_track_source": {
+    "repository": "https://github.com/jhwang7628/monotrack",
+    "commit": "39e9227bd44fa2a579731b1cc97c7f529f391cd6",
+    "license": "Adobe Research License; noncommercial research only"
+  }
+}

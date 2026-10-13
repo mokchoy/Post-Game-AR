@@ -184,6 +184,29 @@ def visible_observations(observations: list[tuple[float, float] | None]) -> list
     ]
 
 
+def validate_pixel_loss(pixel_loss: str, huber_delta_px: float) -> tuple[str, float]:
+    if pixel_loss not in ("mse", "huber"):
+        raise ValueError("pixel_loss must be 'mse' or 'huber'")
+    try:
+        delta = float(huber_delta_px)
+    except (TypeError, ValueError) as error:
+        raise ValueError("huber_delta_px must be positive and finite") from error
+    if not np.isfinite(delta) or delta <= 0:
+        raise ValueError("huber_delta_px must be positive and finite")
+    return pixel_loss, delta
+
+
+def pixel_residual_cost(errors: list[float] | np.ndarray, pixel_loss: str, huber_delta_px: float) -> float:
+    if pixel_loss == "mse":
+        return float(np.mean(np.square(errors)))
+    errors = np.asarray(errors, dtype=np.float64)
+    return float(np.mean(np.where(
+        errors <= huber_delta_px,
+        np.square(errors),
+        2.0 * huber_delta_px * errors - huber_delta_px ** 2,
+    )))
+
+
 def simulate_trajectory(
     start_m: np.ndarray,
     velocity_mps: np.ndarray,
@@ -220,17 +243,22 @@ def reconstruct_flight(
     start_fixed: np.ndarray | None = None,
     end_fixed: np.ndarray | None = None,
     phase: str = "hit_to_hit",
+    pixel_loss: str = "mse",
+    huber_delta_px: float = 10.0,
 ) -> tuple[np.ndarray | None, dict]:
     """Fit one gravity-plus-quadratic-drag flight with frame-aligned reprojection loss."""
+    pixel_loss, huber_delta_px = validate_pixel_loss(pixel_loss, huber_delta_px)
+    configuration = {"pixel_loss": pixel_loss, "huber_delta_px": huber_delta_px}
     duration_frames = int(end_frame) - int(start_frame)
     if duration_frames < 2:
-        return None, {"phase": phase, "status": "insufficient_data", "reason": "fewer_than_3_frames"}
+        return None, {"phase": phase, **configuration, "status": "insufficient_data", "reason": "fewer_than_3_frames"}
     if start_frame < 0 or end_frame >= len(observations):
-        return None, {"phase": phase, "status": "insufficient_data", "reason": "frame_range_outside_tracks"}
+        return None, {"phase": phase, **configuration, "status": "insufficient_data", "reason": "frame_range_outside_tracks"}
     local = observations[start_frame:end_frame + 1]
     visible = visible_observations(local)
     base = {
         "phase": phase,
+        **configuration,
         "start_frame": int(start_frame),
         "end_frame": int(end_frame),
         "duration_seconds": frame_time_seconds(duration_frames, fps),
@@ -252,7 +280,7 @@ def reconstruct_flight(
     if fixed_start is None:
         y0 = float(np.clip(start_reference_xy[1], 0.0, COURT_LENGTH_M))
         x0 = float(np.clip(start_reference_xy[0], 0.0, COURT_WIDTH_M))
-        initial_start = np.asarray([x0, y0, 1.7])
+        initial_start = np.asarray([x0, y0, 0.45 * 1.75])
     else:
         initial_start = fixed_start.copy()
     target_xy = fixed_end[:2] if fixed_end is not None else receive_reference_xy
@@ -305,7 +333,7 @@ def reconstruct_flight(
             if not np.isfinite(projected).all():
                 return 1e12
             errors.append(float(np.linalg.norm(projected - observed)))
-        cost = float(np.mean(np.square(errors)))
+        cost = pixel_residual_cost(errors, pixel_loss, huber_delta_px)
         if fixed_start is None:
             start_error_m = float(np.linalg.norm(path[0, :2] - start_reference_xy))
             cost += (0.15 * camera_scale * start_error_m) ** 2

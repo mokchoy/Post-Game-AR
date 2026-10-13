@@ -113,8 +113,6 @@ def source_interval_origin(video, metadata, start, end):
     period = 1.0 / float(metadata["rate"])
     for extra in (0.2, 5.2, 10.2, 20.2, 40.2):
         query_duration = end - start + extra
-        if query_duration > 60.0:
-            continue
         timestamps = frame_timestamps(video, absolute_start, query_duration)
         relative = [value - metadata["video_start_time"] for value in timestamps]
         inside = [value for value in relative if start - tolerance <= value < end - tolerance]
@@ -780,6 +778,18 @@ def preflight_clean(clean_folder, records, overwrite):
 
 
 def self_test():
+    from unittest.mock import Mock, patch
+
+    for rate, start, count, seek_retry in ((25, 1680.44, 1662, False), (30, 4031.366666667, 1664, True)):
+        timestamps = [start + index / rate for index in range(count)]
+        metadata = {"rate": Fraction(rate), "avg_rate": Fraction(rate),
+                    "nominal_rate": Fraction(rate), "video_start_time": 0.0}
+        probe = Mock(side_effect=[timestamps[:1500], timestamps] if seek_retry else [timestamps])
+        with patch.dict(globals(), frame_timestamps=probe):
+            assert source_interval_origin("synthetic", metadata, start, start + count / rate) == (start, count)
+        assert probe.call_count == (2 if seek_retry else 1)
+        assert probe.call_args.args[2] > 60.0
+
     assert validate_component("Sudirman Cup 2019", "match") == "Sudirman Cup 2019"
     assert validate_component("Sudirman  Cup 2019", "match") == "Sudirman  Cup 2019"
     for value in ("..", "folder/name", "folder\\name", "bad:name", " leading", "trailing "):
@@ -820,7 +830,7 @@ def self_test():
     ending = {"review_flags": ""}
     flag_short_ending_tail(ending, [281], 0, 289, 25.0)
     assert ending["review_flags"] == "short-post-hit-tail"
-    print("Self-test passed: no cuts, edge cuts, internal cuts, single/boundary hits, timestamp shifts, trailing-only trim, and invalid frame mappings.")
+    print("Self-test passed: long-rally probes, keyframe-seek retries, no cuts, edge cuts, internal cuts, single/boundary hits, timestamp shifts, trailing-only trim, and invalid frame mappings.")
 
 
 def parse_args():

@@ -1,6 +1,7 @@
 # Generated rally datasets
 /cleaned_rallies/
 /trimmed_rallies/
+/Professional/
 /trim_rallies/.v3-raw-*/
 
 # Videos and incomplete downloads
