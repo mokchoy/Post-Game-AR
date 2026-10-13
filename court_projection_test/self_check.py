@@ -376,6 +376,21 @@ def run_checks() -> None:
     for identity, color in (("A", (0, 70, 255)), ("B", (255, 120, 0))):
         point = court_panel_point(player_row["player_locations"][identity], panel_rect)
         assert point is not None and tuple(player_preview[point[1], point[0]]) == color
+    for frame in (25, 36, 37, 523):
+        row = {**rows[frame], "court_xy": None}
+        shown = render_frame(np.zeros((1080, 1920, 3), dtype=np.uint8), row, [], court_world_lines())
+        baseline = render_frame(np.zeros((1080, 1920, 3), dtype=np.uint8), {**row, "endpoints": {}}, [], court_world_lines())
+        changed = np.any(shown != baseline, axis=2)
+        assert not np.any(changed[:, :960]) and not np.any(changed[:52]) and not np.any(changed[641:])
+        stroke = row["stroke"]
+        hit_label = "Serve fallback" if stroke.index == 0 else "Hit"
+        assert set(row["endpoints"]) == {hit_label, "Landing"}
+        for label, native in ((hit_label, stroke.a_native), ("Landing", stroke.b_native)):
+            assert np.allclose(row["endpoints"][label], geometry.native_floor_to_world(native))
+            point = court_panel_point(row["endpoints"][label], panel_rect)
+            color = (0, 255, 0) if label == "Landing" else (255, 0, 255)
+            assert tuple(shown[point[1], point[0] + 11]) == color
+    assert rows[24]["endpoints"] == {}
 
     plot_row = {**rows[523], "court_xy": None, "player_locations": None}
     blank = np.zeros((1080, 1920, 3), dtype=np.uint8)

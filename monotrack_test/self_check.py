@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 import numpy as np
 
@@ -28,8 +29,10 @@ from run_projection import (
     DEFAULT_VIDEO,
     assign_paths,
     draw_calibration_preview,
+    fit_hit_flights,
     hold_terminal_marker,
     player_references,
+    panel_point,
     render_frame,
     reserve_output_files,
     repo_path,
@@ -50,6 +53,90 @@ def synthetic_camera() -> np.ndarray:
     extrinsic = np.column_stack((rotation, -rotation @ center))
     projection = intrinsic @ extrinsic
     return projection / projection[2, 3]
+
+
+def test_fit_references(hits: list[dict], geometry, projection: np.ndarray) -> None:
+    # A different landing from the next hit verifies that the current row is authoritative.
+    test_hits = [dict(row) for row in hits]
+    test_hits[2]["landing_x"] = str(float(test_hits[2]["landing_x"]) + 10)
+    players = player_references(test_hits, geometry)
+    calls = []
+
+    def spy(**kwargs):
+        calls.append(kwargs)
+        return None, {"phase": kwargs["phase"], "status": "insufficient_data",
+                      "start_fixed": kwargs["start_fixed"] is not None,
+                      "start_reference_error_m": 1.0, "receive_reference_error_m": 2.0}
+
+    with patch("run_projection.reconstruct_flight", side_effect=spy):
+        _, _, _, paths, diagnostics, _ = fit_hit_flights(test_hits, players, [None] * 524, projection, 25)
+    assert len(calls) == len(diagnostics) == 17 and not paths
+    for index, (call, detail) in enumerate(zip(calls, diagnostics)):
+        row = test_hits[index]
+        prefix = "player_location" if index == 0 else "hit"
+        expected_start = geometry.annotation_floor_to_world([float(row[f"{prefix}_x"]), float(row[f"{prefix}_y"])])
+        expected_end = geometry.annotation_floor_to_world([float(row["landing_x"]), float(row["landing_y"])])
+        assert np.allclose(call["start_reference_xy"], expected_start)
+        assert np.allclose(call["receive_reference_xy"], expected_end)
+        assert call["start_frame"] == row["clip_frame_num"] and call["end_frame"] == test_hits[index + 1]["clip_frame_num"]
+        assert call["fps"] == 25 and call["start_fixed"] is None and "end_fixed" not in call
+        assert np.allclose(detail["start_reference_xy_m"], expected_start)
+        assert np.allclose(detail["receive_reference_xy_m"], expected_end)
+        assert detail["start_reference_source"] == ("first_row_player_location" if index == 0 else "current_row_hit_x_y")
+        assert detail["receive_reference_source"] == "current_row_landing_x_y"
+        assert detail["start_fixed"] is False and detail["start_reference_error_m"] == 1.0 and detail["receive_reference_error_m"] == 2.0
+
+    # Missing, malformed, and nonfinite annotations must fail before any fitter call.
+    for index, field, value in ((0, "hit_x", "nan"), (0, "hit_y", "broken"), (0, "landing_x", ""),
+                                 (1, "hit_x", ""), (1, "hit_y", None), (2, "landing_y", "broken"),
+                                 (16, "landing_x", "inf")):
+        invalid = [dict(row) for row in hits]
+        invalid[index][field] = value
+        invalid_players = player_references(invalid, geometry)
+        with patch("run_projection.reconstruct_flight") as fitter:
+            try:
+                fit_hit_flights(invalid, invalid_players, [None] * 524, projection, 25)
+            except ValueError as error:
+                assert f"Stroke {index + 1}" in str(error) and field.split("_")[0] in str(error)
+            else:
+                raise AssertionError(f"Accepted invalid endpoint {field}={value!r}")
+            fitter.assert_not_called()
+    for point in ([np.nan, 1.0], [1.0, np.inf], [1.0], ["broken", 1.0]):
+        invalid_players = [{**row, "endpoints": dict(row["endpoints"])} for row in players]
+        invalid_players[1]["endpoints"]["Hit"] = point
+        with patch("run_projection.reconstruct_flight") as fitter:
+            try:
+                fit_hit_flights(test_hits, invalid_players, [None] * 524, projection, 25)
+            except ValueError as error:
+                assert "Stroke 2" in str(error) and "hit_x/y" in str(error)
+            else:
+                raise AssertionError(f"Accepted invalid transformed endpoint {point!r}")
+            fitter.assert_not_called()
+    valid_first_hit = [dict(row) for row in hits]
+    valid_first_hit[0].update(hit_x="640.0", hit_y="360.0")
+    calls.clear()
+    with patch("run_projection.reconstruct_flight", side_effect=spy):
+        detail = fit_hit_flights(valid_first_hit, player_references(valid_first_hit, geometry),
+                                 [None] * 524, projection, 25)[4][0]
+    assert detail["start_reference_source"] == "current_row_hit_x_y"
+
+    # Continuity still carries a fitted 3D start rather than imposing the annotated x/y.
+    fixed_point = np.asarray([3.0, 5.5, 1.8])
+    observations = [None] * 524
+    observations[hits[1]["clip_frame_num"]] = tuple(project_point(projection, fixed_point))
+    calls.clear()
+
+    def carry_spy(**kwargs):
+        _, detail = spy(**kwargs)
+        if len(calls) == 1:
+            detail["status"] = "available"
+            return np.tile(fixed_point, (kwargs["end_frame"] - kwargs["start_frame"] + 1, 1)), detail
+        return None, detail
+
+    with patch("run_projection.reconstruct_flight", side_effect=carry_spy):
+        diagnostics = fit_hit_flights(hits[:3], players[:3], observations, projection, 25)[4]
+    assert calls[0]["start_fixed"] is None and np.array_equal(calls[1]["start_fixed"], fixed_point)
+    assert diagnostics[1]["start_fixed"] is True and diagnostics[1]["start_reference_source"] == "current_row_hit_x_y"
 
 
 def run_checks(repo_root: Path, checkpoint: Path | None = None) -> None:
@@ -79,12 +166,21 @@ def run_checks(repo_root: Path, checkpoint: Path | None = None) -> None:
     players = player_references(hits, geometry)
     assert players[0]["hitter"] == "A" and players[1]["hitter"] == "B"
     assert np.allclose(players[0]["A"], geometry.native_floor_to_world([655.0 * 1.5, 544.0 * 1.5]))
+    assert "Hit" not in players[0]["endpoints"]
+    assert np.allclose(players[0]["endpoints"]["Serve fallback"], players[0]["A"])
+    for index, (row, references) in enumerate(zip(hits, players)):
+        for label, prefix in (("Hit", "hit"), ("Landing", "landing")):
+            if index == 0 and label == "Hit":
+                continue
+            expected = geometry.annotation_floor_to_world([float(row[f"{prefix}_x"]), float(row[f"{prefix}_y"])])
+            assert np.allclose(references["endpoints"][label], expected)
 
     true_projection = synthetic_camera()
     world_points = calibration_world_points()
     image_points = np.asarray([project_point(true_projection, point) for point in world_points])
     fitted, camera_rmse = fit_camera_projection(image_points[:4], image_points[4:])
     assert camera_rmse < 1e-5
+    test_fit_references(hits, geometry, fitted)
     sample = np.asarray([3.0, 6.7, 0.9])
     ray_hit = intersect_camera_ray_y(fitted, project_point(fitted, sample), 6.7)
     assert np.allclose(ray_hit, sample, atol=1e-5)
@@ -106,6 +202,34 @@ def run_checks(repo_root: Path, checkpoint: Path | None = None) -> None:
         np.full((524, 3), np.nan), [""] * 524, [], [], fitted,
     )
     assert render_probe.shape == (720, 1440, 3)
+    display_players = [{"frame": frame, "A": np.asarray([1.0, 2.0]), "B": np.asarray([5.0, 11.0]),
+                        "endpoints": endpoints} for frame, endpoints in (
+        (25, {"Serve fallback": np.asarray([2.0, 4.0]), "Landing": np.asarray([4.0, 9.0])}),
+        (37, {"Hit": np.asarray([4.0, 9.0]), "Landing": np.asarray([3.0, 11.0])}),
+    )]
+    blank = np.zeros((1080, 1920, 3), dtype=np.uint8)
+    marker_frame = lambda frame, refs: render_frame(blank, frame, [None] * 524,
+                                                   np.full((524, 3), np.nan), [""] * 524, [], refs, fitted)
+    no_endpoints = [{**item, "endpoints": {}} for item in display_players]
+    rect_width = round(520 * COURT_WIDTH_M / COURT_LENGTH_M)
+    rect = (720 + (720 - rect_width) // 2, 100, rect_width, 520)
+    for frame, index in ((25, 0), (36, 0), (37, 1), (523, 1)):
+        shown = marker_frame(frame, display_players)
+        baseline = marker_frame(frame, no_endpoints)
+        changed = np.any(shown != baseline, axis=2)
+        assert not np.any(changed[:, :720]) and not np.any(changed[:80]) and not np.any(changed[641:])
+        for label, xy in display_players[index]["endpoints"].items():
+            point = panel_point(xy, rect)
+            color = (0, 255, 0) if label == "Landing" else (255, 0, 255)
+            assert tuple(shown[point[1], point[0] + 11]) == color
+    assert np.array_equal(marker_frame(24, display_players), marker_frame(24, no_endpoints))
+    old_hit = panel_point(display_players[0]["endpoints"]["Serve fallback"], rect)
+    switched = marker_frame(37, display_players)
+    assert not np.any(np.all(switched[old_hit[1] - 12:old_hit[1] + 13,
+                                      old_hit[0] - 12:old_hit[0] + 13] == (255, 0, 255), axis=2))
+    outside = [{**display_players[0], "endpoints": {"Hit": np.asarray([3.0, -100.0]),
+                                                   "Landing": np.asarray([np.nan, 0.0])}}]
+    assert np.array_equal(marker_frame(25, outside), marker_frame(25, no_endpoints))
 
     assert frame_time_seconds(25, 25.0) == 1.0
     assert frame_time_seconds(485, 25.0) == 19.4
@@ -151,7 +275,7 @@ def run_checks(repo_root: Path, checkpoint: Path | None = None) -> None:
         assert preserved.read_text(encoding="utf-8") == "keep"
         assert not new_file.exists()
 
-    print("Self-check passed: scaling, dataset-to-metre bounds/round trips, camera/ray calibration, frame timing, constrained terminal endpoint, shared contact, rendering layout, missing detections, player identity, and overwrite refusal.")
+    print("Self-check passed: scaling, dataset-to-metre bounds/round trips, camera/ray calibration, annotated fit references/provenance and serve fallback, invalid endpoint rejection, continuity, frame timing, constrained terminal endpoint, shared contact, rendering layout, current-stroke hit/landing markers, panel clipping, missing detections, player identity, and overwrite refusal. No real-rally fitting or video rendering.")
     if checkpoint is not None:
         tracker_smoke(repo_path(checkpoint))
 

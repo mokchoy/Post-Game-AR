@@ -35,6 +35,7 @@ from reconstruction import (  # noqa: E402
 )
 from run_projection import (  # noqa: E402
     court_world_lines,
+    draw_stroke_endpoints,
     ffprobe,
     prepare_inputs,
     player_references,
@@ -486,6 +487,7 @@ def project_observations(observations: list[tuple[float, float] | None], strokes
                 "B": player_locations[stroke.index]["B"],
             },
             "observed": observed,
+            "endpoints": {} if stroke is None else player_locations[stroke.index].get("endpoints", {}),
             "estimated": None,
             "floor_pixel": None,
             "court_xy": None,
@@ -766,6 +768,7 @@ def render_frame(source_frame: np.ndarray, row: dict, trail: list, court_lines: 
             cv2.putText(plot, identity, label_point, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 3, cv2.LINE_AA)
             cv2.putText(plot, identity, label_point, cv2.FONT_HERSHEY_SIMPLEX, 0.6,
                         player_marker_colors[identity], 1, cv2.LINE_AA)
+    draw_stroke_endpoints(plot, row["endpoints"], plot_rect)
     if row["court_xy"] is not None:
         point = court_panel_point(row["court_xy"], plot_rect)
         if point is not None:

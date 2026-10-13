@@ -423,17 +423,28 @@ def track_shuttle(video: Path, expected_count: int, checkpoint: Path) -> tuple[l
 
 def player_references(hits: list[dict], geometry: CourtGeometry) -> list[dict]:
     result = []
-    for row in hits:
+    for index, row in enumerate(hits):
         hitter_native = np.asarray([row["player_location_x"], row["player_location_y"]]) * ANNOTATION_TO_VIDEO
         opponent_native = np.asarray([row["opponent_location_x"], row["opponent_location_y"]]) * ANNOTATION_TO_VIDEO
         hitter_world = geometry.native_floor_to_world(hitter_native)
         opponent_world = geometry.native_floor_to_world(opponent_native)
+        endpoints = {}
+        for label, prefix in (("Hit", "hit"), ("Landing", "landing")):
+            try:
+                pixel = np.asarray([float(row[f"{prefix}_x"]), float(row[f"{prefix}_y"])])
+                if np.isfinite(pixel).all():
+                    endpoints[label] = geometry.annotation_floor_to_world(pixel)
+            except (KeyError, TypeError, ValueError):
+                pass  # Missing display markers are omitted; fit_hit_flights validates required endpoints.
+        if index == 0 and not row.get("hit_x") and not row.get("hit_y"):
+            endpoints["Serve fallback"] = hitter_world
         result.append(
             {
                 "frame": row["clip_frame_num"],
                 "hitter": row["player"],
                 "A": hitter_world if row["player"] == "A" else opponent_world,
                 "B": opponent_world if row["player"] == "A" else hitter_world,
+                "endpoints": endpoints,
             }
         )
     return result
@@ -471,6 +482,22 @@ def summarize_hit_observations(hits: list[dict], observations: list[tuple[int, i
 def fit_hit_flights(
     hits: list[dict], players: list[dict], observations: list[tuple[int, int] | None], projection: np.ndarray, fps: float
 ):
+    references = []
+    for index in range(len(hits) - 1):
+        endpoints = players[index].get("endpoints", {})
+        start_label = "Serve fallback" if index == 0 and "Hit" not in endpoints and "Serve fallback" in endpoints else "Hit"
+        pair = []
+        for label, fields in ((start_label, "player_location_x/y" if start_label == "Serve fallback" else "hit_x/y"),
+                              ("Landing", "landing_x/y")):
+            message = f"Stroke {index + 1} requires finite {fields} endpoint coordinates ({label})"
+            try:
+                point = np.asarray(endpoints.get(label), dtype=np.float64)
+            except (TypeError, ValueError) as error:
+                raise ValueError(message) from error
+            if point.shape != (2,) or not np.isfinite(point).all():
+                raise ValueError(message)
+            pair.append(point)
+        references.append((*pair, "first_row_player_location" if start_label == "Serve fallback" else "current_row_hit_x_y"))
     coordinates = np.full((len(observations), 3), np.nan, dtype=np.float64)
     phases = [""] * len(observations)
     segment_ids = [-1] * len(observations)
@@ -481,8 +508,7 @@ def fit_hit_flights(
     for index in range(len(hits) - 1):
         start_frame = hits[index]["clip_frame_num"]
         end_frame = hits[index + 1]["clip_frame_num"]
-        start_ref = players[index][hits[index]["player"]]
-        receive_ref = players[index + 1][hits[index + 1]["player"]]
+        start_ref, receive_ref, start_source = references[index]
         path, detail = reconstruct_flight(
             start_frame=start_frame,
             end_frame=end_frame,
@@ -494,6 +520,12 @@ def fit_hit_flights(
             start_fixed=start_fixed,
             phase=f"hit_{index + 1}_to_hit_{index + 2}",
         )
+        detail.update({
+            "start_reference_xy_m": start_ref.tolist(),
+            "receive_reference_xy_m": receive_ref.tolist(),
+            "start_reference_source": start_source,
+            "receive_reference_source": "current_row_landing_x_y",
+        })
         diagnostics.append(detail)
         if path is None:
             start_fixed = None
@@ -713,6 +745,19 @@ def panel_point(xy: np.ndarray, court_rect: tuple[int, int, int, int]) -> tuple[
     )
 
 
+def draw_stroke_endpoints(plot: np.ndarray, endpoints: dict, court_rect: tuple[int, int, int, int]) -> None:
+    """Draw annotation markers on a clipped plotting view, separate from player/shuttle markers."""
+    for label, xy in endpoints.items():
+        if not np.isfinite(xy).all():
+            continue
+        point = panel_point(xy, court_rect)
+        if max(abs(value) for value in point) > 1_000_000:
+            continue
+        color = (0, 255, 0) if label == "Landing" else (255, 0, 255)
+        cv2.drawMarker(plot, point, color, cv2.MARKER_DIAMOND, 22, 2)
+        cv2.putText(plot, label, (point[0] + 14, point[1] + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 1)
+
+
 def render_frame(
     source_frame: np.ndarray,
     frame_index: int,
@@ -787,6 +832,9 @@ def render_frame(
         color = (200, 0, 200) if "net_contact" in item["phase"] else (0, 220, 220)
         for a, b in zip(points, points[1:]):
             cv2.line(canvas, a, b, color, 2)
+    if active_players is not None:
+        draw_stroke_endpoints(canvas[80:641, x0:], active_players.get("endpoints", {}),
+                              (left - x0, court_top - 80, width, height))
     current = coordinates[frame_index]
     if np.isfinite(current).all():
         point = panel_point(current[:2], court_rect)
@@ -956,7 +1004,7 @@ def run_projection(args) -> None:
             "hit_to_hit_segments": hit_diagnostics,
             "terminal_extension": tail_diagnostics,
             "output_video": output_meta,
-            "interpretation": "Player locations are soft fit references, so agreement with them is not independent accuracy evidence. A plausible top-down path does not verify reconstructed height.",
+            "interpretation": "Annotated hit/landing positions are soft horizontal fit references; only the missing first serve hit uses its player's location. A carried fitted 3D endpoint takes precedence at the next start. Agreement with these priors is not independent accuracy evidence, and a plausible top-down path does not verify reconstructed height.",
             "mono_track_source": {"repository": "https://github.com/jhwang7628/monotrack", "commit": SOURCE_COMMIT, "license": "Adobe Research License; noncommercial research only"},
         }
         with outputs[2].open("w", encoding="utf-8", newline="\n") as stream:

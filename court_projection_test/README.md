@@ -40,6 +40,8 @@ python .\court_projection_test\court_projection.py run --output-dir .\player_loc
 
 Relative `--output-dir` paths are resolved inside `court_projection_test`.
 
+The top-down panel also shows only the current stroke's annotated floor endpoints as labeled diamonds: magenta `Hit`, green `Landing`, or `Serve fallback` for the first missing hit. They switch at the next hit, remain separate from A/B player and shuttle markers, and do not change reconstruction or imply a measured landing time.
+
 ## Optional short-gap experiment
 
 To enable filling and held-out validation on a future render, use a fresh output directory:
