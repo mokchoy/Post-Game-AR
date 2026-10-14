@@ -1,50 +1,54 @@
-# YOLO11 player floor-reference experiment
+# Point-only YOLO11n player localisation
 
-This experiment uses only cleaned_rallies/set-1. It never edits the baseline player-localisation pilot, cleaned footage, annotations, or cleanup reports. Generated files, weights, review state, and training outputs stay in this folder.
+This experiment uses only `cleaned_rallies/set-1`. It writes data, settings, checkpoints, and results inside this folder. It does not edit source footage, annotations, cleanup reports, baseline code, or files elsewhere in the repository.
 
-The target is one proxy floor-reference point per player box. Annotation points are in the 1280×720 image reference system and are scaled to each clip's native dimensions. At inference, points are scaled back to annotation space and passed through the existing court geometry. These labels do not establish a foot-midpoint definition or calibration accuracy.
+The model uses YOLO11n layers 0–10 as a feature backbone and a small two-channel stride-4 heatmap decoder: far player in channel 0 and near player in channel 1. It predicts one proxy floor-reference point for each side of the court. A/B identities come from the saved rally court-half mapping. Heatmap peak scores are diagnostics, not presence probabilities. These annotations do not establish foot-midpoint labels or calibrated localisation accuracy.
 
-## Setup
+## Python and dependencies
 
-The project venv reuses the installed CUDA PyTorch:
+Run with the installed system Python. The experiment requires the pinned `ultralytics==8.4.175`, CUDA-enabled PyTorch when using the default CUDA device, OpenCV, NumPy, and PyYAML. The code does not create a virtual environment or install packages. `runner.py check` uses the existing official `yolo11n.pt` if present; otherwise it downloads only that checkpoint into `weights/`.
 
-~~~powershell
-python -m venv --system-site-packages .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-~~~
+## Commands
 
-Ultralytics is pinned to 8.4.175. The check command downloads only the official yolo11n-pose.pt asset into weights/ if it is absent, checks one-keypoint model construction and weight transfer, and runs a one-epoch synthetic smoke training. It does not train on the badminton set.
-
-## Workflow
-
-Run from this folder:
+Run in PowerShell from this folder:
 
 ~~~powershell
-.\.venv\Scripts\python.exe runner.py check
-.\.venv\Scripts\python.exe runner.py prepare
-.\.venv\Scripts\python.exe runner.py review
-.\.venv\Scripts\python.exe runner.py split
-.\.venv\Scripts\python.exe runner.py train-cv
-.\.venv\Scripts\python.exe runner.py train-final --run-id <CV_RUN_ID>
-.\.venv\Scripts\python.exe runner.py evaluate --run-id <FINAL_RUN_ID> --split test
-.\.venv\Scripts\python.exe runner.py overlay --run-id <FINAL_RUN_ID> --match <MATCH_FOLDER> --game 1 --rally 1
+python runner.py check
+python self_check.py
+python runner.py prepare
+python runner.py review
+python runner.py split
+python runner.py train-cv --folds 5
+python runner.py train-final --run-id <CV_RUN_ID>
+python runner.py evaluate --run-id <FINAL_RUN_ID> --split test
+python runner.py overlay --run-id <FINAL_RUN_ID> --match <MATCH_FOLDER> --game 1 --rally 1
+python runner.py review-test --run-id <FINAL_RUN_ID> --check
+python runner.py review-test --run-id <FINAL_RUN_ID>
 ~~~
 
-The config option selects another YAML file for check, prepare, split, or train-cv. The folds option explicitly overrides the YAML fold count for split or train-cv; the requested count is validated and never reduced. train-final uses the chosen CV run's saved resolved settings.
+`check` verifies pretrained transfer, model output, independent initialization, checkpoint reload, gradient flow, and one synthetic optimization step. `self_check.py` adds source-filter, coordinate, fold, configuration, missing-prediction, and synthetic review-render checks. Neither command prepares the full dataset or trains on badminton footage.
 
-The prepare command checks all rally-level rules, then uses pretrained person boxes at confidence >=0.30 by default. One failing annotated frame excludes its whole rally. data/candidate/exclusions.csv records reasons, rallies.jsonl records each rally's automatic status, and manifest.jsonl contains one provenance row per extracted annotated frame. Preliminary counts are recomputed from these inputs before box association.
+`--config PATH` is supported by `check`, `prepare`, `split`, and `train-cv`. The YAML fold count is used unless `--folds N` is supplied to `split` or `train-cv`. Fold counts must be between 2 and the number of development matches. `train-final` reuses the selected CV run's saved settings.
 
-The OpenCV reviewer shows the normal frame, A/B proposal boxes, and A/B reference points. Press A to accept a sample, R to reject its rally, M to reject its whole match, S to save and quit, or Q to quit and resume later. A rally rejection excludes that rally from the frozen set. Unsampled frames that passed automatic checks need no manual approval. split refuses to freeze the dataset while any selected sample is pending.
+## Data and review
 
-split reserves a deterministic 20% of accepted matches with seed 42 and records the immutable held-out set. Development fold assignments are grouped by whole match and saved per fold-count/CV-seed combination. Training and hyperparameter changes do not alter the held-out set.
+`prepare` screens rally-level source quality, permanently omits the two specified CHOU matches, and extracts exactly the annotated `clip_frame_num` images. A/B are aligned using the hitter's `player` field. Coordinates are scaled from the 1280×720 reference image to native resolution and are never inverse-projected through a homography. The version-2 point manifest records source provenance, frame timing, dimensions, both identities and coordinates, and the far/near mapping. Heatmap targets are built when images are loaded; no detector, boxes, or pose labels are produced.
 
-train-cv initializes a fresh nano model from the same pose checkpoint for each fold, saves the resolved settings and transfer report, and evaluates each fold's validation-selected best.pt on its held-out matches. train-final trains on all development matches for the rounded median selected epoch count and uses last.pt; the test set is not used for training or selection. evaluate --split test records the final test evaluation once.
+Every automatic source-quality failure excludes the complete rally and is written to `data/candidate/exclusions.csv`. The OpenCV reviewer samples up to five distinct rallies spread through each match, showing each rally's middle annotated frame and the two labelled reference points. Press A to accept, R to reject the rally, M to reject the match, S to save and quit, or Q to quit and resume later. Automatic checks and sampled-review status are stored separately; remaining frames do not require individual approval.
 
-Inference assigns A/B only from each rally's validated fixed court-half mapping. A/B are not image classes, and predictions are never matched to ground truth by proximity. Multiple eligible detections on one half are treated as ambiguous/missing. Error summaries use available predictions; coverage and distance-success denominators include missing predictions as failures.
+`split` freezes the accepted point manifest and reserves 20% of matches as the seed-42 held-out set. CV fold assignments keep whole matches together. Fold count and training settings do not change held-out membership. Each fold independently loads the same pretrained backbone and selects its checkpoint by validation mean court-metre error; any invalid projection makes that epoch's selection score infinite. OOF exports include combined, player, match, and fold metrics; unavailable points count as failures in coverage and distance-success denominators.
 
-## Outputs
+Final training uses all development matches for the rounded median selected epoch count and keeps the held-out matches out of training and checkpoint selection. `evaluate` runs the full held-out evaluation once. `review-test` selects up to three held-out rallies from different matches before inference, saves the selection, and writes fresh selected-rally diagnostics. It does not replace the full-test results. Its video shows the normal camera image beside a 600-pixel court panel, predicted A/B points, and reference crosses only at the annotated frames. It preserves source FPS and decoded frame count, exports two position rows per frame, records annotation-time errors, and verifies the encoded video by decoding it.
 
-- data/candidate/: exact annotated-frame images, YOLO pose labels, automatic manifest, exclusion ledger, and five review samples per retained match.
-- splits/split.json: frozen match test reservation and exact grouped fold assignments.
-- runs/: one directory per CV/final run, with settings, versions, weight hashes, reports, player positions, and overlay exports.
-- smoke/: the tiny synthetic training check, separate from experiment data.
+## Configuration
+
+Edit `config.yaml` without changing Python:
+
+- `cv.folds`, `cv.seed`: grouped CV fold count and fold shuffle seed.
+- `model.input_width`, `model.input_height`, `model.gaussian_sigma`: full-frame resize and normalized Gaussian target width in heatmap cells.
+- `train.epochs`, `patience`, `batch`, `lr0`, and `weight_decay`: optimization budget and AdamW settings.
+- `train.freeze_backbone_epochs`, `horizontal_flip_probability`, `seed`, `device`, `workers`, and `amp`: initialization/training controls.
+
+Input dimensions must be multiples of four. The default image input is the full RGB frame resized to 960×540 and scaled to [0,1], without cropping or ImageNet normalization. Training uses spatial cross-entropy over each channel's heatmap cells.
+
+Checkpoint and manifest loaders reject obsolete pose artifacts instead of treating them as point-only data. Run outputs save resolved configuration, dependency versions, model contract, transfer details, and checkpoint SHA256 hashes.

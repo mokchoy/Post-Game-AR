@@ -1,9 +1,11 @@
 .venv/
 .tmp/
 .ultralytics/
+Ultralytics/
 weights/*.pt
 data/
 runs/
 splits/
-smoke/
+checks/
 __pycache__/
+*.pyc
