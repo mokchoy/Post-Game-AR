@@ -1,0 +1,272 @@
+"""Single JSON source of defaults; strict typed validation before opening devices."""
+from dataclasses import dataclass, fields
+from pathlib import Path
+from typing import Optional, get_type_hints, get_origin, get_args, Union
+import json
+import math
+
+
+@dataclass(frozen=True)
+class Camera:
+    source_type: str
+    index: int
+    video_path: Optional[str]
+    backend: str
+    width: int
+    height: int
+    calibration_path: str
+    undistort: bool
+    demo_approx: bool
+
+
+@dataclass(frozen=True)
+class Tags:
+    enabled: bool
+    family: str
+    anchor_id: int
+    size_m: float
+    corner_refinement_window_px: int
+    corner_sigma_px: float
+    max_reprojection_rms_px: float
+    min_side_px: float
+    ambiguity_error_gap_px: float
+    ambiguity_rotation_gap_deg: float
+
+
+@dataclass(frozen=True)
+class LK:
+    enabled: bool
+    window_size_px: int
+    max_level: int
+    max_iterations: int
+    epsilon: float
+    forward_backward_max_error_px: float
+
+
+@dataclass(frozen=True)
+class Features:
+    enabled: bool
+    backend: str
+    max_features: int
+    grid_rows: int
+    grid_cols: int
+    scale_factor: float
+    nlevels: int
+    fast_threshold: int
+    edge_threshold: int
+    patch_size: int
+    ratio_test: float
+    max_hamming_distance: int
+    mutual_matching: bool
+    observation_sigma_px: float
+    exclude_tag_regions: bool
+    tag_mask_margin_px: int
+    exclude_rectangles: list
+    redetect_every_n_frames: int
+    redetect_below_tracks: int
+    lk: LK
+
+
+@dataclass(frozen=True)
+class Mapping:
+    mode: str
+    map_path: str
+    max_keyframes: int
+    max_landmarks: int
+    min_ready_landmarks: int
+    min_baseline_m: float
+    min_parallax_deg: float
+    min_confirming_views: int
+    min_depth_m: float
+    max_depth_m: float
+    max_reprojection_rms_px: float
+    refine_bootstrap_map: bool
+    refinement_max_nfev: int
+
+
+@dataclass(frozen=True)
+class Pose:
+    mode: str
+    min_landmark_inliers: int
+    min_occupied_grid_cells: int
+    ransac_iterations: int
+    ransac_reprojection_threshold_px: float
+    ransac_confidence: float
+    robust_loss: str
+    robust_f_scale: float
+    max_nfev: int
+    max_landmark_rms_px: float
+    max_tag_rms_px: float
+    max_linear_speed_m_s: float
+    max_angular_speed_deg_s: float
+    max_prediction_gap_s: float
+
+
+@dataclass(frozen=True)
+class Uncertainty:
+    enabled: bool
+    project_to_panel_corners: bool
+    translation_difference_step_m: float
+    rotation_difference_step_rad: float
+    conditioning_translation_scale_m: float
+    conditioning_rotation_scale_rad: float
+    min_scaled_singular_value_ratio: float
+
+
+@dataclass(frozen=True)
+class Filter:
+    enabled: bool
+    mode: str
+    measurement_weight: float
+
+
+@dataclass(frozen=True)
+class Panel:
+    width_m: float
+    height_m: float
+    offset_y_m: float
+    tilt_x_deg: float
+
+
+@dataclass(frozen=True)
+class Display:
+    enabled: bool
+    debug: bool
+    draw_features: bool
+    draw_uncertainty: bool
+
+
+@dataclass(frozen=True)
+class Logging:
+    enabled: bool
+    output_dir: str
+    save_input_video: bool
+    save_annotated_video: bool
+
+
+@dataclass(frozen=True)
+class Calibration:
+    columns: int
+    rows: int
+    square_size_m: float
+    views: int
+
+
+@dataclass(frozen=True)
+class Config:
+    schema_version: int
+    seed: int
+    camera: Camera
+    tags: Tags
+    features: Features
+    mapping: Mapping
+    pose: Pose
+    uncertainty: Uncertainty
+    filter: Filter
+    panel: Panel
+    display: Display
+    logging: Logging
+    calibration: Calibration
+
+
+DEFAULT_PATH = Path(__file__).resolve().parents[1] / "config.json"
+
+
+def typed(cls, data, prefix=""):
+    if not isinstance(data, dict):
+        raise ValueError(f"{prefix}: expected object")
+    names = {f.name for f in fields(cls)}
+    if set(data) != names:
+        raise ValueError(f"{prefix}: unknown {sorted(set(data)-names)}, missing {sorted(names-set(data))}")
+    values = {}
+    for name, kind in get_type_hints(cls).items():
+        value, label = data[name], prefix + name
+        if hasattr(kind, "__dataclass_fields__"):
+            values[name] = typed(kind, value, label + ".")
+            continue
+        if get_origin(kind) is Union:
+            kind = next(t for t in get_args(kind) if t is not type(None))
+            if value is None:
+                values[name] = None
+                continue
+        valid = (type(value) in (int, float) if kind is float else type(value) is kind)
+        if not valid or (type(value) in (float, int) and not math.isfinite(value)):
+            raise ValueError(f"{label}: expected finite {kind.__name__}")
+        values[name] = float(value) if kind is float else value
+    return cls(**values)
+
+
+def validate(c: Config) -> None:
+    enums = {"camera.source_type": ("camera", "video"), "camera.backend": ("auto", "dshow", "msmf", "v4l2", "avfoundation", "ffmpeg"),
+             "tags.family": ("APRILTAG_36h11",), "features.backend": ("orb",), "mapping.mode": ("off", "build", "localize"),
+             "pose.mode": ("tag_only", "landmark_only", "joint"), "pose.robust_loss": ("linear", "huber", "soft_l1", "cauchy", "arctan"), "filter.mode": ("ema",)}
+    for label, choices in enums.items():
+        section, name = label.split(".")
+        if getattr(getattr(c, section), name) not in choices:
+            raise ValueError(f"{label}: supported values {choices}")
+    nonnegative = {"index", "anchor_id", "fast_threshold", "edge_threshold", "tag_mask_margin_px", "redetect_below_tracks", "max_level", "offset_y_m", "ambiguity_error_gap_px", "ambiguity_rotation_gap_deg", "seed"}
+    signed = {"tilt_x_deg"}
+    def bounds(obj, prefix=""):
+        for f in fields(obj):
+            v = getattr(obj, f.name)
+            if hasattr(v, "__dataclass_fields__"):
+                bounds(v, prefix + f.name + ".")
+            elif type(v) in (int, float) and f.name not in signed:
+                if v < 0 or (v == 0 and f.name not in nonnegative):
+                    raise ValueError(f"{prefix+f.name}: must be {'nonnegative' if f.name in nonnegative else 'positive'}")
+    bounds(c)
+    if c.schema_version != 1 or c.seed > 2**31-1:
+        raise ValueError("schema_version must be 1; seed must fit signed int32")
+    for label, value in (("features.ratio_test", c.features.ratio_test), ("pose.ransac_confidence", c.pose.ransac_confidence)):
+        if not 0 < value < 1:
+            raise ValueError(f"{label}: must be between 0 and 1")
+    if not 0 < c.filter.measurement_weight <= 1 or not 0 < c.uncertainty.min_scaled_singular_value_ratio < 1:
+        raise ValueError("filter.measurement_weight or uncertainty.min_scaled_singular_value_ratio: invalid fraction")
+    if c.features.scale_factor <= 1 or c.features.max_hamming_distance > 256:
+        raise ValueError("features.scale_factor must exceed 1; max_hamming_distance <= 256")
+    if c.features.patch_size < 3 or c.features.patch_size % 2 == 0 or c.features.lk.window_size_px % 2 == 0:
+        raise ValueError("features.patch_size and features.lk.window_size_px must be odd")
+    if c.mapping.min_depth_m >= c.mapping.max_depth_m:
+        raise ValueError("mapping.min_depth_m must be less than max_depth_m")
+    if c.mapping.min_confirming_views < 3 or c.mapping.min_confirming_views > c.mapping.max_keyframes or c.mapping.min_ready_landmarks > c.mapping.max_landmarks:
+        raise ValueError("mapping support/capacity settings are impossible (at least three views)")
+    if c.pose.min_landmark_inliers < 4 or c.pose.min_occupied_grid_cells > c.features.grid_rows*c.features.grid_cols:
+        raise ValueError("pose landmark count/coverage settings are impossible")
+    for i, rect in enumerate(c.features.exclude_rectangles):
+        if not isinstance(rect, list) or len(rect) != 4 or any(type(v) is not int for v in rect) or min(rect[2:]) <= 0:
+            raise ValueError(f"features.exclude_rectangles[{i}]: expected [x,y,positive width,positive height] integers")
+    if c.mapping.mode == "build" and (not c.tags.enabled or not c.features.enabled or c.camera.demo_approx):
+        raise ValueError("mapping.mode=build requires tags, features and actual calibration")
+    if c.pose.mode == "tag_only" and not c.tags.enabled:
+        raise ValueError("pose.mode=tag_only requires tags.enabled")
+    if c.pose.mode == "landmark_only" and (not c.features.enabled or c.mapping.mode != "localize"):
+        raise ValueError("pose.mode=landmark_only requires features and mapping.mode=localize")
+    if c.pose.mode == "joint" and not c.tags.enabled and (not c.features.enabled or c.mapping.mode != "localize"):
+        raise ValueError("pose.mode=joint without tags requires features and a ready loaded map")
+    if c.camera.demo_approx and (c.pose.mode != "tag_only" or c.mapping.mode != "off" or c.uncertainty.enabled):
+        raise ValueError("camera.demo_approx requires tag_only, mapping off, uncertainty disabled")
+    if c.camera.source_type == "video" and not c.camera.video_path:
+        raise ValueError("camera.video_path is required for video")
+    if c.calibration.columns < 2 or c.calibration.rows < 2 or c.calibration.views < 8:
+        raise ValueError("calibration requires >=2 inner corners per dimension and >=8 views")
+    for label in ("camera.calibration_path", "mapping.map_path", "logging.output_dir"):
+        section, name = label.split(".")
+        if not getattr(getattr(c, section), name):
+            raise ValueError(f"{label}: cannot be empty")
+
+
+def load_config(filename=DEFAULT_PATH, overrides=None) -> Config:
+    filename = Path(filename).resolve()
+    data = json.loads(filename.read_text(encoding="utf-8-sig"), parse_constant=lambda x: (_ for _ in ()).throw(ValueError(f"nonfinite JSON value: {x}")))
+    for label, value in (overrides or {}).items():
+        section, name = label.split(".")
+        if section not in data or name not in data[section]:
+            raise ValueError(f"{label}: unknown override")
+        data[section][name] = value
+    c = typed(Config, data)
+    validate(c)
+    for section, name in (("camera", "video_path"), ("camera", "calibration_path"), ("mapping", "map_path"), ("logging", "output_dir")):
+        value = data[section][name]
+        if value is not None:
+            data[section][name] = str((filename.parent / value).resolve())
+    return typed(Config, data)
