@@ -13,6 +13,7 @@ import sys
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
+from time import perf_counter
 
 ROOT = Path(__file__).resolve().parent
 REPO = ROOT.parent
@@ -945,7 +946,7 @@ def score_model_rows(model, rows: list[dict], config: dict, device: torch.device
     width, height = config["model"]["input_width"], config["model"]["input_height"]
     positions, errors, offset = [], [], 0
     geometries = {}
-    model.eval()
+    model.to(device).eval()
     with torch.no_grad():
         for images, _ in loader:
             logits = model(images.to(device, non_blocking=device.type == "cuda"))
@@ -1051,6 +1052,8 @@ def cv_split_rows(rows: list[dict], split: dict, assignments: dict, fold_index: 
 
 def run_training(train_rows: list[dict], val_rows: list[dict] | None, output_dir: Path,
                  config: dict, init_seed: int, epochs: int, *, final: bool = False) -> dict:
+    progress = "Final" if final else f"CV {output_dir.name}"
+    print(f"[{progress}] Initializing training: {len(train_rows)} frames, {epochs} epochs", flush=True)
     weights = ensure_pretrained_weights()
     model, transfer = pm.initialize_from_yolo11n(weights, init_seed)
     if not transfer["complete_transfer"]:
@@ -1066,13 +1069,17 @@ def run_training(train_rows: list[dict], val_rows: list[dict] | None, output_dir
     scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
     best_score, best_epoch, bad_epochs, history = math.inf, None, 0, []
     best_path, last_path = output_dir / "best.pt", output_dir / "last.pt"
+    batches = len(loader)
+    log_every = max(1, math.ceil(batches / 10))
     for epoch in range(1, epochs + 1):
+        epoch_start = perf_counter()
+        print(f"[{progress}] Epoch {epoch}/{epochs} starting ({batches} batches)", flush=True)
         freeze_backbone = epoch <= config["train"]["freeze_backbone_epochs"]
         for parameter in model.backbone.parameters():
             parameter.requires_grad_(not freeze_backbone)
         model.train()
         losses = []
-        for images, targets in loader:
+        for batch, (images, targets) in enumerate(loader, 1):
             images = images.to(device, non_blocking=device.type == "cuda")
             targets = targets.to(device, non_blocking=device.type == "cuda")
             optimizer.zero_grad(set_to_none=True)
@@ -1086,8 +1093,13 @@ def run_training(train_rows: list[dict], val_rows: list[dict] | None, output_dir
                 loss.backward()
                 optimizer.step()
             losses.append(float(loss.detach().float().item()))
+            if batch == 1 or batch % log_every == 0 or batch == batches:
+                print(f"[{progress}] Epoch {epoch}/{epochs} batch {batch}/{batches} "
+                      f"({batch / batches:.0%}) loss={losses[-1]:.4f} "
+                      f"elapsed={perf_counter() - epoch_start:.1f}s", flush=True)
         selection = None
         if val_rows is not None:
+            print(f"[{progress}] Epoch {epoch}/{epochs} validating {len(val_rows)} frames", flush=True)
             _, val_errors = score_model_rows(model, val_rows, config, device)
             metric = error_summary(val_errors)
             invalid = metric["missing_predictions"] > 0 or metric["metre_error"]["count"] != len(val_errors)
@@ -1110,9 +1122,15 @@ def run_training(train_rows: list[dict], val_rows: list[dict] | None, output_dir
             "pretrained_sha256": transfer["source_checkpoint_sha256"], "final_training": final,
         })
         history.append({"epoch": epoch, "train_loss": float(np.mean(losses)), "selection": selection})
+        validation = (f" val_error_m={score:.4f} best_epoch={best_epoch}"
+                      if selection is not None else "")
+        print(f"[{progress}] Epoch {epoch}/{epochs} complete: "
+              f"train_loss={history[-1]['train_loss']:.4f}{validation} "
+              f"elapsed={perf_counter() - epoch_start:.1f}s", flush=True)
         if val_rows is not None and not (best_epoch == epoch):
             patience = config["train"]["patience"]
             if bad_epochs > 0 and bad_epochs >= patience:
+                print(f"[{progress}] Early stopping after {bad_epochs} epochs without improvement", flush=True)
                 break
     write_json(output_dir / "epochs.json", history)
     if val_rows is not None and best_epoch is None:
@@ -1186,6 +1204,7 @@ def train_cv_command(config: dict) -> int:
                 if sha256_file(Path(old["best_checkpoint"])) != old.get("best_sha256"):
                     raise RuntimeError(f"Completed fold checkpoint hash changed: {fold_dir}")
                 summaries[str(fold)] = old
+                print(f"[CV] Fold {fold}/{config['cv']['folds']} already completed; skipping", flush=True)
                 continue
             raise RuntimeError(f"Incomplete fold output exists; preserving it: {fold_dir}")
         if fold_dir.exists() and any(fold_dir.iterdir()):
@@ -1193,6 +1212,7 @@ def train_cv_command(config: dict) -> int:
         train_rows, val_rows = cv_split_rows(rows, split, assignments, fold_index)
         fold_dir.mkdir(parents=True, exist_ok=True)
         init_seed = int(config["train"]["seed"]) + fold
+        print(f"[CV] Starting fold {fold}/{config['cv']['folds']}", flush=True)
         result = run_training(train_rows, val_rows, fold_dir, config, init_seed,
                               config["train"]["epochs"])
         summary = {
@@ -1207,6 +1227,7 @@ def train_cv_command(config: dict) -> int:
         raise RuntimeError(f"Expected exactly {config['cv']['folds']} completed folds")
     positions, errors = [], []
     for fold in range(1, config["cv"]["folds"] + 1):
+        print(f"[CV] Scoring out-of-fold predictions: fold {fold}/{config['cv']['folds']}", flush=True)
         summary = summaries[str(fold)]
         val_matches = set(summary["validation_matches"])
         val_rows = [row for row in rows if row["match"] in val_matches]

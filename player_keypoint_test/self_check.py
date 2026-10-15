@@ -4,6 +4,7 @@ import csv
 import json
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 import cv2
 import numpy as np
@@ -58,6 +59,36 @@ def check_coordinates_targets_and_alignment() -> None:
         assert target[1].argmax().item() != target[0].argmax().item()
         assert target[1].argmax().item() == 4 * 40 + 15
         assert target[0].argmax().item() == 26 * 40 + 21
+
+
+def check_spawned_data_loading() -> None:
+    with tempfile.TemporaryDirectory(prefix="point_workers_", dir=runner.ROOT / "checks") as temp:
+        image_path = Path(temp) / "frame.png"
+        frame = np.arange(64 * 80 * 3, dtype=np.uint8).reshape(64, 80, 3)
+        assert cv2.imwrite(str(image_path), frame)
+        row = {
+            "image_path": str(image_path), "width": 80, "height": 64,
+            "A_native_x": 20, "A_native_y": 10, "B_native_x": 60, "B_native_y": 50,
+            "A_half": "far", "B_half": "near",
+        }
+        config = {
+            "model": {"input_width": 160, "input_height": 128, "gaussian_sigma": 2.0},
+            "train": {"batch": 2, "workers": 4, "device": "cpu", "seed": 42,
+                      "horizontal_flip_probability": 1.0},
+        }
+        for training in (False, True):
+            loader = runner.resolved_train_loader([row] * 8, config, training=training)
+            loader.multiprocessing_context = "spawn"
+            assert loader.num_workers == 4
+            expected_image, expected_target = loader.dataset[0]
+            assert torch.equal(expected_image, pm.image_tensor(frame, 160, 128).flip(2)
+                               if training else pm.image_tensor(frame, 160, 128))
+            seen = 0
+            for images, targets in loader:
+                assert torch.equal(images, expected_image.expand(2, -1, -1, -1))
+                assert torch.equal(targets, expected_target.expand(2, -1, -1, -1))
+                seen += len(images)
+            assert seen == 8
 
 
 def write_annotations(path: Path, rows: list[dict]) -> None:
@@ -154,6 +185,49 @@ def check_splits_and_config() -> dict:
     return config
 
 
+def check_training_progress() -> None:
+    config = {"train": {
+        "optimizer": "AdamW", "lr0": 0.001, "weight_decay": 0.0, "device": "cpu",
+        "amp": False, "freeze_backbone_epochs": 0, "patience": 1,
+    }}
+    for final in (False, True):
+        for batches in (1, 23):
+            model = torch.nn.Sequential()
+            model.add_module("backbone", torch.nn.Linear(1, 1))
+            loader = [(torch.ones(1, 1), torch.zeros(1, 1))] * batches
+            transfer = {"complete_transfer": True, "source_checkpoint_sha256": "synthetic"}
+            errors = [{"available": True, "error_px": 1.0, "error_m": 0.5}]
+            with (
+                tempfile.TemporaryDirectory(prefix="point_progress_", dir=runner.ROOT / "checks") as temp,
+                patch.object(runner, "ensure_pretrained_weights", return_value=Path("unused.pt")),
+                patch.object(pm, "initialize_from_yolo11n", return_value=(model, transfer)),
+                patch.object(runner, "resolved_train_loader", return_value=loader),
+                patch.object(pm, "spatial_cross_entropy", side_effect=torch.nn.functional.mse_loss),
+                patch.object(pm, "save_checkpoint", return_value="synthetic"),
+                patch.object(runner, "score_model_rows", return_value=([], errors)) as score,
+                patch("builtins.print") as output,
+            ):
+                result = runner.run_training([{}] * batches, None if final else [{}],
+                                             Path(temp) / "fold_01", config, 42, 3, final=final)
+            lines = [call.args[0] for call in output.call_args_list]
+            assert all(call.kwargs.get("flush") is True for call in output.call_args_list)
+            label = "Final" if final else "CV fold_01"
+            assert all(line.startswith(f"[{label}]") for line in lines)
+            completed = 3 if final else 2
+            assert result["epochs_completed"] == completed
+            assert score.call_count == (0 if final else completed)
+            assert sum("complete:" in line for line in lines) == completed
+            assert any("Early stopping" in line for line in lines) is (not final)
+            assert any("val_error_m=0.5000" in line for line in lines) is (not final)
+            for epoch in range(1, completed + 1):
+                updates = [line for line in lines if f"Epoch {epoch}/3 batch " in line]
+                assert 1 <= len(updates) <= 11
+                assert f"batch 1/{batches} " in updates[0]
+                assert f"batch {batches}/{batches} (100%)" in updates[-1]
+                if batches > 1:
+                    assert len(updates) < batches
+
+
 def check_deterministic_review_and_render() -> None:
     preferred_match = "Kento_MOMOTA_CHOU_Tien_Chen_KOREA_OPEN_2019_Final"
     matches = [preferred_match, "heldout_b", "heldout_c", "heldout_d"]
@@ -237,14 +311,18 @@ def check_deterministic_review_and_render() -> None:
 def main() -> None:
     (runner.ROOT / "checks").mkdir(parents=True, exist_ok=True)
     check_coordinates_targets_and_alignment()
+    check_spawned_data_loading()
     check_whole_rally_exclusion()
     config = check_splits_and_config()
+    check_training_progress()
     check_deterministic_review_and_render()
     model_summary = runner.run_model_checks(config)
     print(json.dumps({"status": "passed", "checks": [
         "coordinate scaling and pixel-centre conversions", "A/B alignment and far/near target channels",
         "normalised Gaussian targets and peak decoding", "whole-rally flaw exclusion",
+        "four spawned DataLoader workers match direct loading with and without horizontal flips",
         "match-grouped split disjointness and fold validation", "training config reaches AdamW",
+        "sparse flushed batch progress, epoch summaries, and early stopping in CV/final training",
         "deterministic point-only review rendering and failure accounting",
         "complete pretrained transfer, gradients, independent initialization, checkpoint reload",
     ], "model": model_summary}, indent=2))

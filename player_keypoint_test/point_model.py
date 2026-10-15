@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 import torch
 import torch.nn as nn
+from torch.utils.data import Dataset
 
 MODEL_KIND = "yolo11n_two_player_heatmap_v1"
 BACKBONE_LAYERS = 11
@@ -191,47 +192,40 @@ def decode_heatmaps(logits, input_width: int, input_height: int,
     return decoded
 
 
-class FrameDataset:
-    def __new__(cls, rows, input_width: int, input_height: int, sigma: float,
-                horizontal_flip_probability: float = 0.0):
-        import torch
-        from torch.utils.data import Dataset
+class FrameDataset(Dataset):
+    def __init__(self, rows, input_width: int, input_height: int, sigma: float,
+                 horizontal_flip_probability: float = 0.0):
+        self.rows = rows
+        self.input_width, self.input_height = input_width, input_height
+        self.sigma = sigma
+        self.horizontal_flip_probability = horizontal_flip_probability
 
-        class _Dataset(Dataset):
-            def __init__(self):
-                self.rows = rows
-                self.input_width, self.input_height = input_width, input_height
-                self.sigma = sigma
-                self.horizontal_flip_probability = horizontal_flip_probability
+    def __len__(self):
+        return len(self.rows)
 
-            def __len__(self):
-                return len(self.rows)
-
-            def __getitem__(self, index):
-                row = self.rows[index]
-                image = cv2.imread(str(row["image_path"]))
-                if image is None:
-                    raise RuntimeError(f"Could not read prepared image: {row['image_path']}")
-                tensor = image_tensor(image, self.input_width, self.input_height)
-                native_width, native_height = int(row["width"]), int(row["height"])
-                points = [None, None]
-                for player in ("A", "B"):
-                    half = row[f"{player}_half"]
-                    if half not in CHANNELS or points[CHANNELS[half]] is not None:
-                        raise ValueError(f"Invalid far/near mapping in {stable_key(row)}")
-                    points[CHANNELS[half]] = pixel_center_scale(
-                        (float(row[f"{player}_native_x"]), float(row[f"{player}_native_y"])),
-                        native_width, native_height, self.input_width, self.input_height,
-                    )
-                if self.horizontal_flip_probability and random.random() < self.horizontal_flip_probability:
-                    tensor = torch.flip(tensor, dims=(2,))
-                    points = [(self.input_width - 1 - point[0], point[1]) for point in points]
-                targets = heatmap_target(
-                    points, (self.input_height + 3) // 4, (self.input_width + 3) // 4, self.sigma
-                )
-                return tensor, targets
-
-        return _Dataset()
+    def __getitem__(self, index):
+        row = self.rows[index]
+        image = cv2.imread(str(row["image_path"]))
+        if image is None:
+            raise RuntimeError(f"Could not read prepared image: {row['image_path']}")
+        tensor = image_tensor(image, self.input_width, self.input_height)
+        native_width, native_height = int(row["width"]), int(row["height"])
+        points = [None, None]
+        for player in ("A", "B"):
+            half = row[f"{player}_half"]
+            if half not in CHANNELS or points[CHANNELS[half]] is not None:
+                raise ValueError(f"Invalid far/near mapping in {stable_key(row)}")
+            points[CHANNELS[half]] = pixel_center_scale(
+                (float(row[f"{player}_native_x"]), float(row[f"{player}_native_y"])),
+                native_width, native_height, self.input_width, self.input_height,
+            )
+        if self.horizontal_flip_probability and random.random() < self.horizontal_flip_probability:
+            tensor = torch.flip(tensor, dims=(2,))
+            points = [(self.input_width - 1 - point[0], point[1]) for point in points]
+        targets = heatmap_target(
+            points, (self.input_height + 3) // 4, (self.input_width + 3) // 4, self.sigma
+        )
+        return tensor, targets
 
 
 def spatial_cross_entropy(logits, targets):

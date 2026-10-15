@@ -19,5 +19,5 @@ train:
   horizontal_flip_probability: 0.5
   seed: 42
   device: 0
-  workers: 0
+  workers: 4
   amp: true
