@@ -127,6 +127,7 @@ def select_candidates(
     geometry,
     frame_size: tuple[int, int] = (1920, 1080),
     threshold: float = CONFIDENCE_THRESHOLD,
+    *, project=None,
 ) -> dict[str, dict | None]:
     width, height = frame_size
     selected: dict[str, dict | None] = {"far": None, "near": None}
@@ -144,7 +145,8 @@ def select_candidates(
             continue
         bottom = ((x1 + x2) / 2.0, y2)
         try:
-            court = np.asarray(geometry.native_floor_to_world(bottom), dtype=np.float64).reshape(2)
+            court = np.asarray(project(bottom) if project else geometry.native_floor_to_world(bottom),
+                               dtype=np.float64).reshape(2)
         except (ValueError, cv2.error, np.linalg.LinAlgError):
             continue
         if not np.isfinite(court).all() or outside_distance_m(*court) > MAX_COURT_MARGIN_M:

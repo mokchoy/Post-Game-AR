@@ -33,6 +33,51 @@ Predictions come only from person boxes with confidence at least 0.3. The box bo
 
 Pixel errors are measured in native 1920×1080 video pixels; annotation reference coordinates are scaled by 1.5 before comparison. The original 1280×720 reference coordinates are also preserved in `shot_errors.csv`.
 
+## Matched comparison with the point-only model
+
+Run these commands with system Python in PowerShell:
+
+```powershell
+Set-Location 'C:\Users\ILLEGEAR\Documents\Post-Game-AR\player_localisation_test'
+$reviewDir = 'C:\Users\ILLEGEAR\Documents\Post-Game-AR\player_keypoint_test\runs\final_cv_5f_s42_1e4a7705f081\selected_rally_reviews\review_test_20261016T015452Z'
+python compare_review.py --review-dir $reviewDir --check
+```
+
+`--check` validates the local checkpoint hashes, final-run/split/manifest identity, selected clips and video metadata, saved positions and annotation-time errors, A/B mappings, projections, and saved smoothing settings. It recomputes smoothing on the saved trajectories to check compatibility. It checks checkpoint loading and tiny Torchvision operations, without running either model's forward pass, rendering real clips, training, or downloading weights. Prepared JPEG images are not needed for this comparison.
+
+For bounded synthetic validation:
+
+```powershell
+python self_check.py
+python compare_self_check.py
+```
+
+The comparison self-check uses three eight-frame artificial clips and stub models. It retains PNG/PDF previews, synthetic reviews and a report under a fresh `outputs/run_comparison_self_check*` directory. Its timings and errors are **synthetic checks, not real model performance**.
+
+To generate the full comparison yourself:
+
+```powershell
+python compare_review.py --review-dir $reviewDir
+```
+
+This uses the exact saved Korea `002`, Denmark `028`, and Fuzhou `015` clips: 1,529 source frames and 114 player references. It loads the saved final point-model checkpoint and the local Faster R-CNN checkpoint, benchmarking one model at a time on the device in the saved keypoint configuration. Each clip gets ten unmeasured warm-up calls before every frame is timed. The models use batch size 1, FP32 and no autocast; CUDA is synchronized around each timed inference pipeline. Timing includes preprocessing, transfers, forward pass, prediction decoding/selection and court projection, but excludes loading, video decoding, rendering and encoding. Smoothing computation, including inverse projection, is timed separately. The pipeline reports pooled and per-rally mean/median/p95 milliseconds per frame and FPS, rather than video-encoding speed.
+
+Detector accuracy uses freshly computed positions; keypoint accuracy reuses validated saved raw/smoothed exports. The keypoint model reruns only for timing; its videos and accuracy artifacts are not regenerated. The three selected clips share frozen references and pixel-centre scaling, with A **near** for Denmark and Fuzhou. Detector confidence (0.3), person filtering, highest-score selection per court half, and the 1 m court margin remain unchanged. The original `runner.py run` preserves its original single-rally conventions.
+
+The comparison uses the saved `review_smoothing.json`, not the current editable YAML. Both methods use the same rejection, median, Savgol and gap policy. With this review the windows are 5/9 frames and the gap policy is continuous. Filled positions are flagged and shown with hollow markers in the detector video and triangles in the trajectory figures. No trajectory is clamped to the court.
+
+Each full comparison creates a fresh directory under `outputs/` containing:
+
+- `comparison.md` with tables, embedded PNG graphs and links to matching vector PDFs; `comparison.json` with full pooled, per-player, per-rally and per-rally/player metrics.
+- `provenance.json`, including source artifact/video hashes, both checkpoint hashes, runtime versions, detector settings, saved selection and smoothing settings; `references.json` snapshots the frozen references, mappings and geometry.
+- `timings.csv` and `smoothing_times.csv` for reproducible timing summaries.
+- `detector/<rally-id>/` with raw/smoothed position and shot-error CSVs, metrics and verified review videos.
+- `graphs/` with pixel/metre error distributions, pooled/per-rally coverage and success rates, runtime plots, and per-rally court trajectories and annotation-time error plots, each as PNG and PDF.
+
+Error statistics (mean, median, p95, Euclidean RMSE) use available predictions. Coverage and within-0.5 m/within-1 m rates include every eligible reference, so unavailable positions fail success tests. Error-distribution graphs use that same denominator and can plateau below 100%. Pooled statistics are calculated from individual error rows. All-frame position coverage and filled-position counts are reported separately. References are plotted as isolated crosses; there is no continuous ground-truth trajectory between annotation times.
+
+Three selected rallies provide an exploratory comparison of an unadapted COCO detector against a badminton-trained heatmap model. They do not establish architecture superiority or comprehensive test accuracy. Heatmap scores are not presence probabilities, so score values are not compared with detector confidence. Continuous smoothing uses future samples, interpolates long gaps and holds endpoints; high smoothed coverage is not proof of observed positions or live tracking latency.
+
 ## Interpretation limits
 
 The box bottom-centre is only an approximate floor reference, especially during lunges and jumps. The annotation's exact foot-midpoint definition is unconfirmed, and evaluation at shot timestamps does not validate positions between shots. The homography maps annotation image pixels to dataset court coordinates; those raw coordinates are not metres. The runner applies the existing dataset-to-metre transform before scoring or rendering positions.
