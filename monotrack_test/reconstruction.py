@@ -214,21 +214,52 @@ def simulate_trajectory(
     frame_count: int,
     fps: float,
     substeps: int = 30,
+    stop_at_ground: bool = False,
 ) -> np.ndarray:
-    """Return positions at integer frame times, including the exact initial frame."""
+    """Return frame positions, optionally stopping at an interpolated ground crossing."""
     if frame_count < 0 or fps <= 0 or substeps < 1:
         raise ValueError("Invalid trajectory timing")
     position = np.asarray(start_m, dtype=np.float64).copy()
     velocity = np.asarray(velocity_mps, dtype=np.float64).copy()
     result = [position.copy()]
+    if stop_at_ground and position[2] <= 0 and velocity[2] <= 0:
+        return np.asarray(result)
     dt = 1.0 / (float(fps) * substeps)
     gravity = np.asarray([0.0, 0.0, -9.8])
     for _ in range(frame_count):
         for _ in range(substeps):
+            previous = position.copy() if stop_at_ground else None
             velocity += dt * (gravity - float(drag) * np.linalg.norm(velocity) * velocity)
             position += dt * velocity
+            if stop_at_ground:
+                if not np.isfinite(position).all():
+                    raise FloatingPointError("Non-finite hypothetical flight")
+                if previous[2] >= 0 and position[2] <= 0:
+                    fraction = previous[2] / (previous[2] - position[2])
+                    landing = previous + fraction * (position - previous)
+                    landing[2] = 0.0
+                    return np.asarray(result + [landing])
         result.append(position.copy())
     return np.asarray(result)
+
+
+def extrapolated_landing_distance(start_m: np.ndarray, velocity_mps: np.ndarray, drag: float, fps: float) -> float | None:
+    """Distance outside the full court if this shot continues without another hit."""
+    if (np.asarray(start_m).shape != (3,) or np.asarray(velocity_mps).shape != (3,)
+            or not np.isfinite(start_m).all() or not np.isfinite(velocity_mps).all()
+            or not np.isfinite(drag) or drag < 0 or not np.isfinite(fps) or fps <= 0 or start_m[2] < 0):
+        return None
+    # shortcut: cap hypothetical flights at 60 s; revisit if velocity/height bounds grow.
+    with np.errstate(over="ignore", invalid="ignore"):
+        try:
+            landing = simulate_trajectory(start_m, velocity_mps, drag, int(np.ceil(60 * fps)), fps,
+                                          stop_at_ground=True)[-1]
+        except FloatingPointError:
+            return None
+    if landing[2] != 0:
+        return None
+    nearest = np.clip(landing[:2], [0.0, 0.0], [COURT_WIDTH_M, COURT_LENGTH_M])
+    return float(np.linalg.norm(landing[:2] - nearest))
 
 
 def reconstruct_flight(
@@ -340,6 +371,11 @@ def reconstruct_flight(
         if fixed_end is None:
             endpoint_error_m = float(np.linalg.norm(path[-1, :2] - receive_reference_xy))
             cost += (0.15 * camera_scale * endpoint_error_m) ** 2
+        start, velocity, drag = unpack(params)
+        landing_distance_m = extrapolated_landing_distance(start, velocity, drag, fps)
+        if landing_distance_m is None:
+            return 1e12
+        cost += (0.15 * camera_scale * landing_distance_m) ** 2
         return cost if np.isfinite(cost) else 1e12
 
     constraints = []
@@ -355,6 +391,8 @@ def reconstruct_flight(
             options={"maxiter": 160, "ftol": 1e-6, "disp": False},
         )
         path = trajectory_for(result.x)
+        start, velocity, drag = unpack(result.x)
+        landing_distance_m = extrapolated_landing_distance(start, velocity, drag, fps)
     except (ValueError, np.linalg.LinAlgError, FloatingPointError) as error:
         return None, {**base, "status": "failed", "reason": f"optimizer_error: {error}"}
 
@@ -368,6 +406,7 @@ def reconstruct_flight(
         and np.isfinite(path).all()
         and np.isfinite(reprojection_errors).all()
         and endpoint_error <= 0.01
+        and landing_distance_m is not None
     )
     diagnostics = {
         **base,
@@ -377,6 +416,8 @@ def reconstruct_flight(
         "optimizer_status": int(result.status),
         "optimizer_message": str(result.message),
         "objective": float(result.fun),
+        "landing_outside_distance_m": landing_distance_m,
+        "landing_penalty": None if landing_distance_m is None else (0.15 * camera_scale * landing_distance_m) ** 2,
         "reprojection_rmse_px": float(np.sqrt(np.mean(np.square(reprojection_errors)))),
         "reprojection_median_px": float(np.median(reprojection_errors)),
         "reprojection_max_px": float(np.max(reprojection_errors)),
@@ -384,6 +425,8 @@ def reconstruct_flight(
         "start_reference_error_m": float(np.linalg.norm(path[0, :2] - start_reference_xy)),
         "receive_reference_error_m": float(np.linalg.norm(path[-1, :2] - receive_reference_xy)),
     }
+    if landing_distance_m is None:
+        diagnostics["reason"] = "hypothetical_ground_contact_unavailable_within_60s"
     return (path if available else None), diagnostics
 
 

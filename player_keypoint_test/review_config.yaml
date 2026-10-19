@@ -1,0 +1,4 @@
+smoothing:
+  median_window: 5
+  savgol_window: 9
+  gap_policy: continuous

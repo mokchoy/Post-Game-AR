@@ -1,0 +1,1385 @@
+{
+  "input_video": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\cleaned_rallies\\set-1\\Kento_MOMOTA_CHOU_Tien_Chen_KOREA_OPEN_2019_Final\\set1\\rally_002.mp4",
+  "rally_csv": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\cleaned_rallies\\set-1\\Kento_MOMOTA_CHOU_Tien_Chen_KOREA_OPEN_2019_Final\\set1\\rally_002.csv",
+  "homography_csv": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\set-1\\homography.csv",
+  "homography_row_id": "3",
+  "input_metadata": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 25.0,
+    "frame_count": 790
+  },
+  "annotated_hits": 29,
+  "pixel_loss": "huber",
+  "huber_delta_px": 10.0,
+  "hit_to_hit_segments_attempted": 28,
+  "hit_to_hit_segments_available": 27,
+  "hit_track_neighborhood": [
+    {
+      "hit_frame": 25,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 25,
+      "frame_offset": 0,
+      "pixel_native": [
+        941,
+        528
+      ]
+    },
+    {
+      "hit_frame": 42,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 43,
+      "frame_offset": 1,
+      "pixel_native": [
+        1098,
+        352
+      ]
+    },
+    {
+      "hit_frame": 75,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 75,
+      "frame_offset": 0,
+      "pixel_native": [
+        1162,
+        405
+      ]
+    },
+    {
+      "hit_frame": 98,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 98,
+      "frame_offset": 0,
+      "pixel_native": [
+        825,
+        202
+      ]
+    },
+    {
+      "hit_frame": 114,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 113,
+      "frame_offset": 1,
+      "pixel_native": [
+        663,
+        678
+      ]
+    },
+    {
+      "hit_frame": 142,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 142,
+      "frame_offset": 0,
+      "pixel_native": [
+        693,
+        288
+      ]
+    },
+    {
+      "hit_frame": 158,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 158,
+      "frame_offset": 0,
+      "pixel_native": [
+        750,
+        536
+      ]
+    },
+    {
+      "hit_frame": 182,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 182,
+      "frame_offset": 0,
+      "pixel_native": [
+        1113,
+        476
+      ]
+    },
+    {
+      "hit_frame": 207,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 208,
+      "frame_offset": 1,
+      "pixel_native": [
+        1245,
+        551
+      ]
+    },
+    {
+      "hit_frame": 233,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 233,
+      "frame_offset": 0,
+      "pixel_native": [
+        1275,
+        450
+      ]
+    },
+    {
+      "hit_frame": 271,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 270,
+      "frame_offset": 1,
+      "pixel_native": [
+        1376,
+        483
+      ]
+    },
+    {
+      "hit_frame": 296,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 295,
+      "frame_offset": 1,
+      "pixel_native": [
+        1113,
+        202
+      ]
+    },
+    {
+      "hit_frame": 316,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 316,
+      "frame_offset": 0,
+      "pixel_native": [
+        622,
+        641
+      ]
+    },
+    {
+      "hit_frame": 340,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 340,
+      "frame_offset": 0,
+      "pixel_native": [
+        761,
+        427
+      ]
+    },
+    {
+      "hit_frame": 364,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 364,
+      "frame_offset": 0,
+      "pixel_native": [
+        1207,
+        558
+      ]
+    },
+    {
+      "hit_frame": 393,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 393,
+      "frame_offset": 0,
+      "pixel_native": [
+        1226,
+        311
+      ]
+    },
+    {
+      "hit_frame": 405,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 405,
+      "frame_offset": 0,
+      "pixel_native": [
+        1248,
+        465
+      ]
+    },
+    {
+      "hit_frame": 418,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 418,
+      "frame_offset": 0,
+      "pixel_native": [
+        1166,
+        352
+      ]
+    },
+    {
+      "hit_frame": 437,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 437,
+      "frame_offset": 0,
+      "pixel_native": [
+        1226,
+        528
+      ]
+    },
+    {
+      "hit_frame": 460,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 460,
+      "frame_offset": 0,
+      "pixel_native": [
+        1181,
+        202
+      ]
+    },
+    {
+      "hit_frame": 488,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 489,
+      "frame_offset": 1,
+      "pixel_native": [
+        1185,
+        543
+      ]
+    },
+    {
+      "hit_frame": 513,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 513,
+      "frame_offset": 0,
+      "pixel_native": [
+        1177,
+        423
+      ]
+    },
+    {
+      "hit_frame": 548,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 548,
+      "frame_offset": 0,
+      "pixel_native": [
+        1207,
+        450
+      ]
+    },
+    {
+      "hit_frame": 566,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 566,
+      "frame_offset": 0,
+      "pixel_native": [
+        727,
+        476
+      ]
+    },
+    {
+      "hit_frame": 592,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 592,
+      "frame_offset": 0,
+      "pixel_native": [
+        735,
+        491
+      ]
+    },
+    {
+      "hit_frame": 624,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 624,
+      "frame_offset": 0,
+      "pixel_native": [
+        1113,
+        273
+      ]
+    },
+    {
+      "hit_frame": 643,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 643,
+      "frame_offset": 0,
+      "pixel_native": [
+        1218,
+        648
+      ]
+    },
+    {
+      "hit_frame": 670,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 669,
+      "frame_offset": 1,
+      "pixel_native": [
+        1132,
+        528
+      ]
+    },
+    {
+      "hit_frame": 715,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 715,
+      "frame_offset": 0,
+      "pixel_native": [
+        641,
+        405
+      ]
+    }
+  ],
+  "tracker": {
+    "script": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\TrackNetv2-pretrained\\track_video.py",
+    "checkpoint": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\TrackNetv2-pretrained\\track.pt",
+    "device": "cuda"
+  },
+  "frame_timing": {
+    "authoritative": "clip_frame_num",
+    "fps": 25.0,
+    "fr_adjust": 1.0,
+    "frame_time": "frame / fps"
+  },
+  "camera_calibration_rmse_px": 0.27918620577305714,
+  "hit_to_hit_segments": [
+    {
+      "phase": "hit_1_to_hit_2",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 25,
+      "end_frame": 42,
+      "duration_seconds": 0.68,
+      "visible_detections": 12,
+      "missing_detections": 6,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 857.6034919127161,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 143.758816620344,
+      "reprojection_median_px": 3.840799426202287,
+      "reprojection_max_px": 497.7774864942504,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.005216860583854612,
+      "receive_reference_error_m": 0.2540055438722047,
+      "start_reference_xy_m": [
+        2.9269091313872444,
+        9.57202480725339
+      ],
+      "receive_reference_xy_m": [
+        3.75619570140752,
+        3.3975198491246537
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_2_to_hit_3",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 42,
+      "end_frame": 75,
+      "duration_seconds": 1.32,
+      "visible_detections": 33,
+      "missing_detections": 1,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 200.95141035844105,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 32.830580751616296,
+      "reprojection_median_px": 6.979708239386522,
+      "reprojection_max_px": 179.0795773030961,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.15004757186041742,
+      "receive_reference_error_m": 0.20177541373164556,
+      "start_reference_xy_m": [
+        3.75619570140752,
+        3.3975198491246537
+      ],
+      "receive_reference_xy_m": [
+        4.629962430344136,
+        12.534572333885668
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 179.0795773030961
+    },
+    {
+      "phase": "hit_3_to_hit_4",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 75,
+      "end_frame": 98,
+      "duration_seconds": 0.92,
+      "visible_detections": 24,
+      "missing_detections": 0,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 118.83134351043635,
+      "landing_outside_distance_m": 0.2476082387501807,
+      "landing_penalty": 17.331025400429578,
+      "reprojection_rmse_px": 9.079800212197595,
+      "reprojection_median_px": 4.03461376458463,
+      "reprojection_max_px": 32.415974952189785,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.23435661038968994,
+      "receive_reference_error_m": 0.3204493294804887,
+      "start_reference_xy_m": [
+        4.629962430344136,
+        12.534572333885668
+      ],
+      "receive_reference_xy_m": [
+        2.017046126220089,
+        1.033733448920512
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 7.896821550883601
+    },
+    {
+      "phase": "hit_4_to_hit_5",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 98,
+      "end_frame": 114,
+      "duration_seconds": 0.64,
+      "visible_detections": 16,
+      "missing_detections": 1,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 115.10066235433953,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 5.20027747432527,
+      "reprojection_median_px": 3.224606940153165,
+      "reprojection_max_px": 12.402473313683982,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.3204493294804887,
+      "receive_reference_error_m": 0.5592739351060252,
+      "start_reference_xy_m": [
+        2.017046126220089,
+        1.033733448920512
+      ],
+      "receive_reference_xy_m": [
+        1.7362796225864217,
+        10.228672716466665
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_5_to_hit_6",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 114,
+      "end_frame": 142,
+      "duration_seconds": 1.12,
+      "visible_detections": 28,
+      "missing_detections": 1,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 547.2210349173394,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 6.458918924222191,
+      "reprojection_median_px": 5.429952017176955,
+      "reprojection_max_px": 15.459434792141721,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.5924745159960016,
+      "receive_reference_error_m": 1.2004153120133856,
+      "start_reference_xy_m": [
+        1.7362796225864217,
+        10.228672716466665
+      ],
+      "receive_reference_xy_m": [
+        1.866172077429616,
+        1.6505958876147646
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 4.661170195802935
+    },
+    {
+      "phase": "hit_6_to_hit_7",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 142,
+      "end_frame": 158,
+      "duration_seconds": 0.64,
+      "visible_detections": 17,
+      "missing_detections": 0,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 222.0526072013018,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 15.444245308097617,
+      "reprojection_median_px": 4.661170195802935,
+      "reprojection_max_px": 60.08411743244506,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 1.2004153120133856,
+      "receive_reference_error_m": 0.6809643801868671,
+      "start_reference_xy_m": [
+        1.866172077429616,
+        1.6505958876147646
+      ],
+      "receive_reference_xy_m": [
+        2.1997219356121303,
+        10.34067470279623
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 60.08411743244506
+    },
+    {
+      "phase": "hit_7_to_hit_8",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 158,
+      "end_frame": 182,
+      "duration_seconds": 0.96,
+      "visible_detections": 19,
+      "missing_detections": 6,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 798.0622967179065,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 99.41764400499615,
+      "reprojection_median_px": 4.41480383908247,
+      "reprojection_max_px": 430.2437030155857,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.3260723529643615,
+      "receive_reference_error_m": 0.9220252586309572,
+      "start_reference_xy_m": [
+        2.1997219356121303,
+        10.34067470279623
+      ],
+      "receive_reference_xy_m": [
+        3.2465700540138616,
+        3.0550880055892553
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 41.66588962711688
+    },
+    {
+      "phase": "hit_8_to_hit_9",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 182,
+      "end_frame": 207,
+      "duration_seconds": 1.0,
+      "visible_detections": 24,
+      "missing_detections": 2,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 302.67798001654546,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 12.12505264463836,
+      "reprojection_median_px": 4.431054824417787,
+      "reprojection_max_px": 41.44257354459736,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.7524077736756571,
+      "receive_reference_error_m": 0.451822245024704,
+      "start_reference_xy_m": [
+        3.2465700540138616,
+        3.0550880055892553
+      ],
+      "receive_reference_xy_m": [
+        4.545952900575918,
+        8.513212139367827
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_9_to_hit_10",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 207,
+      "end_frame": 233,
+      "duration_seconds": 1.04,
+      "visible_detections": 25,
+      "missing_detections": 2,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 546.7441284624521,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 16.773388503962714,
+      "reprojection_median_px": 5.806668903332927,
+      "reprojection_max_px": 79.0563320052398,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.44475553926256417,
+      "receive_reference_error_m": 1.1898964450347578,
+      "start_reference_xy_m": [
+        4.545952900575918,
+        8.513212139367827
+      ],
+      "receive_reference_xy_m": [
+        4.269148413676915,
+        3.968806598235842
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 79.0563320052398
+    },
+    {
+      "phase": "hit_10_to_hit_11",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 233,
+      "end_frame": 271,
+      "duration_seconds": 1.52,
+      "visible_detections": 38,
+      "missing_detections": 1,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 867.9118564785626,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 29.64408812972448,
+      "reprojection_median_px": 24.794130184321716,
+      "reprojection_max_px": 90.91341922260204,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 1.0455353485008654,
+      "receive_reference_error_m": 0.7047816209563953,
+      "start_reference_xy_m": [
+        4.269148413676915,
+        3.968806598235842
+      ],
+      "receive_reference_xy_m": [
+        4.966954127050166,
+        12.602216788059156
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_11_to_hit_12",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 271,
+      "end_frame": 296,
+      "duration_seconds": 1.0,
+      "visible_detections": 24,
+      "missing_detections": 2,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 94.07657273359821,
+      "landing_outside_distance_m": 0.040930649463119285,
+      "landing_penalty": 0.473577813859914,
+      "reprojection_rmse_px": 3.478635508874855,
+      "reprojection_median_px": 3.1725454135759428,
+      "reprojection_max_px": 6.362464035690555,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.12090666999578782,
+      "receive_reference_error_m": 0.5231648977633018,
+      "start_reference_xy_m": [
+        4.966954127050166,
+        12.602216788059156
+      ],
+      "receive_reference_xy_m": [
+        3.8213715680851146,
+        1.6907203592567668
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_12_to_hit_13",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 296,
+      "end_frame": 316,
+      "duration_seconds": 0.8,
+      "visible_detections": 20,
+      "missing_detections": 1,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 326.71282268900995,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 30.970356413763145,
+      "reprojection_median_px": 5.391310693864352,
+      "reprojection_max_px": 131.60274552200795,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.2273328084664611,
+      "receive_reference_error_m": 0.6565330673210648,
+      "start_reference_xy_m": [
+        3.8213715680851146,
+        1.6907203592567668
+      ],
+      "receive_reference_xy_m": [
+        1.4973270409139061,
+        10.229884606231312
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 131.60274552200795
+    },
+    {
+      "phase": "hit_13_to_hit_14",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 316,
+      "end_frame": 340,
+      "duration_seconds": 0.96,
+      "visible_detections": 25,
+      "missing_detections": 0,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 493.63433101099855,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 12.916887280151295,
+      "reprojection_median_px": 6.84661042284598,
+      "reprojection_max_px": 41.5339953166127,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.5750553281694412,
+      "receive_reference_error_m": 1.0268051505086389,
+      "start_reference_xy_m": [
+        1.4973270409139061,
+        10.229884606231312
+      ],
+      "receive_reference_xy_m": [
+        2.3444799606060993,
+        3.309414666945491
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 12.706057902673402
+    },
+    {
+      "phase": "hit_14_to_hit_15",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 340,
+      "end_frame": 364,
+      "duration_seconds": 0.96,
+      "visible_detections": 23,
+      "missing_detections": 2,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 276.1862348514794,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 21.327886016733896,
+      "reprojection_median_px": 7.086371209660109,
+      "reprojection_max_px": 96.51629350914232,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 1.0268051505086389,
+      "receive_reference_error_m": 0.7212924746192468,
+      "start_reference_xy_m": [
+        2.3444799606060993,
+        3.309414666945491
+      ],
+      "receive_reference_xy_m": [
+        4.042494089018396,
+        8.746666876540365
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 96.51629350914232
+    },
+    {
+      "phase": "hit_15_to_hit_16",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 364,
+      "end_frame": 393,
+      "duration_seconds": 1.16,
+      "visible_detections": 30,
+      "missing_detections": 0,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 976.8077755517045,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 34.740567770257506,
+      "reprojection_median_px": 6.5999759396843976,
+      "reprojection_max_px": 185.0424370824884,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.6673015677631284,
+      "receive_reference_error_m": 1.5420939986338833,
+      "start_reference_xy_m": [
+        4.042494089018396,
+        8.746666876540365
+      ],
+      "receive_reference_xy_m": [
+        3.6751070869608613,
+        1.746439025998918
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 22.17906376470914
+    },
+    {
+      "phase": "hit_16_to_hit_17",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 393,
+      "end_frame": 405,
+      "duration_seconds": 0.48,
+      "visible_detections": 13,
+      "missing_detections": 0,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 390.0543537995035,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 28.717736144534936,
+      "reprojection_median_px": 10.699712453148475,
+      "reprojection_max_px": 94.42327459595559,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 1.5420939986338833,
+      "receive_reference_error_m": 0.6898808242827839,
+      "start_reference_xy_m": [
+        3.6751070869608613,
+        1.746439025998918
+      ],
+      "receive_reference_xy_m": [
+        4.410271046367539,
+        10.610560813429359
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 94.42327459595559
+    },
+    {
+      "phase": "hit_17_to_hit_18",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 405,
+      "end_frame": 418,
+      "duration_seconds": 0.52,
+      "visible_detections": 14,
+      "missing_detections": 0,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 672.5029263250937,
+      "landing_outside_distance_m": 0.046132227362974246,
+      "landing_penalty": 0.6015932078536385,
+      "reprojection_rmse_px": 10.66709618319888,
+      "reprojection_median_px": 4.814824952567271,
+      "reprojection_max_px": 31.232932938350675,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.4400602787823545,
+      "receive_reference_error_m": 1.3790893525206485,
+      "start_reference_xy_m": [
+        4.410271046367539,
+        10.610560813429359
+      ],
+      "receive_reference_xy_m": [
+        3.2251808595389804,
+        2.179889299652091
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 31.232932938350675
+    },
+    {
+      "phase": "hit_18_to_hit_19",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 418,
+      "end_frame": 437,
+      "duration_seconds": 0.76,
+      "visible_detections": 20,
+      "missing_detections": 0,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 351.5858530046002,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 25.768954111686774,
+      "reprojection_median_px": 14.796169268394246,
+      "reprojection_max_px": 91.74054115444332,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 1.3790893525206485,
+      "receive_reference_error_m": 0.545809870893197,
+      "start_reference_xy_m": [
+        3.2251808595389804,
+        2.179889299652091
+      ],
+      "receive_reference_xy_m": [
+        4.341455947297604,
+        9.805587650196998
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 91.74054115444332
+    },
+    {
+      "phase": "hit_19_to_hit_20",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 437,
+      "end_frame": 460,
+      "duration_seconds": 0.92,
+      "visible_detections": 22,
+      "missing_detections": 2,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 298.0955678732708,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 4.752711441044487,
+      "reprojection_median_px": 4.162467683633841,
+      "reprojection_max_px": 8.256001202254328,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.4677927639989138,
+      "receive_reference_error_m": 0.8693665928650525,
+      "start_reference_xy_m": [
+        4.341455947297604,
+        9.805587650196998
+      ],
+      "receive_reference_xy_m": [
+        4.058584384593752,
+        2.1206367653971987
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 6.158894867047319
+    },
+    {
+      "phase": "hit_20_to_hit_21",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 460,
+      "end_frame": 488,
+      "duration_seconds": 1.12,
+      "visible_detections": 25,
+      "missing_detections": 4,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 43.48870082510925,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 4.190803299927356,
+      "reprojection_median_px": 3.447217434962242,
+      "reprojection_max_px": 8.375371067631255,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.8693665928650525,
+      "receive_reference_error_m": 0.30284444979666764,
+      "start_reference_xy_m": [
+        4.058584384593752,
+        2.1206367653971987
+      ],
+      "receive_reference_xy_m": [
+        4.284857646797248,
+        9.193718701168232
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_21_to_hit_22",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 488,
+      "end_frame": 513,
+      "duration_seconds": 1.0,
+      "visible_detections": 25,
+      "missing_detections": 1,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 230.31894653771238,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 19.236816161936922,
+      "reprojection_median_px": 3.369705289050536,
+      "reprojection_max_px": 92.76521008319476,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.24826486389497393,
+      "receive_reference_error_m": 0.6478212479412847,
+      "start_reference_xy_m": [
+        4.284857646797248,
+        9.193718701168232
+      ],
+      "receive_reference_xy_m": [
+        4.010733990336996,
+        4.017463107363005
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 92.76521008319476
+    },
+    {
+      "phase": "hit_22_to_hit_23",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 513,
+      "end_frame": 548,
+      "duration_seconds": 1.4,
+      "visible_detections": 36,
+      "missing_detections": 0,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 543.347941492944,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 37.20128320647348,
+      "reprojection_median_px": 11.284400520360776,
+      "reprojection_max_px": 173.7960418090365,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.602215957905807,
+      "receive_reference_error_m": 0.7020778072569299,
+      "start_reference_xy_m": [
+        4.010733990336996,
+        4.017463107363005
+      ],
+      "receive_reference_xy_m": [
+        4.732991654261831,
+        12.534117848406106
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 173.7960418090365
+    },
+    {
+      "phase": "hit_23_to_hit_24",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 548,
+      "end_frame": 566,
+      "duration_seconds": 0.72,
+      "visible_detections": 16,
+      "missing_detections": 3,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 829.6433876084782,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 15.029011773177983,
+      "reprojection_median_px": 10.111423111205628,
+      "reprojection_max_px": 37.88168619821258,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.15594877840377946,
+      "receive_reference_error_m": 1.5421676079262838,
+      "start_reference_xy_m": [
+        4.732991654261831,
+        12.534117848406106
+      ],
+      "receive_reference_xy_m": [
+        2.746319117879548,
+        2.3416060811792114
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 37.88168619821258
+    },
+    {
+      "phase": "hit_24_to_hit_25",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 566,
+      "end_frame": 592,
+      "duration_seconds": 1.04,
+      "visible_detections": 26,
+      "missing_detections": 1,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "failed",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 1000000000000.0,
+      "landing_outside_distance_m": null,
+      "landing_penalty": null,
+      "reprojection_rmse_px": 136.4633046978734,
+      "reprojection_median_px": 129.2352381214814,
+      "reprojection_max_px": 322.4706152171238,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 1.5421676079262838,
+      "receive_reference_error_m": 2.438287101691244,
+      "reason": "hypothetical_ground_contact_unavailable_within_60s",
+      "start_reference_xy_m": [
+        2.746319117879548,
+        2.3416060811792114
+      ],
+      "receive_reference_xy_m": [
+        1.6801109585837564,
+        8.792207004918918
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location"
+    },
+    {
+      "phase": "hit_25_to_hit_26",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 592,
+      "end_frame": 624,
+      "duration_seconds": 1.28,
+      "visible_detections": 33,
+      "missing_detections": 0,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 312.72407264917115,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 7.15210695736768,
+      "reprojection_median_px": 3.230028852329432,
+      "reprojection_max_px": 25.809495508932677,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.1263757196181106,
+      "receive_reference_error_m": 0.9718461638500796,
+      "start_reference_xy_m": [
+        1.6801109585837564,
+        8.792207004918918
+      ],
+      "receive_reference_xy_m": [
+        3.2147692765250193,
+        1.5302619476018817
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 25.809495508932677
+    },
+    {
+      "phase": "hit_26_to_hit_27",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 624,
+      "end_frame": 643,
+      "duration_seconds": 0.76,
+      "visible_detections": 20,
+      "missing_detections": 0,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 202.79873071304547,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 16.678099167541927,
+      "reprojection_median_px": 11.795071822753759,
+      "reprojection_max_px": 45.89741692214972,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.9718461638500796,
+      "receive_reference_error_m": 0.2988554113558471,
+      "start_reference_xy_m": [
+        3.2147692765250193,
+        1.5302619476018817
+      ],
+      "receive_reference_xy_m": [
+        4.552106571618157,
+        9.863964857511467
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 45.89741692214972
+    },
+    {
+      "phase": "hit_27_to_hit_28",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 643,
+      "end_frame": 670,
+      "duration_seconds": 1.08,
+      "visible_detections": 27,
+      "missing_detections": 1,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 217.18121913004538,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 6.025357613320332,
+      "reprojection_median_px": 4.436063333917168,
+      "reprojection_max_px": 15.181521753119284,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.23505178567893187,
+      "receive_reference_error_m": 0.7691158448642322,
+      "start_reference_xy_m": [
+        4.552106571618157,
+        9.863964857511467
+      ],
+      "receive_reference_xy_m": [
+        3.6330601761177292,
+        3.9731636668936647
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_28_to_hit_29",
+      "pixel_loss": "huber",
+      "huber_delta_px": 10.0,
+      "start_frame": 670,
+      "end_frame": 715,
+      "duration_seconds": 1.8,
+      "visible_detections": 19,
+      "missing_detections": 27,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 307.112544045727,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 21.323998905639257,
+      "reprojection_median_px": 12.148026850782983,
+      "reprojection_max_px": 73.14489464084005,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.578480377702946,
+      "receive_reference_error_m": 0.06751459961759818,
+      "start_reference_xy_m": [
+        3.6330601761177292,
+        3.9731636668936647
+      ],
+      "receive_reference_xy_m": [
+        1.2553171501404374,
+        12.220797480639876
+      ],
+      "start_reference_source": "current_row_player_location",
+      "receive_reference_source": "next_row_player_location",
+      "hit_endpoint_reprojection_error_px": 73.14489464084005
+    }
+  ],
+  "terminal_extension": {
+    "extension": "terminal reconstruction disabled",
+    "status": "disabled",
+    "reason": "manual_contacts_evaluation_only",
+    "pixel_loss": "huber",
+    "huber_delta_px": 10.0,
+    "phases": []
+  },
+  "output_video": {
+    "codec": "h264",
+    "width": 1440,
+    "height": 720,
+    "fps": 25.0,
+    "frames": 790,
+    "duration_seconds": 31.6,
+    "source_audio_present": true,
+    "output_audio_present": true,
+    "audio_video_start_delta_seconds": 0.0,
+    "audio_video_duration_delta_seconds": 0.0
+  },
+  "interpretation": "Current and next hitters' player positions are soft horizontal fit references. Shuttle hit/landing labels are display-only and manual terminal contacts do not enter reconstruction. A carried fitted 3D endpoint takes precedence at the next start. Estimates stop at the final hit; a plausible top-down path does not verify reconstructed height.",
+  "mono_track_source": {
+    "repository": "https://github.com/jhwang7628/monotrack",
+    "commit": "39e9227bd44fa2a579731b1cc97c7f529f391cd6",
+    "license": "Adobe Research License; noncommercial research only"
+  }
+}

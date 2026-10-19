@@ -27,6 +27,8 @@ import cv2
 import numpy as np
 import torch
 import yaml
+from scipy.ndimage import median_filter
+from scipy.signal import savgol_filter
 
 import point_model as pm
 sys.path.insert(0, str(REPO / "monotrack_test"))
@@ -38,6 +40,7 @@ from run_projection import court_world_lines  # noqa: E402
 SOURCE = REPO / "cleaned_rallies" / "set-1"
 HOMOGRAPHY = REPO / "set-1" / "homography.csv"
 CONFIG_DEFAULT = ROOT / "config.yaml"
+REVIEW_CONFIG = ROOT / "review_config.yaml"
 WEIGHTS = ROOT / "weights" / "yolo11n.pt"
 PREP = ROOT / "data" / "candidate"
 SPLIT_FILE = ROOT / "splits" / "split.json"
@@ -1441,8 +1444,181 @@ def verify_review_video(path: Path, expected_frames: int, fps: float,
     return {**info, "decoded_frames": decoded}
 
 
+def load_review_smoothing(path: Path = REVIEW_CONFIG) -> dict:
+    config = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(config, dict) or set(config) != {"smoothing"}:
+        raise ValueError("Review config must contain exactly a smoothing section")
+    settings = config["smoothing"]
+    if not isinstance(settings, dict) or set(settings) != {"median_window", "savgol_window", "gap_policy"}:
+        raise ValueError("smoothing requires median_window, savgol_window, and gap_policy")
+    for key, minimum in (("median_window", 1), ("savgol_window", 3)):
+        value = settings[key]
+        if isinstance(value, bool) or not isinstance(value, int) or value < minimum or value % 2 != 1:
+            raise ValueError(f"smoothing.{key} must be an odd integer >= {minimum}")
+    if settings["gap_policy"] not in ("conservative", "continuous"):
+        raise ValueError("smoothing.gap_policy must be conservative or continuous")
+    # shortcut: fixed rejection limits are exploratory, validate on development clips before measuring motion.
+    return {**settings, "polyorder": 2, "court_margin_m": 3.0, "half_margin_m": 1.0,
+            "median_outlier_m": 1.0, "max_short_gap_seconds": 0.2}
+
+
+def mask_runs(mask):
+    edges = np.flatnonzero(np.diff(np.r_[False, mask, False]))
+    return zip(edges[::2], edges[1::2])
+
+
+def smooth_court_track(points, half: str, fps: float, settings: dict):
+    points = np.asarray(points, dtype=np.float64)
+    if points.ndim != 2 or points.shape[1] != 2 or half not in ("far", "near"):
+        raise ValueError("Expected an Nx2 court trajectory and a far/near half")
+    if not math.isfinite(fps) or fps <= 0:
+        raise ValueError("Smoothing requires positive finite FPS")
+    reasons = np.full(len(points), "", dtype=object)
+    valid = np.isfinite(points).all(axis=1)
+    reasons[~valid] = "nonfinite_projection"
+    margin = settings["court_margin_m"]
+    bounds = ((points[:, 0] >= -margin) & (points[:, 0] <= COURT_WIDTH_M + margin) &
+              (points[:, 1] >= -margin) & (points[:, 1] <= COURT_LENGTH_M + margin))
+    reasons[valid & ~bounds] = "court_bounds"
+    valid &= bounds
+    correct_half = (points[:, 1] <= NET_Y_M + settings["half_margin_m"] if half == "far"
+                    else points[:, 1] >= NET_Y_M - settings["half_margin_m"])
+    reasons[valid & ~correct_half] = "court_half"
+    valid &= correct_half
+    cleaned = np.full_like(points, np.nan)
+    for start, stop in mask_runs(valid):
+        window = min(settings["median_window"], (stop - start - 1) // 2 * 2 + 1)
+        median = median_filter(points[start:stop], size=(window, 1), mode="nearest")
+        outliers = np.linalg.norm(points[start:stop] - median, axis=1) > settings["median_outlier_m"]
+        cleaned[start:stop] = median
+        cleaned[start:stop][outliers] = np.nan
+        reasons[start:stop][outliers] = "temporal_outlier"
+    valid = np.isfinite(cleaned).all(axis=1)
+    statuses = np.where(valid, "smoothed", "unavailable").astype(object)
+    anchors = np.flatnonzero(valid)
+    if len(anchors):
+        for start, stop in mask_runs(~valid):
+            bracketed = start > 0 and stop < len(points)
+            short = bracketed and (stop - start) / fps <= settings["max_short_gap_seconds"] + 1e-9
+            if not short and settings["gap_policy"] != "continuous":
+                continue
+            for axis in (0, 1):
+                cleaned[start:stop, axis] = np.interp(
+                    np.arange(start, stop), anchors, cleaned[anchors, axis])
+            statuses[start:stop] = ("short_interpolation" if short else
+                                    "long_interpolation" if bracketed else "endpoint_hold")
+    for start, stop in mask_runs(np.isfinite(cleaned).all(axis=1)):
+        window = min(settings["savgol_window"], (stop - start - 1) // 2 * 2 + 1)
+        if window >= 3:
+            cleaned[start:stop] = savgol_filter(cleaned[start:stop], window, settings["polyorder"],
+                                               axis=0, mode="interp")
+    return cleaned, statuses, reasons
+
+
+def render_smoothed_review(rally: dict, output_dir: Path, positions: list[dict], geometry,
+                           annotations: dict, raw_metrics: dict, settings: dict) -> dict:
+    width, height = raw_metrics["source_dimensions"]
+    fps, frame_count = raw_metrics["source_fps"], raw_metrics["decoded_frames"]
+    filtered, errors = [], []
+    halves = {p: rally["rows"][0][f"{p}_half"] for p in ("A", "B")}
+    for player in ("A", "B"):
+        source = [row for row in positions if row["player"] == player]
+        points, statuses, reasons = smooth_court_track(
+            [[row["x_court_m"], row["y_court_m"]] for row in source], halves[player], fps, settings)
+        for raw, world, status, reason in zip(source, points, statuses, reasons):
+            image = (native_point(geometry.world_to_annotation_floor(world), width, height)
+                     if np.isfinite(world).all() else (np.nan, np.nan))
+            available = bool(np.isfinite(image).all() and np.isfinite(world).all())
+            row = {**raw, "available": available,
+                   "prediction_status": "available" if available else "unavailable_after_smoothing",
+                   "x_native": float(image[0]) if available else None,
+                   "y_native": float(image[1]) if available else None,
+                   "x_court_m": float(world[0]) if available else None,
+                   "y_court_m": float(world[1]) if available else None,
+                   "filter_status": str(status) if available else "unavailable",
+                   "rejection_reason": str(reason),
+                   "gap_filled": available and status not in ("smoothed", "unavailable")}
+            filtered.append(row)
+            frame = row["clip_frame_num"]
+            if frame in annotations:
+                reference = annotations[frame][player]
+                has_error = available and reference["world"] is not None
+                errors.append({**row, "available": has_error,
+                               "prediction_status": row["prediction_status"] if has_error or not available
+                               else "invalid_reference_projection",
+                               "error_px": float(np.linalg.norm(np.asarray(image) - reference["image"]))
+                               if has_error else None,
+                               "error_m": float(np.linalg.norm(world - reference["world"]))
+                               if has_error else None})
+    filtered.sort(key=lambda row: (row["clip_frame_num"], row["player"]))
+    errors.sort(key=lambda row: (row["clip_frame_num"], row["player"]))
+    write_csv(output_dir / "player_positions_smoothed.csv", filtered,
+              [*positions[0], "filter_status", "rejection_reason", "gap_filled"])
+    write_csv(output_dir / "shot_errors_smoothed.csv", errors, [
+        *KEY_FIELDS, "clip_frame_num", "clip_time_seconds", "player", "prediction_status", "available",
+        "error_px", "error_m", "filter_status", "rejection_reason", "gap_filled",
+    ])
+    metrics = {**raw_metrics, "smoothing": settings, "combined": error_summary(errors),
+               "per_player": {p: error_summary([row for row in errors if row["player"] == p])
+                              for p in ("A", "B")},
+               "position_coverage": sum(row["available"] for row in filtered) / len(filtered),
+               "filled_points": sum(row["gap_filled"] for row in filtered),
+               "filter_counts": {status: sum(row["filter_status"] == status for row in filtered)
+                                 for status in sorted({row["filter_status"] for row in filtered})},
+               "rejection_counts": {reason: sum(row["rejection_reason"] == reason for row in filtered)
+                                    for reason in sorted({row["rejection_reason"] for row in filtered} - {""})}}
+    write_json(output_dir / "metrics_smoothed.json", metrics)
+    by_frame = defaultdict(dict)
+    for row in filtered:
+        by_frame[row["clip_frame_num"]][row["player"]] = row
+    video_path = output_dir / "review_smoothed.mp4"
+    cap = cv2.VideoCapture(rally["clip_path"])
+    writer = cv2.VideoWriter(str(video_path), cv2.VideoWriter_fourcc(*"mp4v"), fps, (width + 600, height))
+    if not cap.isOpened() or not writer.isOpened():
+        cap.release()
+        writer.release()
+        raise RuntimeError("Could not open smoothed review source or writer")
+    previous, frame_index = {}, 0
+    try:
+        while True:
+            ok, frame = cap.read()
+            if not ok:
+                break
+            if frame_index >= frame_count:
+                raise RuntimeError("Source frame count changed during smoothed rendering")
+            court_points = {}
+            for player, row in by_frame[frame_index].items():
+                color = REVIEW_COLORS[player]
+                if row["available"]:
+                    court_points[player] = (row["x_court_m"], row["y_court_m"])
+                    x, y = row["x_native"], row["y_native"]
+                    if 0 <= x < width and 0 <= y < height:
+                        point = (int(round(x)), int(round(y)))
+                        cv2.circle(frame, point, 8, color, -1, cv2.LINE_AA)
+                        cv2.putText(frame, f"{player} {row['filter_status']}",
+                                    (max(10, point[0] + 10), max(24, point[1] - 10)),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.62, color, 2, cv2.LINE_AA)
+                else:
+                    cv2.putText(frame, f"{player}: unavailable", (24, 110 if player == "A" else 145),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.62, color, 2, cv2.LINE_AA)
+            refs = {p: ref["world"] for p, ref in annotations.get(frame_index, {}).items()}
+            cv2.putText(frame, f"frame {frame_index} | smoothed ({settings['gap_policy']})", (24, 38),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (20, 20, 20), 2)
+            panel = court_panel(height, court_points, refs, previous, frame_index, halves)
+            writer.write(np.hstack((frame, panel)))
+            previous = court_points
+            frame_index += 1
+    finally:
+        cap.release()
+        writer.release()
+    if frame_index != frame_count:
+        raise RuntimeError("Source frame count changed during smoothed rendering")
+    video_info = verify_review_video(video_path, frame_count, fps, (width + 600, height))
+    return {"video": str(video_path), "video_info": video_info, "metrics": metrics}
+
+
 def render_review_rally(rally: dict, output_dir: Path, model, geometry,
-                        config: dict, device: torch.device) -> dict:
+                        config: dict, device: torch.device, smoothing: dict | None = None) -> dict:
     rows = sorted(rally["rows"], key=lambda row: int(row["clip_frame_num"]))
     template = rows[0]
     width, height, fps = int(template["width"]), int(template["height"]), float(template["fps"])
@@ -1557,8 +1733,12 @@ def render_review_rally(rally: dict, output_dir: Path, model, geometry,
     }
     write_json(output_dir / "metrics.json", metrics)
     video_info = verify_review_video(video_path, frame_index, source_fps, (width + 600, height))
-    return {"key": list(rally["key"]), "directory": str(output_dir), "video": str(video_path),
-            "frames": frame_index, "video_info": video_info, "metrics": metrics}
+    result = {"key": list(rally["key"]), "directory": str(output_dir), "video": str(video_path),
+              "frames": frame_index, "video_info": video_info, "metrics": metrics}
+    if smoothing is not None:
+        result["smoothed"] = render_smoothed_review(
+            rally, output_dir, positions, geometry, annotations, metrics, smoothing)
+    return result
 
 
 def review_rallies(rows: list[dict], held_out: set[str], seed: int = 42) -> list[dict]:
@@ -1647,7 +1827,8 @@ def review_test_context(final_run_id: str) -> tuple[dict, list[str]]:
     return context, blockers
 
 
-def review_test_command(final_run_id: str, check_only: bool = False) -> int:
+def review_test_command(final_run_id: str, check_only: bool = False, smooth: bool = False) -> int:
+    smoothing = load_review_smoothing() if smooth else None
     context, blockers = review_test_context(final_run_id)
     if not blockers:
         try:
@@ -1664,6 +1845,8 @@ def review_test_command(final_run_id: str, check_only: bool = False) -> int:
         "selected_match_count": len({item["key"][1] for item in selected}),
         "shortfall_from_three": max(0, 3 - len(selected)), "blockers": blockers,
     }
+    if smoothing is not None:
+        report["smoothing"] = smoothing
     if check_only or blockers:
         print(json.dumps(report, indent=2))
         return 0 if not blockers else 2
@@ -1676,6 +1859,8 @@ def review_test_command(final_run_id: str, check_only: bool = False) -> int:
         output_dir = output_root / f"review_test_{stamp}_{suffix}"
         suffix += 1
     output_dir.mkdir(parents=True)
+    if smoothing is not None:
+        write_json(output_dir / "review_smoothing.json", smoothing)
     settings = resolved_settings(context["config"])
     write_json(output_dir / "selection.json", {
         "diagnostic_scope": "selected-rally diagnostics; not the full held-out test score",
@@ -1693,7 +1878,7 @@ def review_test_command(final_run_id: str, check_only: bool = False) -> int:
     for rally in selected:
         rendered.append(render_review_rally(
             rally, output_dir / safe_id(rally["key"]), model,
-            import_geometry(rally["key"][1]), context["config"], device,
+            import_geometry(rally["key"][1]), context["config"], device, smoothing=smoothing,
         ))
     write_json(output_dir / "render_summary.json", {
         "final_run_id": final_run_id, "checkpoint_sha256": context["checkpoint_hash"],
@@ -1701,7 +1886,8 @@ def review_test_command(final_run_id: str, check_only: bool = False) -> int:
     })
     print(json.dumps({"review_directory": str(output_dir), **report,
                       "rendered": [{"key": row["key"], "video": row["video"],
-                                    "frames": row["frames"], "metrics": row["metrics"]["combined"]}
+                                    "frames": row["frames"], "metrics": row["metrics"]["combined"],
+                                    **({"smoothed": row["smoothed"]} if smoothing is not None else {})}
                                    for row in rendered]}, indent=2))
     return 0
 
@@ -1804,6 +1990,7 @@ def parser() -> argparse.ArgumentParser:
     test_review = commands.add_parser("review-test")
     test_review.add_argument("--run-id", required=True)
     test_review.add_argument("--check", action="store_true", help="Preflight only; does not run training smoke")
+    test_review.add_argument("--smooth", action="store_true", help="Also render smoothing from review_config.yaml")
     return root
 
 
@@ -1819,7 +2006,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "overlay":
             return overlay_command(args.run_id, args.match, args.game, args.rally)
         if args.command == "review-test":
-            return review_test_command(args.run_id, args.check)
+            return review_test_command(args.run_id, args.check, args.smooth)
         config = load_config(args.config, getattr(args, "folds", None))
         if args.command == "check":
             return check_command(config)

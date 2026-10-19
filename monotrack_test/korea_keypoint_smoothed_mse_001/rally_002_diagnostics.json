@@ -1,0 +1,1743 @@
+{
+  "input_video": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\cleaned_rallies\\set-1\\Kento_MOMOTA_CHOU_Tien_Chen_KOREA_OPEN_2019_Final\\set1\\rally_002.mp4",
+  "rally_csv": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\cleaned_rallies\\set-1\\Kento_MOMOTA_CHOU_Tien_Chen_KOREA_OPEN_2019_Final\\set1\\rally_002.csv",
+  "homography_csv": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\set-1\\homography.csv",
+  "homography_row_id": "3",
+  "input_metadata": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 25.0,
+    "frame_count": 790
+  },
+  "annotated_hits": 29,
+  "player_positions": {
+    "source": "keypoint_smoothed",
+    "csv_path": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\player_keypoint_test\\runs\\final_cv_5f_s42_1e4a7705f081\\selected_rally_reviews\\review_test_20261016T015452Z\\39b5e3329a5c474e\\player_positions_smoothed.csv",
+    "csv_sha256": "a054959a460f52701a3089285952c4f49a2cb569521eab6a22e6de7eea4a7880",
+    "selection_json": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\player_keypoint_test\\runs\\final_cv_5f_s42_1e4a7705f081\\selected_rally_reviews\\review_test_20261016T015452Z\\selection.json",
+    "final_run_id": "final_cv_5f_s42_1e4a7705f081",
+    "checkpoint": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\player_keypoint_test\\runs\\final_cv_5f_s42_1e4a7705f081\\training\\last.pt",
+    "checkpoint_sha256": "fa190c7b2535c421e2ebbdf55823e9b34b34c113761ad040583822f6b489f748",
+    "dataset_identity": "4b250891b8339f28587d9846a61c9adf3f507f311f4a3b1a0dc2fa177d744390",
+    "smoothing": {
+      "median_window": 5,
+      "savgol_window": 9,
+      "gap_policy": "continuous",
+      "polyorder": 2,
+      "court_margin_m": 3.0,
+      "half_margin_m": 1.0,
+      "median_outlier_m": 1.0,
+      "max_short_gap_seconds": 0.2
+    },
+    "required_hitter_positions": 29,
+    "filled_hitter_positions": 0
+  },
+  "pixel_loss": "mse",
+  "huber_delta_px": 10.0,
+  "hit_to_hit_segments_attempted": 28,
+  "hit_to_hit_segments_available": 28,
+  "hit_track_neighborhood": [
+    {
+      "hit_frame": 25,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 25,
+      "frame_offset": 0,
+      "pixel_native": [
+        941,
+        528
+      ]
+    },
+    {
+      "hit_frame": 42,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 43,
+      "frame_offset": 1,
+      "pixel_native": [
+        1098,
+        352
+      ]
+    },
+    {
+      "hit_frame": 75,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 75,
+      "frame_offset": 0,
+      "pixel_native": [
+        1162,
+        405
+      ]
+    },
+    {
+      "hit_frame": 98,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 98,
+      "frame_offset": 0,
+      "pixel_native": [
+        825,
+        202
+      ]
+    },
+    {
+      "hit_frame": 114,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 113,
+      "frame_offset": 1,
+      "pixel_native": [
+        663,
+        678
+      ]
+    },
+    {
+      "hit_frame": 142,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 142,
+      "frame_offset": 0,
+      "pixel_native": [
+        693,
+        288
+      ]
+    },
+    {
+      "hit_frame": 158,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 158,
+      "frame_offset": 0,
+      "pixel_native": [
+        750,
+        536
+      ]
+    },
+    {
+      "hit_frame": 182,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 182,
+      "frame_offset": 0,
+      "pixel_native": [
+        1113,
+        476
+      ]
+    },
+    {
+      "hit_frame": 207,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 208,
+      "frame_offset": 1,
+      "pixel_native": [
+        1245,
+        551
+      ]
+    },
+    {
+      "hit_frame": 233,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 233,
+      "frame_offset": 0,
+      "pixel_native": [
+        1275,
+        450
+      ]
+    },
+    {
+      "hit_frame": 271,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 270,
+      "frame_offset": 1,
+      "pixel_native": [
+        1376,
+        483
+      ]
+    },
+    {
+      "hit_frame": 296,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 295,
+      "frame_offset": 1,
+      "pixel_native": [
+        1113,
+        202
+      ]
+    },
+    {
+      "hit_frame": 316,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 316,
+      "frame_offset": 0,
+      "pixel_native": [
+        622,
+        641
+      ]
+    },
+    {
+      "hit_frame": 340,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 340,
+      "frame_offset": 0,
+      "pixel_native": [
+        761,
+        427
+      ]
+    },
+    {
+      "hit_frame": 364,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 364,
+      "frame_offset": 0,
+      "pixel_native": [
+        1207,
+        558
+      ]
+    },
+    {
+      "hit_frame": 393,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 393,
+      "frame_offset": 0,
+      "pixel_native": [
+        1226,
+        311
+      ]
+    },
+    {
+      "hit_frame": 405,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 405,
+      "frame_offset": 0,
+      "pixel_native": [
+        1248,
+        465
+      ]
+    },
+    {
+      "hit_frame": 418,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 418,
+      "frame_offset": 0,
+      "pixel_native": [
+        1166,
+        352
+      ]
+    },
+    {
+      "hit_frame": 437,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 437,
+      "frame_offset": 0,
+      "pixel_native": [
+        1226,
+        528
+      ]
+    },
+    {
+      "hit_frame": 460,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 460,
+      "frame_offset": 0,
+      "pixel_native": [
+        1181,
+        202
+      ]
+    },
+    {
+      "hit_frame": 488,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 489,
+      "frame_offset": 1,
+      "pixel_native": [
+        1185,
+        543
+      ]
+    },
+    {
+      "hit_frame": 513,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 513,
+      "frame_offset": 0,
+      "pixel_native": [
+        1177,
+        423
+      ]
+    },
+    {
+      "hit_frame": 548,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 548,
+      "frame_offset": 0,
+      "pixel_native": [
+        1207,
+        450
+      ]
+    },
+    {
+      "hit_frame": 566,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 566,
+      "frame_offset": 0,
+      "pixel_native": [
+        727,
+        476
+      ]
+    },
+    {
+      "hit_frame": 592,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 592,
+      "frame_offset": 0,
+      "pixel_native": [
+        735,
+        491
+      ]
+    },
+    {
+      "hit_frame": 624,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 624,
+      "frame_offset": 0,
+      "pixel_native": [
+        1113,
+        273
+      ]
+    },
+    {
+      "hit_frame": 643,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 643,
+      "frame_offset": 0,
+      "pixel_native": [
+        1218,
+        648
+      ]
+    },
+    {
+      "hit_frame": 670,
+      "hitter": "A",
+      "nearest_visible_track_frame_within_2": 669,
+      "frame_offset": 1,
+      "pixel_native": [
+        1132,
+        528
+      ]
+    },
+    {
+      "hit_frame": 715,
+      "hitter": "B",
+      "nearest_visible_track_frame_within_2": 715,
+      "frame_offset": 0,
+      "pixel_native": [
+        641,
+        405
+      ]
+    }
+  ],
+  "tracker": {
+    "script": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\TrackNetv2-pretrained\\track_video.py",
+    "checkpoint": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\TrackNetv2-pretrained\\track.pt",
+    "device": "cuda"
+  },
+  "frame_timing": {
+    "authoritative": "clip_frame_num",
+    "fps": 25.0,
+    "fr_adjust": 1.0,
+    "frame_time": "frame / fps"
+  },
+  "camera_calibration_rmse_px": 0.27918620577305714,
+  "hit_to_hit_segments": [
+    {
+      "phase": "hit_1_to_hit_2",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 25,
+      "end_frame": 42,
+      "duration_seconds": 0.68,
+      "visible_detections": 12,
+      "missing_detections": 6,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 15729.780950031854,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 124.89479873362777,
+      "reprojection_median_px": 30.489811410304583,
+      "reprojection_max_px": 381.49276541166813,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.19278800606535856,
+      "receive_reference_error_m": 0.6530725306643382,
+      "start_reference_xy_m": [
+        2.967557697957311,
+        9.827777730676683
+      ],
+      "receive_reference_xy_m": [
+        4.231086588865266,
+        4.020043367946862
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_2_to_hit_3",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 42,
+      "end_frame": 75,
+      "duration_seconds": 1.32,
+      "visible_detections": 33,
+      "missing_detections": 1,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 1010.2314150863803,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 31.391289575834413,
+      "reprojection_median_px": 11.256005865393004,
+      "reprojection_max_px": 163.60707028835074,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.18405271962172742,
+      "receive_reference_error_m": 0.23220990189836455,
+      "start_reference_xy_m": [
+        4.231086588865266,
+        4.020043367946862
+      ],
+      "receive_reference_xy_m": [
+        4.623444557545529,
+        12.507702179562813
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 163.60707028835074
+    },
+    {
+      "phase": "hit_3_to_hit_4",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 75,
+      "end_frame": 98,
+      "duration_seconds": 0.92,
+      "visible_detections": 24,
+      "missing_detections": 0,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 227.9373851406792,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 5.681514645902065,
+      "reprojection_median_px": 4.730039610021318,
+      "reprojection_max_px": 12.833652699309782,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.3419716560151229,
+      "receive_reference_error_m": 0.758425916532601,
+      "start_reference_xy_m": [
+        4.623444557545529,
+        12.507702179562813
+      ],
+      "receive_reference_xy_m": [
+        2.661072891123771,
+        1.7623821757645235
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 8.99789227641371
+    },
+    {
+      "phase": "hit_4_to_hit_5",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 98,
+      "end_frame": 114,
+      "duration_seconds": 0.64,
+      "visible_detections": 16,
+      "missing_detections": 1,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 115.58046612803494,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 5.479800983231978,
+      "reprojection_median_px": 3.823344130606428,
+      "reprojection_max_px": 13.011342815964134,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.758425916532601,
+      "receive_reference_error_m": 0.5501342358602838,
+      "start_reference_xy_m": [
+        2.661072891123771,
+        1.7623821757645235
+      ],
+      "receive_reference_xy_m": [
+        1.7359870225499072,
+        10.357221829440073
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_5_to_hit_6",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 114,
+      "end_frame": 142,
+      "duration_seconds": 1.12,
+      "visible_detections": 28,
+      "missing_detections": 1,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 240.27648368934362,
+      "landing_outside_distance_m": 0.014059903831811733,
+      "landing_penalty": 0.05588030618494861,
+      "reprojection_rmse_px": 5.648326161982265,
+      "reprojection_median_px": 5.383308585127846,
+      "reprojection_max_px": 10.210745587446603,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.5612865262422065,
+      "receive_reference_error_m": 0.6495344124578741,
+      "start_reference_xy_m": [
+        1.7359870225499072,
+        10.357221829440073
+      ],
+      "receive_reference_xy_m": [
+        1.2181808652992938,
+        0.8505328533020765
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 8.62076765258925
+    },
+    {
+      "phase": "hit_6_to_hit_7",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 142,
+      "end_frame": 158,
+      "duration_seconds": 0.64,
+      "visible_detections": 17,
+      "missing_detections": 0,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 313.2104744014255,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 14.777755246375145,
+      "reprojection_median_px": 6.898616819073703,
+      "reprojection_max_px": 48.794405857075404,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.6495344124578741,
+      "receive_reference_error_m": 0.5791915653634575,
+      "start_reference_xy_m": [
+        1.2181808652992938,
+        0.8505328533020765
+      ],
+      "receive_reference_xy_m": [
+        2.120458425769755,
+        10.355285993113307
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 48.794405857075404
+    },
+    {
+      "phase": "hit_7_to_hit_8",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 158,
+      "end_frame": 182,
+      "duration_seconds": 0.96,
+      "visible_detections": 19,
+      "missing_detections": 6,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 9325.97890033734,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 96.34535505447884,
+      "reprojection_median_px": 21.54605883726649,
+      "reprojection_max_px": 402.26217759943694,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.18772378579048957,
+      "receive_reference_error_m": 0.3447120976983286,
+      "start_reference_xy_m": [
+        2.120458425769755,
+        10.355285993113307
+      ],
+      "receive_reference_xy_m": [
+        3.9262215013382145,
+        4.157608742205525
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 43.36724717060317
+    },
+    {
+      "phase": "hit_8_to_hit_9",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 182,
+      "end_frame": 207,
+      "duration_seconds": 1.0,
+      "visible_detections": 24,
+      "missing_detections": 2,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 105.49705856070312,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 5.072555295478271,
+      "reprojection_median_px": 3.8596080762965057,
+      "reprojection_max_px": 12.448100235756636,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.28288006922611453,
+      "receive_reference_error_m": 0.44961995197485144,
+      "start_reference_xy_m": [
+        3.9262215013382145,
+        4.157608742205525
+      ],
+      "receive_reference_xy_m": [
+        4.51269602408513,
+        8.69250584608868
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_9_to_hit_10",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 207,
+      "end_frame": 233,
+      "duration_seconds": 1.04,
+      "visible_detections": 25,
+      "missing_detections": 2,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 320.58084362694524,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 16.010169793196273,
+      "reprojection_median_px": 6.489884178371704,
+      "reprojection_max_px": 71.5565396913637,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.4148671399027166,
+      "receive_reference_error_m": 0.23493267777381885,
+      "start_reference_xy_m": [
+        4.51269602408513,
+        8.69250584608868
+      ],
+      "receive_reference_xy_m": [
+        5.162069352628624,
+        5.6153407301600655
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 71.5565396913637
+    },
+    {
+      "phase": "hit_10_to_hit_11",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 233,
+      "end_frame": 271,
+      "duration_seconds": 1.52,
+      "visible_detections": 38,
+      "missing_detections": 1,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 449.31574933519914,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 16.130884536853912,
+      "reprojection_median_px": 15.341915522045618,
+      "reprojection_max_px": 29.64947902376817,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.49517785345491244,
+      "receive_reference_error_m": 0.6509924898928646,
+      "start_reference_xy_m": [
+        5.162069352628624,
+        5.6153407301600655
+      ],
+      "receive_reference_xy_m": [
+        4.9851441169764055,
+        12.517202506687333
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_11_to_hit_12",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 271,
+      "end_frame": 296,
+      "duration_seconds": 1.0,
+      "visible_detections": 24,
+      "missing_detections": 2,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 28.178917660867285,
+      "landing_outside_distance_m": 0.12280016800369803,
+      "landing_penalty": 4.26277096175467,
+      "reprojection_rmse_px": 3.36973948915153,
+      "reprojection_median_px": 2.483168884088087,
+      "reprojection_max_px": 8.95365062828537,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.15934231684855232,
+      "receive_reference_error_m": 0.13800558584721814,
+      "start_reference_xy_m": [
+        4.9851441169764055,
+        12.517202506687333
+      ],
+      "receive_reference_xy_m": [
+        4.398704206824563,
+        1.3266604941784994
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_12_to_hit_13",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 296,
+      "end_frame": 316,
+      "duration_seconds": 0.8,
+      "visible_detections": 20,
+      "missing_detections": 1,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 841.2702278928111,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 26.867371442097948,
+      "reprojection_median_px": 10.669107117175269,
+      "reprojection_max_px": 101.28633170066028,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.0924419758001628,
+      "receive_reference_error_m": 0.6433449873214908,
+      "start_reference_xy_m": [
+        4.398704206824563,
+        1.3266604941784994
+      ],
+      "receive_reference_xy_m": [
+        1.5171768059464528,
+        10.051266774282322
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 101.28633170066028
+    },
+    {
+      "phase": "hit_13_to_hit_14",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 316,
+      "end_frame": 340,
+      "duration_seconds": 0.96,
+      "visible_detections": 25,
+      "missing_detections": 0,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 268.5193320165099,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 7.67336264144405,
+      "reprojection_median_px": 5.841665505957465,
+      "reprojection_max_px": 20.852714027735146,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.6511849573951649,
+      "receive_reference_error_m": 0.563535020273215,
+      "start_reference_xy_m": [
+        1.5171768059464528,
+        10.051266774282322
+      ],
+      "receive_reference_xy_m": [
+        1.838822762469396,
+        3.938131441838591
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 20.852714027735146
+    },
+    {
+      "phase": "hit_14_to_hit_15",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 340,
+      "end_frame": 364,
+      "duration_seconds": 0.96,
+      "visible_detections": 23,
+      "missing_detections": 2,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 550.8416508411595,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 20.592808095650483,
+      "reprojection_median_px": 8.116162113676227,
+      "reprojection_max_px": 85.23268806725127,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.563535020273215,
+      "receive_reference_error_m": 0.6696914403044977,
+      "start_reference_xy_m": [
+        1.838822762469396,
+        3.938131441838591
+      ],
+      "receive_reference_xy_m": [
+        4.065697482700784,
+        8.719311251885001
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 85.23268806725127
+    },
+    {
+      "phase": "hit_15_to_hit_16",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 364,
+      "end_frame": 393,
+      "duration_seconds": 1.16,
+      "visible_detections": 30,
+      "missing_detections": 0,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 1287.1180968305935,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 32.66538206214547,
+      "reprojection_median_px": 8.4212711252545,
+      "reprojection_max_px": 161.8078085124808,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.43693468241432243,
+      "receive_reference_error_m": 0.7666007231584383,
+      "start_reference_xy_m": [
+        4.065697482700784,
+        8.719311251885001
+      ],
+      "receive_reference_xy_m": [
+        4.574923458201331,
+        1.4368012492055913
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 13.654800448412589
+    },
+    {
+      "phase": "hit_16_to_hit_17",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 393,
+      "end_frame": 405,
+      "duration_seconds": 0.48,
+      "visible_detections": 13,
+      "missing_detections": 0,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 773.5496344525149,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 25.382164081099553,
+      "reprojection_median_px": 10.859862331717402,
+      "reprojection_max_px": 75.41557187346903,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.7666007231584383,
+      "receive_reference_error_m": 0.6763079098017569,
+      "start_reference_xy_m": [
+        4.574923458201331,
+        1.4368012492055913
+      ],
+      "receive_reference_xy_m": [
+        4.37984428080283,
+        10.480793553149182
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 75.41557187346903
+    },
+    {
+      "phase": "hit_17_to_hit_18",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 405,
+      "end_frame": 418,
+      "duration_seconds": 0.52,
+      "visible_detections": 14,
+      "missing_detections": 0,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 154.91073850167905,
+      "landing_outside_distance_m": 0.012941049401930159,
+      "landing_penalty": 0.0473405246814626,
+      "reprojection_rmse_px": 6.717788236082981,
+      "reprojection_median_px": 3.404547505159883,
+      "reprojection_max_px": 20.343757149016717,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.4577605668726736,
+      "receive_reference_error_m": 0.42267044073240145,
+      "start_reference_xy_m": [
+        4.37984428080283,
+        10.480793553149182
+      ],
+      "receive_reference_xy_m": [
+        4.298240142875715,
+        2.0209978514159435
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 20.343757149016717
+    },
+    {
+      "phase": "hit_18_to_hit_19",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 418,
+      "end_frame": 437,
+      "duration_seconds": 0.76,
+      "visible_detections": 20,
+      "missing_detections": 0,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 628.2135679290582,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 23.845291449006993,
+      "reprojection_median_px": 13.43371993969168,
+      "reprojection_max_px": 81.0632772755927,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.42267044073240145,
+      "receive_reference_error_m": 0.45923299129057027,
+      "start_reference_xy_m": [
+        4.298240142875715,
+        2.0209978514159435
+      ],
+      "receive_reference_xy_m": [
+        4.381384944169237,
+        9.874912489541027
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 81.0632772755927
+    },
+    {
+      "phase": "hit_19_to_hit_20",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 437,
+      "end_frame": 460,
+      "duration_seconds": 0.92,
+      "visible_detections": 22,
+      "missing_detections": 2,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 103.58273037383515,
+      "landing_outside_distance_m": 0.09199974859436802,
+      "landing_penalty": 2.3925849019871417,
+      "reprojection_rmse_px": 4.143926230461756,
+      "reprojection_median_px": 3.817236070254281,
+      "reprojection_max_px": 6.537861248813788,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.4140826507625848,
+      "receive_reference_error_m": 0.3546206301839251,
+      "start_reference_xy_m": [
+        4.381384944169237,
+        9.874912489541027
+      ],
+      "receive_reference_xy_m": [
+        4.656197783271338,
+        1.5168297101299129
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 3.8733012786261214
+    },
+    {
+      "phase": "hit_20_to_hit_21",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 460,
+      "end_frame": 488,
+      "duration_seconds": 1.12,
+      "visible_detections": 25,
+      "missing_detections": 4,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 36.915397375465886,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 3.801359193607254,
+      "reprojection_median_px": 3.462665914319505,
+      "reprojection_max_px": 8.346874583456062,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.3546206301839251,
+      "receive_reference_error_m": 0.28190761523789876,
+      "start_reference_xy_m": [
+        4.656197783271338,
+        1.5168297101299129
+      ],
+      "receive_reference_xy_m": [
+        4.305198267454632,
+        9.061927534003132
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_21_to_hit_22",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 488,
+      "end_frame": 513,
+      "duration_seconds": 1.0,
+      "visible_detections": 25,
+      "missing_detections": 1,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 361.9264990511014,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 18.25405021570086,
+      "reprojection_median_px": 7.243246885577562,
+      "reprojection_max_px": 82.12720587516895,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.2190856551362249,
+      "receive_reference_error_m": 0.23148881558729442,
+      "start_reference_xy_m": [
+        4.305198267454632,
+        9.061927534003132
+      ],
+      "receive_reference_xy_m": [
+        4.399268131530539,
+        5.480967521956485
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 82.12720587516895
+    },
+    {
+      "phase": "hit_22_to_hit_23",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 513,
+      "end_frame": 548,
+      "duration_seconds": 1.4,
+      "visible_detections": 36,
+      "missing_detections": 0,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 1104.368199114495,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 31.07748941901683,
+      "reprojection_median_px": 14.196619691678805,
+      "reprojection_max_px": 160.41461245340093,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.4447224858555726,
+      "receive_reference_error_m": 0.5407226647538561,
+      "start_reference_xy_m": [
+        4.399268131530539,
+        5.480967521956485
+      ],
+      "receive_reference_xy_m": [
+        4.839262887171149,
+        12.344761716998402
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 160.41461245340093
+    },
+    {
+      "phase": "hit_23_to_hit_24",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 548,
+      "end_frame": 566,
+      "duration_seconds": 0.72,
+      "visible_detections": 16,
+      "missing_detections": 3,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 217.91773173376924,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 11.380238492079203,
+      "reprojection_median_px": 4.755100443636938,
+      "reprojection_max_px": 33.07801901326439,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.24651034443443648,
+      "receive_reference_error_m": 0.5019785175176281,
+      "start_reference_xy_m": [
+        4.839262887171149,
+        12.344761716998402
+      ],
+      "receive_reference_xy_m": [
+        1.6654722851119188,
+        3.685915686161207
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 33.07801901326439
+    },
+    {
+      "phase": "hit_24_to_hit_25",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 566,
+      "end_frame": 592,
+      "duration_seconds": 1.04,
+      "visible_detections": 26,
+      "missing_detections": 1,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 1083.945888367022,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 32.25261252531258,
+      "reprojection_median_px": 11.553605565432225,
+      "reprojection_max_px": 142.3756035252758,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.5019785175176281,
+      "receive_reference_error_m": 0.39324895335838717,
+      "start_reference_xy_m": [
+        1.6654722851119188,
+        3.685915686161207
+      ],
+      "receive_reference_xy_m": [
+        1.6022759001550329,
+        8.732800663084554
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 142.3756035252758
+    },
+    {
+      "phase": "hit_25_to_hit_26",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 592,
+      "end_frame": 624,
+      "duration_seconds": 1.28,
+      "visible_detections": 33,
+      "missing_detections": 0,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 199.80092478815376,
+      "landing_outside_distance_m": 0.40228540637874066,
+      "landing_penalty": 45.74700144307504,
+      "reprojection_rmse_px": 6.3705679311323715,
+      "reprojection_median_px": 4.173382671772162,
+      "reprojection_max_px": 22.973404339420192,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.1047355445709074,
+      "receive_reference_error_m": 0.6248508593545389,
+      "start_reference_xy_m": [
+        1.6022759001550329,
+        8.732800663084554
+      ],
+      "receive_reference_xy_m": [
+        3.830400550548731,
+        -0.17702931473130407
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 22.973404339420192
+    },
+    {
+      "phase": "hit_26_to_hit_27",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 624,
+      "end_frame": 643,
+      "duration_seconds": 0.76,
+      "visible_detections": 20,
+      "missing_detections": 0,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 251.84799116283116,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 15.282941759274458,
+      "reprojection_median_px": 11.756134563859334,
+      "reprojection_max_px": 38.487153055087795,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.6248508593545389,
+      "receive_reference_error_m": 0.2542946854610816,
+      "start_reference_xy_m": [
+        3.830400550548731,
+        -0.17702931473130407
+      ],
+      "receive_reference_xy_m": [
+        4.57404888062256,
+        9.864521960437806
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 38.487153055087795
+    },
+    {
+      "phase": "hit_27_to_hit_28",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 643,
+      "end_frame": 670,
+      "duration_seconds": 1.08,
+      "visible_detections": 27,
+      "missing_detections": 1,
+      "start_fixed": true,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 126.37024828384865,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 9.970787115727074,
+      "reprojection_median_px": 5.0427643756558265,
+      "reprojection_max_px": 38.487153055087795,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.2542946854610816,
+      "receive_reference_error_m": 0.30878896704864317,
+      "start_reference_xy_m": [
+        4.57404888062256,
+        9.864521960437806
+      ],
+      "receive_reference_xy_m": [
+        4.147011896892754,
+        5.034584631041598
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": null
+    },
+    {
+      "phase": "hit_28_to_hit_29",
+      "pixel_loss": "mse",
+      "huber_delta_px": 10.0,
+      "start_frame": 670,
+      "end_frame": 715,
+      "duration_seconds": 1.8,
+      "visible_detections": 19,
+      "missing_detections": 27,
+      "start_fixed": false,
+      "end_fixed": false,
+      "status": "available",
+      "optimizer": "SLSQP",
+      "optimizer_success": true,
+      "optimizer_status": 0,
+      "optimizer_message": "Optimization terminated successfully",
+      "objective": 338.0107762289533,
+      "landing_outside_distance_m": 0.0,
+      "landing_penalty": 0.0,
+      "reprojection_rmse_px": 17.89267852545148,
+      "reprojection_median_px": 9.437903233463626,
+      "reprojection_max_px": 62.362847918380574,
+      "endpoint_constraint_error_m": 0.0,
+      "start_reference_error_m": 0.23308895494546103,
+      "receive_reference_error_m": 0.09413120521099987,
+      "start_reference_xy_m": [
+        4.147011896892754,
+        5.034584631041598
+      ],
+      "receive_reference_xy_m": [
+        1.3215467677250308,
+        12.567998308525867
+      ],
+      "start_reference_source": "current_row_keypoint_smoothed",
+      "receive_reference_source": "next_row_keypoint_smoothed",
+      "start_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "far",
+        "rejection_reason": ""
+      },
+      "receive_player_prediction": {
+        "filter_status": "smoothed",
+        "gap_filled": false,
+        "court_half": "near",
+        "rejection_reason": ""
+      },
+      "hit_endpoint_reprojection_error_px": 62.362847918380574
+    }
+  ],
+  "terminal_extension": {
+    "extension": "terminal reconstruction disabled",
+    "status": "disabled",
+    "reason": "manual_contacts_evaluation_only",
+    "pixel_loss": "mse",
+    "huber_delta_px": 10.0,
+    "phases": []
+  },
+  "output_video": {
+    "codec": "h264",
+    "width": 1440,
+    "height": 720,
+    "fps": 25.0,
+    "frames": 790,
+    "duration_seconds": 31.6,
+    "source_audio_present": true,
+    "output_audio_present": true,
+    "audio_video_start_delta_seconds": 0.0,
+    "audio_video_duration_delta_seconds": 0.0
+  },
+  "interpretation": "Current and next hitters' player positions are soft horizontal fit references. Shuttle hit/landing labels are display-only and manual terminal contacts do not enter reconstruction. A carried fitted 3D endpoint takes precedence at the next start. Estimates stop at the final hit; a plausible top-down path does not verify reconstructed height.",
+  "mono_track_source": {
+    "repository": "https://github.com/jhwang7628/monotrack",
+    "commit": "39e9227bd44fa2a579731b1cc97c7f529f391cd6",
+    "license": "Adobe Research License; noncommercial research only"
+  }
+}

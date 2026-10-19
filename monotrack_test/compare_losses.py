@@ -22,6 +22,7 @@ from run_projection import (
     fit_terminal_tail,
     inside_test,
     load_calibration,
+    load_player_positions,
     player_references,
     prepare_inputs,
     repo_path,
@@ -93,7 +94,7 @@ def fit_chain(
     pixel_loss: str,
     huber_delta_px: float,
 ) -> dict:
-    """Fit only to TrackNet observations and annotation/calibration inputs."""
+    """Fit to TrackNet pixels and player priors, excluding shuttle endpoint labels."""
     coordinates, phases, segment_ids, _, hit_diagnostics, last_path = fit_hit_flights(
         hits, players, observations, projection, fps, pixel_loss, huber_delta_px
     )
@@ -169,7 +170,7 @@ def evaluate_trajectories(
         if clean_frame < first_hit_frame:
             reason = "pre_hit_padding"
         elif floor_contact_frame is not None and clean_frame == floor_contact_frame:
-            reason = "manual_floor_contact_constraint"
+            reason = "manual_floor_contact_evaluation_boundary"
         elif floor_contact_frame is not None and clean_frame > floor_contact_frame:
             reason = "post_contact"
         elif not gt["visibility"]:
@@ -233,8 +234,8 @@ def evaluate_trajectories(
             },
         }
 
-    baseline_rows = [row for row in eligible_rows if row["clean_frame"] < final_hit_frame]
-    final_flight_rows = [row for row in eligible_rows if row["clean_frame"] >= final_hit_frame]
+    baseline_rows = [row for row in eligible_rows if row["clean_frame"] <= final_hit_frame]
+    final_flight_rows = [row for row in eligible_rows if row["clean_frame"] > final_hit_frame]
     overall_summary = summarize(eligible_rows)
     coverage = overall_summary["coverage"]
 
@@ -319,9 +320,12 @@ def _new_output_dir(value: Path | None) -> Path:
 
 def run_comparison(args) -> dict:
     _, delta = validate_pixel_loss("huber", args.huber_delta_px)
+    player_csv = getattr(args, "player_positions_csv", None)
     video, hits_csv, homography_csv, metadata, hits, geometry = prepare_inputs(
-        args.video, args.rally_csv, args.homography_csv
+        args.video, args.rally_csv, args.homography_csv, require_player_positions=player_csv is None
     )
+    player_tracks, player_provenance = load_player_positions(player_csv, video, metadata, hits, geometry)
+    players = player_references(hits, geometry, player_tracks)
     calibration_path = inside_test(repo_path(args.calibration))
     if not calibration_path.is_file():
         raise FileNotFoundError(f"Calibration JSON not found: {calibration_path}")
@@ -352,7 +356,6 @@ def run_comparison(args) -> dict:
     try:
         observations, device = track_shuttle(video, metadata["frame_count"], repo_path(args.checkpoint))
         projection = np.asarray(calibration["camera_calibration"]["projection_matrix"], dtype=np.float64)
-        players = player_references(hits, geometry)
         # Ground truth is deliberately not passed into either fitting call.
         fits = fit_loss_pair(hits, players, observations, projection, metadata["fps"], calibration, geometry, delta)
         mse_fit, huber_fit = fits["mse"], fits["huber"]
@@ -412,6 +415,7 @@ def run_comparison(args) -> dict:
                 },
             },
             "provenance": {
+                "player_positions": player_provenance,
                 "tracknet_run_count": 1,
                 "ground_truth_used_only_for_evaluation": True,
                 "ground_truth_used_for_fitting_or_initialization": False,
@@ -475,6 +479,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--calibration", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, help="New output directory inside monotrack_test; defaults to a timestamped path")
     parser.add_argument("--checkpoint", type=Path, default=DEFAULT_CHECKPOINT)
+    parser.add_argument("--player-positions-csv", type=Path, help="Saved smoothed keypoint CSV with review metadata; otherwise use annotated player positions")
     parser.add_argument("--gt-csv", type=Path, required=True)
     parser.add_argument("--gt-frame-offset", type=int, required=True, help="Cleaned frame = GT frame + offset (Korea default: 28)")
     parser.add_argument("--huber-delta-px", type=float, default=10.0, help="Huber threshold in cleaned-video pixels (default: 10)")

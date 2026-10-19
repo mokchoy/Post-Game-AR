@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import inspect
+import json
 import tempfile
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import numpy as np
@@ -14,6 +17,7 @@ from reconstruction import (
     ANNOTATION_TO_VIDEO,
     COURT_LENGTH_M,
     COURT_WIDTH_M,
+    extrapolated_landing_distance,
     calibration_world_points,
     fit_camera_projection,
     frame_time_seconds,
@@ -32,6 +36,7 @@ from compare_losses import (
     _new_output_dir,
     evaluate_trajectories,
     fit_loss_pair,
+    build_parser as build_comparison_parser,
     load_ground_truth,
     run_comparison,
     write_error_plot,
@@ -53,6 +58,7 @@ from run_projection import (
     repo_path,
     video_metadata,
     load_annotations,
+    load_player_positions,
 )
 
 
@@ -71,9 +77,7 @@ def synthetic_camera() -> np.ndarray:
 
 
 def test_fit_references(hits: list[dict], geometry, projection: np.ndarray, frame_count: int) -> None:
-    # A different landing from the next hit verifies that the current row is authoritative.
     test_hits = [dict(row) for row in hits]
-    test_hits[2]["landing_x"] = str(float(test_hits[2]["landing_x"]) + 10)
     players = player_references(test_hits, geometry)
     calls = []
 
@@ -90,9 +94,9 @@ def test_fit_references(hits: list[dict], geometry, projection: np.ndarray, fram
     assert len(calls) == len(diagnostics) == len(test_hits) - 1 and not paths
     for index, (call, detail) in enumerate(zip(calls, diagnostics)):
         row = test_hits[index]
-        prefix = "player_location" if index == 0 else "hit"
-        expected_start = geometry.annotation_floor_to_world([float(row[f"{prefix}_x"]), float(row[f"{prefix}_y"])])
-        expected_end = geometry.annotation_floor_to_world([float(row["landing_x"]), float(row["landing_y"])])
+        receiver = test_hits[index + 1]
+        expected_start = geometry.annotation_floor_to_world([row["player_location_x"], row["player_location_y"]])
+        expected_end = geometry.annotation_floor_to_world([receiver["player_location_x"], receiver["player_location_y"]])
         assert np.allclose(call["start_reference_xy"], expected_start)
         assert np.allclose(call["receive_reference_xy"], expected_end)
         assert call["start_frame"] == row["clip_frame_num"] and call["end_frame"] == test_hits[index + 1]["clip_frame_num"]
@@ -101,45 +105,25 @@ def test_fit_references(hits: list[dict], geometry, projection: np.ndarray, fram
         assert call["huber_delta_px"] == detail["huber_delta_px"] == 7.5
         assert np.allclose(detail["start_reference_xy_m"], expected_start)
         assert np.allclose(detail["receive_reference_xy_m"], expected_end)
-        assert detail["start_reference_source"] == ("first_row_player_location" if index == 0 else "current_row_hit_x_y")
-        assert detail["receive_reference_source"] == "current_row_landing_x_y"
+        assert detail["start_reference_source"] == "current_row_player_location"
+        assert detail["receive_reference_source"] == "next_row_player_location"
         assert detail["start_fixed"] is False and detail["start_reference_error_m"] == 1.0 and detail["receive_reference_error_m"] == 2.0
 
-    # Missing, malformed, and nonfinite annotations must fail before any fitter call.
-    for index, field, value in ((0, "hit_x", "nan"), (0, "hit_y", "broken"), (0, "landing_x", ""),
-                                 (1, "hit_x", ""), (1, "hit_y", None), (2, "landing_y", "broken"),
-                                 (len(hits) - 2, "landing_x", "inf")):
-        invalid = [dict(row) for row in hits]
-        invalid[index][field] = value
-        invalid_players = player_references(invalid, geometry)
-        with patch("run_projection.reconstruct_flight") as fitter:
-            try:
-                fit_hit_flights(invalid, invalid_players, [None] * frame_count, projection, 25)
-            except ValueError as error:
-                assert f"Stroke {index + 1}" in str(error) and field.split("_")[0] in str(error)
-            else:
-                raise AssertionError(f"Accepted invalid endpoint {field}={value!r}")
-            fitter.assert_not_called()
-    for point in ([np.nan, 1.0], [1.0, np.inf], [1.0], ["broken", 1.0]):
-        invalid_players = [{**row, "endpoints": dict(row["endpoints"])} for row in players]
-        invalid_players[1]["endpoints"]["Hit"] = point
-        with patch("run_projection.reconstruct_flight") as fitter:
-            try:
-                fit_hit_flights(test_hits, invalid_players, [None] * frame_count, projection, 25)
-            except ValueError as error:
-                assert "Stroke 2" in str(error) and "hit_x/y" in str(error)
-            else:
-                raise AssertionError(f"Accepted invalid transformed endpoint {point!r}")
-            fitter.assert_not_called()
-    valid_first_hit = [dict(row) for row in hits]
-    valid_first_hit[0].update(hit_x="640.0", hit_y="360.0")
-    calls.clear()
-    with patch("run_projection.reconstruct_flight", side_effect=spy):
-        detail = fit_hit_flights(valid_first_hit, player_references(valid_first_hit, geometry),
-                                 [None] * frame_count, projection, 25)[4][0]
-    assert detail["start_reference_source"] == "current_row_hit_x_y"
+    # Validate every transformed player reference before starting any flight.
+    for row_index in (0, 1, len(hits) - 1):
+        for point in (None, [np.nan, 1.0], [1.0, np.inf], [1.0], ["broken", 1.0]):
+            invalid_players = [dict(row) for row in players]
+            invalid_players[row_index][hits[row_index]["player"]] = point
+            with patch("run_projection.reconstruct_flight") as fitter:
+                try:
+                    fit_hit_flights(test_hits, invalid_players, [None] * frame_count, projection, 25)
+                except ValueError as error:
+                    assert f"Stroke {max(1, row_index)}" in str(error) and "player_location_x/y" in str(error)
+                else:
+                    raise AssertionError(f"Accepted invalid transformed player position {point!r}")
+                fitter.assert_not_called()
 
-    # Continuity still carries a fitted 3D start rather than imposing the annotated x/y.
+    # Continuity still carries a fitted 3D start rather than imposing the player x/y.
     fixed_point = np.asarray([3.0, 5.5, 1.8])
     observations = [None] * frame_count
     observations[hits[1]["clip_frame_num"]] = tuple(project_point(projection, fixed_point))
@@ -156,7 +140,235 @@ def test_fit_references(hits: list[dict], geometry, projection: np.ndarray, fram
         diagnostics = fit_hit_flights(hits[:3], players[:3], observations, projection, 25)[4]
     assert calls[0]["start_fixed"] is None and np.array_equal(calls[1]["start_fixed"], fixed_point)
     assert all(call["pixel_loss"] == "mse" and call["huber_delta_px"] == 10.0 for call in calls)
-    assert diagnostics[1]["start_fixed"] is True and diagnostics[1]["start_reference_source"] == "current_row_hit_x_y"
+    assert diagnostics[1]["start_fixed"] is True and diagnostics[1]["start_reference_source"] == "current_row_player_location"
+
+    # Optional shuttle labels and manual contacts cannot affect either loss's trajectories.
+    original_hits = hits[:3]
+    observations = [None] * frame_count
+    baseline_calls = []
+
+    def successful_spy(**kwargs):
+        baseline_calls.append(kwargs)
+        _, detail = spy(**kwargs)
+        detail["status"] = "available"
+        return np.tile(fixed_point, (kwargs["end_frame"] - kwargs["start_frame"] + 1, 1)), detail
+
+    with patch("run_projection.reconstruct_flight", side_effect=successful_spy):
+        baseline = fit_loss_pair(original_hits, players[:3], observations, projection, 25, {}, geometry, 10.0)
+    original_calls = baseline_calls[:]
+    for value in (None, "broken", "nan", "inf", "99999"):
+        changed_hits = [dict(row) for row in original_hits]
+        for row in changed_hits:
+            for field in ("hit_x", "hit_y", "landing_x", "landing_y"):
+                if value is None:
+                    row.pop(field, None)
+                else:
+                    row[field] = value
+        terminal = {"terminal_events": {
+            name: {"status": "manual", "frame": frame_count - 1, "pixel_native": [100, 200]}
+            for name in ("net_contact", "floor_contact")
+        }}
+        baseline_calls.clear()
+        with patch("run_projection.reconstruct_flight", side_effect=successful_spy):
+            changed = fit_loss_pair(changed_hits, player_references(changed_hits, geometry), observations,
+                                    projection, 25, terminal, geometry, 10.0)
+        assert len(baseline_calls) == len(original_calls) == 4
+        for original, current in zip(original_calls, baseline_calls):
+            for key in original:
+                np.testing.assert_equal(current[key], original[key])
+        for method in ("mse", "huber"):
+            np.testing.assert_equal(changed[method]["coordinates"], baseline[method]["coordinates"])
+            assert changed[method]["phases"] == baseline[method]["phases"]
+            assert changed[method]["hit_diagnostics"] == baseline[method]["hit_diagnostics"]
+            assert changed[method]["terminal_diagnostics"] == baseline[method]["terminal_diagnostics"]
+            final_frame = changed_hits[-1]["clip_frame_num"]
+            assert np.array_equal(changed[method]["coordinates"][final_frame], fixed_point)
+            assert changed[method]["phases"][final_frame] == "hit_2_to_hit_3"
+            assert np.isnan(changed[method]["coordinates"][final_frame + 1:]).all()
+    assert np.isnan(fit_hit_flights(hits[:1], players[:1], observations, projection, 25)[0]).all()
+    assert np.isnan(fit_hit_flights(hits[:2], players[:2], observations, projection, 25)[0]).all()
+
+
+def test_saved_player_tracks(geometry, projection: np.ndarray) -> None:
+    metadata = {"width": 1920, "height": 1080, "fps": 25.0, "frame_count": 4}
+    hits = [{"player": "A", "clip_frame_num": 1, "clip_time_seconds": 0.04},
+            {"player": "B", "clip_frame_num": 3, "clip_time_seconds": 0.12}]
+    key = ["set-1", geometry.row_video, "1", "15"]
+    rows = []
+    for frame in range(4):
+        for player, half, y in (("A", "far", 2.0), ("B", "near", 10.0)):
+            world = np.asarray([1.0 + frame * 0.4 if player == "A" else 4.0, y])
+            native = (geometry.world_to_annotation_floor(world) + 0.5) * 1.5 - 0.5
+            filled = frame == 3 and player == "B"
+            rows.append({**dict(zip(("dataset", "match", "game", "original_rally_id"), key)),
+                         "clip_frame_num": frame, "clip_time_seconds": frame / 25,
+                         "player": player, "court_half": half, "available": True,
+                         "x_native": native[0], "y_native": native[1],
+                         "x_court_m": world[0], "y_court_m": world[1],
+                         "filter_status": "long_interpolation" if filled else "smoothed", "gap_filled": filled,
+                         "reference_x_native": "ignored", "reference_y_native": "ignored"})
+    rows[4].update(available=False, filter_status="unavailable", x_native="", y_native="",
+                   x_court_m="", y_court_m="")
+    metrics = {"source_dimensions": [1920, 1080], "decoded_frames": 4, "source_fps": 25,
+               "smoothing": {"median_window": 5, "savgol_window": 9, "gap_policy": "continuous"}}
+    selection = {"selected_rallies": [{"key": key, "clip_path": str(DEFAULT_VIDEO)}],
+                 "final_run_id": "synthetic_final", "checkpoint": "saved-model.pt", "checkpoint_sha256": "a" * 64}
+    with tempfile.TemporaryDirectory(prefix="player-track-check-", dir=repo_path("monotrack_test")) as directory:
+        review = Path(directory)
+        rally_dir = review / "rally"
+        rally_dir.mkdir()
+        path = rally_dir / "player_positions_smoothed.csv"
+
+        def write_fixture(current_rows=rows, current_metrics=metrics, current_selection=selection):
+            with path.open("w", newline="", encoding="utf-8") as stream:
+                writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+                writer.writeheader()
+                writer.writerows(current_rows)
+            (rally_dir / "metrics_smoothed.json").write_text(json.dumps(current_metrics), encoding="utf-8")
+            (review / "selection.json").write_text(json.dumps(current_selection), encoding="utf-8")
+
+        def load():
+            return load_player_positions(path, DEFAULT_VIDEO, metadata, hits, geometry)
+
+        write_fixture()
+        tracks, provenance = load()
+        assert len(tracks) == 4 and provenance["filled_hitter_positions"] == 1
+        assert provenance["smoothing"] == metrics["smoothing"] and len(provenance["csv_sha256"]) == 64
+        assert np.array_equal(tracks[1]["A"], [1.4, 2.0]) and np.isnan(tracks[2]["A"]).all()
+        players = player_references(hits, geometry, tracks)
+        altered_hits = [{**hit, "player_location_x": "broken", "player_location_y": "nan",
+                         "opponent_location_x": "inf", "opponent_location_y": "broken"} for hit in hits]
+        altered_players = player_references(altered_hits, geometry, tracks)
+        for original, altered in zip(players, altered_players):
+            for player in ("A", "B"):
+                np.testing.assert_equal(original[player], altered[player])
+        calls = []
+
+        def spy(**kwargs):
+            calls.append(kwargs)
+            return None, {"phase": kwargs["phase"], "status": "insufficient_data"}
+
+        with patch("run_projection.reconstruct_flight", side_effect=spy):
+            fits = fit_loss_pair(hits, players, [None] * 4, projection, 25, {}, geometry, 10)
+        assert len(calls) == 2
+        for call in calls:
+            assert call["start_frame"] == 1 and call["end_frame"] == 3
+            np.testing.assert_equal(call["start_reference_xy"], tracks[1]["A"])
+            np.testing.assert_equal(call["receive_reference_xy"], tracks[3]["B"])
+        for method in ("mse", "huber"):
+            detail = fits[method]["hit_diagnostics"][0]
+            assert detail["start_reference_source"] == "current_row_keypoint_smoothed"
+            assert detail["receive_reference_source"] == "next_row_keypoint_smoothed"
+            assert detail["receive_player_prediction"]["gap_filled"] is True
+            assert detail["receive_player_prediction"]["filter_status"] == "long_interpolation"
+        altered_rows = [{**row, "reference_x_native": "nan", "reference_y_native": "99999"} for row in rows]
+        write_fixture(altered_rows)
+        reference_free, _ = load()
+        for original, altered in zip(tracks, reference_free):
+            for player in ("A", "B"):
+                np.testing.assert_equal(original[player], altered[player])
+
+        annotations = review / "hits.csv"
+        with annotations.open("w", newline="", encoding="utf-8") as stream:
+            writer = csv.DictWriter(stream, fieldnames=list(hits[0]))
+            writer.writeheader()
+            writer.writerows(hits)
+        assert load_annotations(annotations, 4, 25, require_player_positions=False) == hits
+        try:
+            load_annotations(annotations, 4, 25)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Annotation mode accepted missing player coordinates")
+
+        for changes in ({"match": "different_match"}, {"clip_time_seconds": 0.1}, {"clip_frame_num": 10},
+                        {"player": "C"}, {"x_court_m": 999}, {"x_court_m": "nan"},
+                        {"available": "maybe"}, {"filter_status": "smoothed", "gap_filled": True}):
+            invalid = [dict(row) for row in rows]
+            invalid[0].update(changes)
+            write_fixture(invalid)
+            try:
+                load()
+            except ValueError:
+                pass
+            else:
+                raise AssertionError(f"Accepted invalid player CSV row: {changes}")
+        invalid_variants = [rows + [rows[0]], rows[:-1],
+                            [{**row, "court_half": "near"} if i == 2 else row for i, row in enumerate(rows)]]
+        for invalid in invalid_variants:
+            write_fixture(invalid)
+            try:
+                load()
+            except ValueError:
+                pass
+            else:
+                raise AssertionError("Accepted duplicate/missing player row or unstable identity mapping")
+        for changes in ({"source_fps": 30}, {"decoded_frames": 5}, {"source_dimensions": [1280, 720]},
+                        {"smoothing": None}):
+            write_fixture(current_metrics={**metrics, **changes})
+            try:
+                load()
+            except ValueError:
+                pass
+            else:
+                raise AssertionError(f"Accepted incompatible player review metadata: {changes}")
+        wrong_selection = {**selection, "selected_rallies": [{"key": key, "clip_path": str(review / DEFAULT_VIDEO.name)}]}
+        write_fixture(current_selection=wrong_selection)
+        try:
+            load()
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Accepted a different video with the same rally filename")
+        write_fixture()
+        (review / "selection.json").unlink()
+        try:
+            load()
+        except FileNotFoundError:
+            pass
+        else:
+            raise AssertionError("Accepted missing player review metadata")
+
+        invalid = [dict(row) for row in rows]
+        invalid[-1].update(available=False, filter_status="unavailable", gap_filled=False)
+        write_fixture(invalid)
+        args = argparse.Namespace(video=DEFAULT_VIDEO, rally_csv=annotations, homography_csv="unused",
+                                  pixel_loss="mse", huber_delta_px=10, player_positions_csv=path)
+        for module, command in (("run_projection", run_projection), ("compare_losses", run_comparison)):
+            with patch(f"{module}.prepare_inputs", return_value=(DEFAULT_VIDEO, annotations, Path("unused"),
+                                                                  metadata, hits, geometry)), \
+                    patch(f"{module}.track_shuttle") as tracker, \
+                    patch(f"{module}.reserve_output_files") as reserve:
+                try:
+                    command(args)
+                except ValueError as error:
+                    assert "frame 3, player B" in str(error)
+                else:
+                    raise AssertionError("Unavailable required player position did not stop the command")
+                tracker.assert_not_called()
+                reserve.assert_not_called()
+
+        blank = np.zeros((1080, 1920, 3), dtype=np.uint8)
+        coordinates, phases = np.full((4, 3), np.nan), [""] * 4
+        width = round(520 * COURT_WIDTH_M / COURT_LENGTH_M)
+        rect = (720 + (720 - width) // 2, 100, width, 520)
+        for frame in (1, 3):
+            shown = render_frame(blank, frame, [None] * 4, coordinates, phases, [], [], projection, tracks)
+            point = panel_point(tracks[frame]["A"], rect)
+            assert tuple(shown[point[1], point[0]]) == (30, 80, 255)
+        hidden = render_frame(blank, 2, [None] * 4, coordinates, phases, [], [], projection, tracks)
+        previous = panel_point(tracks[1]["A"], rect)
+        assert tuple(hidden[previous[1], previous[0]]) != (30, 80, 255)
+        players[0]["endpoints"] = {"Landing": np.asarray([3.0, 6.0])}
+        shown = render_frame(blank, 1, [None] * 4, coordinates, phases, [], players, projection, tracks)
+        point = panel_point(players[0]["endpoints"]["Landing"], rect)
+        assert tuple(shown[point[1], point[0] + 11]) == (0, 255, 0)
+    assert load_player_positions(None, DEFAULT_VIDEO, metadata, hits, geometry) == (None, {"source": "dataset_annotations"})
+    for parser, arguments in ((build_projection_parser(), ["run", "--calibration", "calibration.json"]),
+                              (build_comparison_parser(), ["--calibration", "calibration.json", "--gt-csv", "gt.csv",
+                                                            "--gt-frame-offset", "28"])):
+        assert parser.parse_args(arguments).player_positions_csv is None
+        assert parser.parse_args(arguments + ["--player-positions-csv", "tracks.csv"]).player_positions_csv == Path("tracks.csv")
 
 
 def test_pixel_losses() -> None:
@@ -205,6 +417,64 @@ def test_pixel_losses() -> None:
         "run", "--calibration", "calibration.json", "--pixel-loss", "huber", "--huber-delta-px", "7.5"
     ])
     assert args.pixel_loss == "huber" and args.huber_delta_px == 7.5
+
+
+def test_court_landing_penalty() -> None:
+    start, velocity = np.asarray([3.0, 6.0, 1.5]), np.asarray([4.0, 0.5, 4.0])
+    start_before, velocity_before = start.copy(), velocity.copy()
+    landing_time = (velocity[2] + np.sqrt(velocity[2] ** 2 + 2 * 9.8 * start[2])) / 9.8
+    expected_xy = start[:2] + velocity[:2] * landing_time
+    flight = simulate_trajectory(start, velocity, 0.0, 75, 25.0, stop_at_ground=True)
+    assert flight[-1, 2] == 0.0 and np.all(flight[:-1, 2] > 0.0)
+    assert np.allclose(flight[-1, :2], expected_xy, atol=0.01)
+    assert np.array_equal(start, start_before) and np.array_equal(velocity, velocity_before)
+    expected_distance = expected_xy[0] - COURT_WIDTH_M
+    assert abs(extrapolated_landing_distance(start, velocity, 0.0, 25.0) - expected_distance) < 0.01
+    assert simulate_trajectory(start, velocity, 0.0, 2, 25.0).shape == (3, 3)
+    # The observed interval is inside, but its hypothetical landing is outside.
+    observed_path = simulate_trajectory(start, velocity, 0.0, 2, 25.0)
+    assert np.all(observed_path[:, 0] < COURT_WIDTH_M) and expected_distance > 0
+    for x, y, distance in ((3.0, 6.0, 0.0), (0.0, 0.0, 0.0),
+                            (COURT_WIDTH_M, COURT_LENGTH_M, 0.0), (7.1, 6.0, 1.0), (-3.0, -4.0, 5.0)):
+        actual = extrapolated_landing_distance(np.asarray([x, y, 1.0]), np.zeros(3), 0.12, 25.0)
+        assert np.isclose(actual, distance)
+    assert extrapolated_landing_distance(np.asarray([3.0, 6.0, 0.0]), np.zeros(3), 0.0, 25.0) == 0.0
+    ascending = simulate_trajectory(np.asarray([3.0, 6.0, 0.0]), velocity, 0.12, 75, 25.0,
+                                     stop_at_ground=True)
+    assert len(ascending) > 2 and np.max(ascending[:, 2]) > 0 and ascending[-1, 2] == 0
+    for point in (np.asarray([3.0, 6.0, -1.0]), np.asarray([np.nan, 6.0, 1.0]),
+                  np.asarray([3.0, 6.0, 1e9])):
+        assert extrapolated_landing_distance(point, np.zeros(3), 0.0, 25.0) is None
+
+    # Inspect the actual objective for both losses without running an optimizer.
+    projection = synthetic_camera()
+    observations = [tuple(project_point(projection, point)) for point in observed_path]
+    scale = 0.15 * np.linalg.norm(projection[:, :3], ord=2)
+
+    def optimizer(objective, initial, **kwargs):
+        return SimpleNamespace(x=initial, success=True, status=0, message="synthetic objective check",
+                               fun=objective(initial))
+
+    for loss in ("mse", "huber"):
+        inside_cost = None
+        for distance in (0.0, 2.0, 5.0, None):
+            with patch("reconstruction.minimize", side_effect=optimizer), \
+                    patch("reconstruction.extrapolated_landing_distance", return_value=distance):
+                path, detail = reconstruct_flight(
+                    start_frame=0, end_frame=2, observations=observations, projection=projection,
+                    start_reference_xy=start[:2], receive_reference_xy=observed_path[-1, :2],
+                    start_fixed=start, fps=25.0, pixel_loss=loss,
+                )
+            assert detail["landing_outside_distance_m"] == distance
+            if distance is None:
+                assert path is None and detail["status"] == "failed" and detail["landing_penalty"] is None
+                assert detail["reason"] == "hypothetical_ground_contact_unavailable_within_60s"
+            else:
+                assert path.shape == (3, 3) and detail["status"] == "available"
+                assert np.isclose(detail["landing_penalty"], (scale * distance) ** 2)
+                if distance == 0:
+                    inside_cost = detail["objective"]
+                assert np.isclose(detail["objective"] - inside_cost, (scale * distance) ** 2)
 
 
 def test_ground_truth_evaluation() -> None:
@@ -267,7 +537,7 @@ def test_ground_truth_evaluation() -> None:
     assert rows[0]["mse_error_px"] == 5.0 and rows[0]["huber_error_px"] == 0.0
     assert rows[1]["eligibility_reason"] == "invisible_ground_truth" and rows[1]["mse_error_px"] is None
     assert rows[2]["mse_error_px"] is None and rows[2]["huber_error_px"] == 5.0
-    assert rows[3]["eligibility_reason"] == "manual_floor_contact_constraint" and not rows[3]["comparison_eligible"]
+    assert rows[3]["eligibility_reason"] == "manual_floor_contact_evaluation_boundary" and not rows[3]["comparison_eligible"]
     assert rows[4]["eligibility_reason"] == "post_contact" and not rows[4]["comparison_eligible"]
     assert coverage["eligible_visible_gt_frames"] == 2
     assert coverage["mse_available_frames"] == 1 and coverage["huber_available_frames"] == 2
@@ -276,7 +546,10 @@ def test_ground_truth_evaluation() -> None:
     assert metrics["overall"]["huber"]["paired_metrics"]["rmse_px"] == 0.0
     assert metrics["per_flight"]["synthetic_flight"]["huber"]["individual_metrics"]["count"] == 2
     assert metrics["hit_to_hit_baseline"]["coverage"]["paired_available_frames"] == 1
-    assert metrics["final_flight_extension"]["huber"]["individual_metrics"]["rmse_px"] == 5.0
+    assert metrics["hit_to_hit_baseline"]["coverage"]["eligible_visible_gt_frames"] == 2
+    assert metrics["hit_to_hit_baseline"]["huber"]["individual_metrics"]["count"] == 2
+    assert metrics["final_flight_extension"]["coverage"]["eligible_visible_gt_frames"] == 0
+    assert metrics["final_flight_extension"]["huber"]["individual_metrics"]["rmse_px"] is None
     with tempfile.TemporaryDirectory(prefix="plot-check-", dir=Path(__file__).resolve().parent) as temp_name:
         plot_path = Path(temp_name) / "errors.png"
         write_error_plot(plot_path, rows, _matplotlib_pyplot())
@@ -367,7 +640,9 @@ def run_checks(repo_root: Path, checkpoint: Path | None = None) -> None:
     fitted, camera_rmse = fit_camera_projection(image_points[:4], image_points[4:])
     assert camera_rmse < 1e-5
     test_fit_references(hits, geometry, fitted, frame_count)
+    test_saved_player_tracks(geometry, fitted)
     test_pixel_losses()
+    test_court_landing_penalty()
     test_ground_truth_evaluation()
     test_ground_truth_fit_separation()
     test_comparison_output_protection()
@@ -385,25 +660,19 @@ def run_checks(repo_root: Path, checkpoint: Path | None = None) -> None:
     assert detail["pixel_loss"] == "mse" and detail["huber_delta_px"] == 10.0
     assert np.allclose(phase[0], truth[0], atol=1e-6) and np.allclose(phase[-1], truth[-1], atol=0.01)
 
-    direct_start = np.asarray([3.0, 12.0, 1.8])
-    direct_end = np.asarray([7.0, 15.0, 0.0])
-    direct_truth = simulate_trajectory(direct_start, np.asarray([4.0, 3.0, 3.1]), 0.0, 25, 25.0)
-    direct_observations = [None] * 100 + [tuple(project_point(fitted, point)) for point in direct_truth]
     terminal = {"terminal_events": {
-        "net_contact": {"status": "unidentified", "frame": None, "pixel_native": None},
+        "net_contact": {"status": "manual", "frame": 110, "pixel_native": [600.0, 400.0]},
         "floor_contact": {"status": "manual", "frame": 125, "pixel_native": [500.0, 500.0]},
     }}
-    with patch.object(type(geometry), "native_floor_to_world", return_value=direct_end[:2]):
+    with patch("run_projection.reconstruct_flight") as fitter:
         direct_paths, direct_detail, floor_world = fit_terminal_tail(
-            terminal, geometry, [{"clip_frame_num": 100}], direct_observations, fitted, 25.0,
-            np.asarray([direct_start]), "huber", 8.0,
+            terminal, geometry, [{"clip_frame_num": 100}], terminal_observations, fitted, 25.0,
+            truth, "huber", 8.0,
         )
-    assert direct_detail["floor_contact_inside_court"] is False
-    assert np.allclose(floor_world, direct_end) and direct_paths[0]["phase"] == "last_hit_to_floor_contact"
-    assert direct_detail["phases"][-1]["status"] == "available"
-    assert direct_detail["phases"][-1]["pixel_loss"] == "huber"
-    assert np.allclose(direct_paths[0]["trajectory"][0], direct_start, atol=1e-6)
-    assert np.allclose(direct_paths[0]["trajectory"][-1], direct_end, atol=0.01)
+        fitter.assert_not_called()
+    assert not direct_paths and floor_world is None and not direct_detail["phases"]
+    assert direct_detail["status"] == "disabled" and direct_detail["reason"] == "manual_contacts_evaluation_only"
+    assert direct_detail["pixel_loss"] == "huber" and direct_detail["huber_delta_px"] == 8.0
 
     calibration_preview = draw_calibration_preview(
         np.zeros((1080, 1920, 3), dtype=np.uint8), geometry, "left_post_top", {}, 0, frame_count, 2.0 / 3.0
@@ -487,7 +756,7 @@ def run_checks(repo_root: Path, checkpoint: Path | None = None) -> None:
         assert preserved.read_text(encoding="utf-8") == "keep"
         assert not new_file.exists()
 
-    print("Self-check passed: dynamic Fuzhou metadata and hit timing, scaling and homography, camera calibration, MSE/Huber behavior and propagation, independent-GT evaluation masks/metrics, GT/fitting separation, direct out-of-court terminal fit, continuity, rendering, and overwrite refusal. No real-rally fitting or video rendering.")
+    print("Self-check passed: dynamic Fuzhou metadata and hit timing, scaling and homography, camera calibration, player reference selection/validation, saved smoothed-track validation and preflight rejection, moving/unavailable player markers, MSE/Huber behavior and propagation, extrapolated landing/court penalty, shuttle-label/terminal-contact separation from fitting, final-hit inclusion, independent-GT evaluation masks/metrics, disabled terminal reconstruction, continuity, rendering, and overwrite refusal. No real-rally fitting or video rendering.")
     if checkpoint is not None:
         tracker_smoke(repo_path(checkpoint))
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import importlib.util
 import json
 import math
@@ -26,8 +27,6 @@ from reconstruction import (
     CourtGeometry,
     fit_camera_projection,
     frame_time_seconds,
-    intersect_camera_ray_y,
-    join_piecewise,
     load_court_geometry,
     project_point,
     reconstruct_flight,
@@ -99,12 +98,12 @@ def video_metadata(video: Path) -> dict:
         capture.release()
 
 
-def load_annotations(csv_path: Path, frame_count: int, fps: float) -> list[dict]:
-    required = {
-        "player", "clip_frame_num", "clip_time_seconds",
+def load_annotations(csv_path: Path, frame_count: int, fps: float, require_player_positions: bool = True) -> list[dict]:
+    player_fields = (
         "player_location_x", "player_location_y",
         "opponent_location_x", "opponent_location_y",
-    }
+    ) if require_player_positions else ()
+    required = {"player", "clip_frame_num", "clip_time_seconds", *player_fields}
     with csv_path.open("r", newline="", encoding="utf-8-sig") as stream:
         reader = csv.DictReader(stream)
         if not required.issubset(reader.fieldnames or []):
@@ -125,7 +124,7 @@ def load_annotations(csv_path: Path, frame_count: int, fps: float) -> list[dict]
             )
         if row["player"] not in ("A", "B"):
             raise ValueError(f"Hit row {row_number} has unknown player identity {row['player']!r}")
-        for key in ("player_location_x", "player_location_y", "opponent_location_x", "opponent_location_y"):
+        for key in player_fields:
             row[key] = float(row[key])
             if not math.isfinite(row[key]):
                 raise ValueError(f"Hit row {row_number} has a non-finite {key}")
@@ -138,7 +137,8 @@ def load_annotations(csv_path: Path, frame_count: int, fps: float) -> list[dict]
     return hits
 
 
-def prepare_inputs(video_value: str | Path, hits_value: str | Path, homography_value: str | Path):
+def prepare_inputs(video_value: str | Path, hits_value: str | Path, homography_value: str | Path,
+                   require_player_positions: bool = True):
     video, hits_csv, homography_csv = map(repo_path, (video_value, hits_value, homography_value))
     for path in (video, hits_csv, homography_csv):
         if not path.is_file():
@@ -148,7 +148,7 @@ def prepare_inputs(video_value: str | Path, hits_value: str | Path, homography_v
     if (observed[:2] != EXPECTED_VIDEO[:2] or not math.isfinite(observed[2])
             or abs(observed[2] - EXPECTED_VIDEO[2]) > 1e-6 or metadata["frame_count"] < 1):
         raise ValueError(f"Expected 1920x1080 at 25 fps with a positive frame count; found {metadata}")
-    hits = load_annotations(hits_csv, metadata["frame_count"], metadata["fps"])
+    hits = load_annotations(hits_csv, metadata["frame_count"], metadata["fps"], require_player_positions)
     geometry = load_court_geometry(homography_csv, video.parent.parent.name)
     return video, hits_csv, homography_csv, metadata, hits, geometry
 
@@ -422,13 +422,115 @@ def track_shuttle(video: Path, expected_count: int, checkpoint: Path) -> tuple[l
     return observations, str(device)
 
 
-def player_references(hits: list[dict], geometry: CourtGeometry) -> list[dict]:
+def load_player_positions(csv_value: str | Path | None, video: Path, metadata: dict,
+                          hits: list[dict], geometry: CourtGeometry) -> tuple[list[dict] | None, dict]:
+    """Validate saved smoothed predictions without loading the player model or reference labels."""
+    if csv_value is None:
+        return None, {"source": "dataset_annotations"}
+    path = repo_path(csv_value)
+    selection_path = path.parent.parent / "selection.json"
+    selection = json.loads(selection_path.read_text(encoding="utf-8-sig"))
+    metrics = json.loads((path.parent / "metrics_smoothed.json").read_text(encoding="utf-8-sig"))
+    selected = [item for item in selection.get("selected_rallies", [])
+                if repo_path(item["clip_path"]) == video.resolve()]
+    if len(selected) != 1:
+        raise ValueError("Player review selection must identify the exact input video once")
+    key = tuple(map(str, selected[0]["key"]))
+    if len(key) != 4 or key[1] != geometry.row_video:
+        raise ValueError("Player review rally identity disagrees with the court geometry")
+    if (metrics.get("source_dimensions") != [metadata["width"], metadata["height"]]
+            or metrics.get("decoded_frames") != metadata["frame_count"]
+            or not math.isclose(float(metrics.get("source_fps", math.nan)), metadata["fps"], abs_tol=1e-6)):
+        raise ValueError("Player review video dimensions, FPS, or frame count disagree with the input")
+    if not isinstance(metrics.get("smoothing"), dict) or not metrics["smoothing"]:
+        raise ValueError("Player review is missing saved smoothing settings")
+    if not all(isinstance(selection.get(field), str) and selection[field]
+               for field in ("final_run_id", "checkpoint", "checkpoint_sha256")):
+        raise ValueError("Player review is missing saved model/checkpoint provenance")
+    identity_fields = ("dataset", "match", "game", "original_rally_id")
+    required = {*identity_fields, "clip_frame_num", "clip_time_seconds", "player", "court_half",
+                "available", "x_native", "y_native", "x_court_m", "y_court_m", "filter_status", "gap_filled"}
+    with path.open(newline="", encoding="utf-8-sig") as stream:
+        reader = csv.DictReader(stream)
+        if not required.issubset(reader.fieldnames or []):
+            raise ValueError(f"Smoothed player CSV is missing columns: {sorted(required - set(reader.fieldnames or []))}")
+        rows = list(reader)
+    tracks = [{"frame": frame, "A": np.full(2, np.nan), "B": np.full(2, np.nan),
+               "source": "keypoint_smoothed", "prediction_metadata": {}}
+              for frame in range(metadata["frame_count"])]
+    seen, halves = set(), {}
+    filled_statuses = {"short_interpolation", "long_interpolation", "endpoint_hold"}
+    reference_scale = np.asarray([1280 / metadata["width"], 720 / metadata["height"]])
+    for row_number, row in enumerate(rows, start=2):
+        message = f"Invalid smoothed player CSV row {row_number}"
+        if tuple(row[field] for field in identity_fields) != key:
+            raise ValueError(f"{message}: rally identity mismatch")
+        frame, player = int(row["clip_frame_num"]), row["player"]
+        seconds = float(row["clip_time_seconds"])
+        if (not 0 <= frame < len(tracks) or player not in ("A", "B")
+                or not math.isfinite(seconds) or abs(seconds - frame / metadata["fps"]) > 1e-5):
+            raise ValueError(f"{message}: frame, player, or timing mismatch")
+        if (frame, player) in seen:
+            raise ValueError(f"{message}: duplicate frame {frame}, player {player}")
+        seen.add((frame, player))
+        half = row["court_half"]
+        if half not in ("far", "near") or halves.setdefault(player, half) != half:
+            raise ValueError(f"{message}: unstable A/B court-half mapping")
+        if any(row[field].lower() not in ("true", "false") for field in ("available", "gap_filled")):
+            raise ValueError(f"{message}: invalid availability or gap flag")
+        available, filled = row["available"].lower() == "true", row["gap_filled"].lower() == "true"
+        status = row["filter_status"]
+        if (status not in {"smoothed", "unavailable", *filled_statuses}
+                or available != (status != "unavailable") or filled != (status in filled_statuses)):
+            raise ValueError(f"{message}: inconsistent filtering status")
+        if available:
+            point = np.asarray([float(row["x_court_m"]), float(row["y_court_m"])])
+            native = np.asarray([float(row["x_native"]), float(row["y_native"])])
+            # Keypoint exports use pixel-centre scaling, not simple division by 1.5.
+            projected = geometry.annotation_floor_to_world((native + 0.5) * reference_scale - 0.5)
+            if (not np.isfinite(point).all() or not np.isfinite(native).all()
+                    or not np.allclose(projected, point, atol=1e-4, rtol=0)):
+                raise ValueError(f"{message}: nonfinite coordinates or incompatible court geometry")
+            tracks[frame][player] = point
+        tracks[frame]["prediction_metadata"][player] = {
+            "filter_status": status, "gap_filled": filled, "court_half": half,
+            "rejection_reason": row.get("rejection_reason", ""),
+        }
+    if len(seen) != 2 * len(tracks):
+        frame, player = next((frame, player) for frame in range(len(tracks)) for player in ("A", "B")
+                             if (frame, player) not in seen)
+        raise ValueError(f"Smoothed player CSV is missing frame {frame}, player {player}")
+    if set(halves.values()) != {"far", "near"}:
+        raise ValueError("Smoothed player CSV must map A and B to different court halves")
+    required_predictions = []
+    for hit in hits:
+        frame, player = hit["clip_frame_num"], hit["player"]
+        if not np.isfinite(tracks[frame][player]).all():
+            raise ValueError(f"Player prediction unavailable at required hit frame {frame}, player {player}")
+        required_predictions.append(tracks[frame]["prediction_metadata"][player])
+    return tracks, {
+        "source": "keypoint_smoothed", "csv_path": str(path),
+        "csv_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "selection_json": str(selection_path), "final_run_id": selection["final_run_id"],
+        "checkpoint": selection["checkpoint"], "checkpoint_sha256": selection["checkpoint_sha256"],
+        "dataset_identity": selection.get("dataset_identity"), "smoothing": metrics["smoothing"],
+        "required_hitter_positions": len(required_predictions),
+        "filled_hitter_positions": sum(item["gap_filled"] for item in required_predictions),
+    }
+
+
+def player_references(hits: list[dict], geometry: CourtGeometry, player_tracks: list[dict] | None = None) -> list[dict]:
     result = []
     for index, row in enumerate(hits):
-        hitter_native = np.asarray([row["player_location_x"], row["player_location_y"]]) * ANNOTATION_TO_VIDEO
-        opponent_native = np.asarray([row["opponent_location_x"], row["opponent_location_y"]]) * ANNOTATION_TO_VIDEO
-        hitter_world = geometry.native_floor_to_world(hitter_native)
-        opponent_world = geometry.native_floor_to_world(opponent_native)
+        if player_tracks is None:
+            hitter_native = np.asarray([row["player_location_x"], row["player_location_y"]]) * ANNOTATION_TO_VIDEO
+            opponent_native = np.asarray([row["opponent_location_x"], row["opponent_location_y"]]) * ANNOTATION_TO_VIDEO
+            hitter_world = geometry.native_floor_to_world(hitter_native)
+            opponent_world = geometry.native_floor_to_world(opponent_native)
+        else:
+            frame_players = player_tracks[row["clip_frame_num"]]
+            hitter_world = frame_players[row["player"]]
+            opponent_world = frame_players["B" if row["player"] == "A" else "A"]
         endpoints = {}
         for label, prefix in (("Hit", "hit"), ("Landing", "landing")):
             try:
@@ -436,7 +538,7 @@ def player_references(hits: list[dict], geometry: CourtGeometry) -> list[dict]:
                 if np.isfinite(pixel).all():
                     endpoints[label] = geometry.annotation_floor_to_world(pixel)
             except (KeyError, TypeError, ValueError):
-                pass  # Missing display markers are omitted; fit_hit_flights validates required endpoints.
+                pass  # Shuttle endpoint annotations are optional display markers only.
         if index == 0 and not row.get("hit_x") and not row.get("hit_y"):
             endpoints["Serve fallback"] = hitter_world
         result.append(
@@ -448,6 +550,8 @@ def player_references(hits: list[dict], geometry: CourtGeometry) -> list[dict]:
                 "endpoints": endpoints,
             }
         )
+        if player_tracks is not None:
+            result[-1].update(source="keypoint_smoothed", prediction_metadata=frame_players["prediction_metadata"])
     return result
 
 
@@ -487,20 +591,17 @@ def fit_hit_flights(
     pixel_loss, huber_delta_px = validate_pixel_loss(pixel_loss, huber_delta_px)
     references = []
     for index in range(len(hits) - 1):
-        endpoints = players[index].get("endpoints", {})
-        start_label = "Serve fallback" if index == 0 and "Hit" not in endpoints and "Serve fallback" in endpoints else "Hit"
         pair = []
-        for label, fields in ((start_label, "player_location_x/y" if start_label == "Serve fallback" else "hit_x/y"),
-                              ("Landing", "landing_x/y")):
-            message = f"Stroke {index + 1} requires finite {fields} endpoint coordinates ({label})"
+        for row_index in (index, index + 1):
+            message = f"Stroke {index + 1} requires finite player_location_x/y coordinates for hit {row_index + 1}"
             try:
-                point = np.asarray(endpoints.get(label), dtype=np.float64)
+                point = np.asarray(players[row_index].get(hits[row_index]["player"]), dtype=np.float64)
             except (TypeError, ValueError) as error:
                 raise ValueError(message) from error
             if point.shape != (2,) or not np.isfinite(point).all():
                 raise ValueError(message)
             pair.append(point)
-        references.append((*pair, "first_row_player_location" if start_label == "Serve fallback" else "current_row_hit_x_y"))
+        references.append(pair)
     coordinates = np.full((len(observations), 3), np.nan, dtype=np.float64)
     phases = [""] * len(observations)
     segment_ids = [-1] * len(observations)
@@ -511,7 +612,7 @@ def fit_hit_flights(
     for index in range(len(hits) - 1):
         start_frame = hits[index]["clip_frame_num"]
         end_frame = hits[index + 1]["clip_frame_num"]
-        start_ref, receive_ref, start_source = references[index]
+        start_ref, receive_ref = references[index]
         path, detail = reconstruct_flight(
             start_frame=start_frame,
             end_frame=end_frame,
@@ -530,9 +631,12 @@ def fit_hit_flights(
             "huber_delta_px": huber_delta_px,
             "start_reference_xy_m": start_ref.tolist(),
             "receive_reference_xy_m": receive_ref.tolist(),
-            "start_reference_source": start_source,
-            "receive_reference_source": "current_row_landing_x_y",
+            "start_reference_source": f"current_row_{players[index].get('source', 'player_location')}",
+            "receive_reference_source": f"next_row_{players[index + 1].get('source', 'player_location')}",
         })
+        for prefix, row_index in (("start", index), ("receive", index + 1)):
+            if "prediction_metadata" in players[row_index]:
+                detail[f"{prefix}_player_prediction"] = players[row_index]["prediction_metadata"][hits[row_index]["player"]]
         diagnostics.append(detail)
         if path is None:
             start_fixed = None
@@ -551,6 +655,11 @@ def fit_hit_flights(
         detail["hit_endpoint_reprojection_error_px"] = reprojection_error
         # MonoTrack carries a hit point forward only when its image reprojection is close.
         start_fixed = path[-1].copy() if reprojection_error is not None and reprojection_error < 40.0 else None
+    if last_path is not None:
+        final_frame = hits[-1]["clip_frame_num"]
+        coordinates[final_frame] = last_path[-1]
+        phases[final_frame] = diagnostics[-1]["phase"]
+        segment_ids[final_frame] = len(hits) - 2
     return coordinates, phases, segment_ids, paths, diagnostics, last_path
 
 
@@ -565,150 +674,16 @@ def fit_terminal_tail(
     pixel_loss: str = "mse",
     huber_delta_px: float = 10.0,
 ):
+    """Keep the shared interface while excluding manually annotated terminal contacts."""
     pixel_loss, huber_delta_px = validate_pixel_loss(pixel_loss, huber_delta_px)
-    details = {
-        "extension": "piecewise flight assumptions beyond MonoTrack hit-to-hit reconstruction",
+    return [], {
+        "extension": "terminal reconstruction disabled",
+        "status": "disabled",
+        "reason": "manual_contacts_evaluation_only",
         "pixel_loss": pixel_loss,
         "huber_delta_px": huber_delta_px,
         "phases": [],
-    }
-    terminal_events = calibration["terminal_events"]
-    net_event = terminal_events["net_contact"]
-    floor_event = terminal_events["floor_contact"]
-    net_point = None
-    floor_point = None
-    if net_event.get("status") == "manual":
-        try:
-            net_point = intersect_camera_ray_y(projection, net_event["pixel_native"], NET_Y_M)
-            if not 0.0 <= net_point[2] <= POST_TOP_M:
-                raise ValueError(f"Net-plane intersection height {net_point[2]:.3f} m is outside 0..{POST_TOP_M:.2f} m")
-            details["net_contact_world_m"] = net_point.tolist()
-            details["net_contact_status"] = "available"
-        except (ValueError, np.linalg.LinAlgError) as error:
-            details["net_contact_status"] = "unidentifiable"
-            details["net_contact_reason"] = str(error)
-    else:
-        details["net_contact_status"] = "unidentifiable"
-        details["net_contact_reason"] = "manual_net_contact_not_identified"
-    if floor_event.get("status") == "manual":
-        try:
-            floor_xy = geometry.native_floor_to_world(floor_event["pixel_native"])
-            floor_point = np.asarray([floor_xy[0], floor_xy[1], 0.0], dtype=np.float64)
-            details["floor_contact_world_m"] = floor_point.tolist()
-            details["floor_contact_status"] = "available"
-            details["floor_contact_inside_court"] = bool(
-                0.0 <= floor_point[0] <= COURT_WIDTH_M and 0.0 <= floor_point[1] <= COURT_LENGTH_M
-            )
-        except (ValueError, np.linalg.LinAlgError) as error:
-            details["floor_contact_status"] = "unidentifiable"
-            details["floor_contact_reason"] = str(error)
-    else:
-        details["floor_contact_status"] = "unidentifiable"
-        details["floor_contact_reason"] = "manual_floor_contact_not_identified"
-
-    last_hit_frame = hits[-1]["clip_frame_num"]
-    net_frame = int(net_event["frame"]) if net_event.get("status") == "manual" else None
-    floor_frame = int(floor_event["frame"]) if floor_event.get("status") == "manual" else None
-    net_frame_valid = net_frame is not None and last_hit_frame < net_frame < len(observations)
-    floor_order_valid = (
-        net_frame_valid and floor_point is not None and floor_frame is not None
-        and net_frame < floor_frame < len(observations)
-    )
-    direct_floor_order_valid = floor_point is not None and floor_frame is not None and last_hit_frame < floor_frame < len(observations)
-    active_order_valid = floor_order_valid if net_point is not None else direct_floor_order_valid
-    details["event_order_status"] = "available" if active_order_valid else "unidentifiable"
-    if not active_order_valid:
-        details["event_order_reason"] = (
-            "expected last hit < net contact < floor contact < frame count"
-            if net_point is not None else "expected last hit < floor contact < frame count"
-        )
-
-    paths = []
-    if net_point is None:
-        details["phases"].append({"phase": "last_hit_to_net_contact", "status": "unidentifiable", "reason": "net_contact_position_unavailable"})
-    elif last_path is None:
-        details["phases"].append({"phase": "last_hit_to_net_contact", "status": "unidentifiable", "reason": "last_hit_3d_position_unavailable"})
-    elif not net_frame_valid:
-        details["phases"].append({"phase": "last_hit_to_net_contact", "status": "unidentifiable", "reason": "net_contact_must_follow_last_hit"})
-    else:
-        start = last_path[-1]
-        first, detail = reconstruct_flight(
-            start_frame=last_hit_frame,
-            end_frame=net_frame,
-            observations=observations,
-            projection=projection,
-            start_reference_xy=start[:2],
-            receive_reference_xy=net_point[:2],
-            fps=fps,
-            start_fixed=start,
-            end_fixed=net_point,
-            phase="last_hit_to_net_contact",
-            pixel_loss=pixel_loss,
-            huber_delta_px=huber_delta_px,
-        )
-        details["phases"].append(detail)
-        if first is not None:
-            paths.append({"start_frame": last_hit_frame, "end_frame": net_frame, "trajectory": first, "phase": detail["phase"]})
-
-    if net_point is not None and floor_point is not None:
-        if not floor_order_valid:
-            details["phases"].append({"phase": "net_contact_to_floor_contact", "status": "unidentifiable", "reason": details.get("event_order_reason", "terminal_event_order_unavailable")})
-        else:
-            second, detail = reconstruct_flight(
-                start_frame=net_frame,
-                end_frame=floor_frame,
-                observations=observations,
-                projection=projection,
-                start_reference_xy=net_point[:2],
-                receive_reference_xy=floor_point[:2],
-                fps=fps,
-                start_fixed=net_point,
-                end_fixed=floor_point,
-                phase="net_contact_to_floor_contact",
-                pixel_loss=pixel_loss,
-                huber_delta_px=huber_delta_px,
-            )
-            details["phases"].append(detail)
-            if second is not None:
-                paths.append({"start_frame": net_frame, "end_frame": floor_frame, "trajectory": second, "phase": detail["phase"]})
-                first_path = next((path["trajectory"] for path in paths if path["phase"] == "last_hit_to_net_contact"), None)
-                if first_path is not None:
-                    join_piecewise(first_path, second)
-    elif floor_point is None:
-        details["phases"].append({"phase": "net_contact_to_floor_contact", "status": "unidentifiable", "reason": "terminal_contact_position_unavailable"})
-    else:
-        if last_path is None:
-            details["phases"].append({"phase": "last_hit_to_floor_contact", "status": "unidentifiable", "reason": "last_hit_3d_position_unavailable"})
-        elif not direct_floor_order_valid:
-            details["phases"].append({"phase": "last_hit_to_floor_contact", "status": "unidentifiable", "reason": "floor_contact_must_follow_last_hit"})
-        else:
-            start = last_path[-1]
-            direct, detail = reconstruct_flight(
-                start_frame=last_hit_frame,
-                end_frame=floor_frame,
-                observations=observations,
-                projection=projection,
-                start_reference_xy=start[:2],
-                receive_reference_xy=floor_point[:2],
-                fps=fps,
-                start_fixed=start,
-                end_fixed=floor_point,
-                phase="last_hit_to_floor_contact",
-                pixel_loss=pixel_loss,
-                huber_delta_px=huber_delta_px,
-            )
-            details["phases"].append(detail)
-            if direct is not None:
-                paths.append({"start_frame": last_hit_frame, "end_frame": floor_frame, "trajectory": direct, "phase": detail["phase"]})
-    details["piecewise_contact_position_shared"] = bool(
-        net_point is not None
-        and any(item["phase"] == "last_hit_to_net_contact" for item in paths)
-        and any(item["phase"] == "net_contact_to_floor_contact" for item in paths)
-    )
-    for phase_detail in details["phases"]:
-        phase_detail.setdefault("pixel_loss", pixel_loss)
-        phase_detail.setdefault("huber_delta_px", huber_delta_px)
-    return paths, details, floor_point if floor_point is not None else None
+    }, None
 
 
 def assign_paths(
@@ -819,6 +794,7 @@ def render_frame(
     paths: list[dict],
     players_by_hit: list[dict],
     projection: np.ndarray,
+    player_tracks: list[dict] | None = None,
 ) -> np.ndarray:
     canvas = np.zeros((OUTPUT_SIZE[1], OUTPUT_SIZE[0], 3), dtype=np.uint8)
     panel_width = OUTPUT_SIZE[0] // 2
@@ -867,9 +843,12 @@ def render_frame(
             active_players = item
         else:
             break
-    if active_players is not None:
+    displayed_players = active_players if player_tracks is None else player_tracks[frame_index]
+    if displayed_players is not None:
         for player, color in (("A", (30, 80, 255)), ("B", (255, 120, 0))):
-            point = panel_point(active_players[player], court_rect)
+            if not np.isfinite(displayed_players[player]).all():
+                continue
+            point = panel_point(displayed_players[player], court_rect)
             cv2.circle(canvas, point, 9, color, -1)
             cv2.putText(canvas, player, (point[0] + 10, point[1] - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
 
@@ -909,6 +888,7 @@ def render_h264_with_audio(
     players: list[dict],
     projection: np.ndarray,
     frame_count: int,
+    player_tracks: list[dict] | None = None,
 ) -> dict:
     if not shutil_which("ffmpeg") or not shutil_which("ffprobe"):
         raise RuntimeError("ffmpeg and ffprobe are required to encode H.264 and retain source audio")
@@ -935,7 +915,7 @@ def render_h264_with_audio(
                 if not ok:
                     raise RuntimeError(f"Could not decode source frame {frame_index} while rendering")
                 composed = render_frame(
-                    source_frame, frame_index, observations, coordinates, phases, paths, players, projection
+                    source_frame, frame_index, observations, coordinates, phases, paths, players, projection, player_tracks
                 )
                 process.stdin.write(composed.tobytes())
             process.stdin.close()
@@ -1001,12 +981,15 @@ def shutil_which(name: str) -> str | None:
 
 def run_projection(args) -> None:
     args.pixel_loss, args.huber_delta_px = validate_pixel_loss(args.pixel_loss, args.huber_delta_px)
+    player_csv = getattr(args, "player_positions_csv", None)
     video, hits_csv, homography_csv, metadata, hits, geometry = prepare_inputs(
-        args.video, args.rally_csv, args.homography_csv
+        args.video, args.rally_csv, args.homography_csv, require_player_positions=player_csv is None
     )
+    player_tracks, player_provenance = load_player_positions(player_csv, video, metadata, hits, geometry)
+    players = player_references(hits, geometry, player_tracks)
     calibration_path = inside_test(repo_path(args.calibration))
-    output_dir = ensure_output_dir(args.output_dir)
     calibration = load_calibration(calibration_path, geometry, metadata)
+    output_dir = ensure_output_dir(args.output_dir)
     projection = np.asarray(calibration["camera_calibration"]["projection_matrix"], dtype=np.float64)
     stem = video.stem
     outputs = [
@@ -1019,28 +1002,20 @@ def run_projection(args) -> None:
     complete = False
     try:
         observations, device = track_shuttle(video, metadata["frame_count"], repo_path(args.checkpoint))
-        players = player_references(hits, geometry)
         coordinates, phases, segment_ids, paths, hit_diagnostics, last_path = fit_hit_flights(
             hits, players, observations, projection, metadata["fps"], args.pixel_loss, args.huber_delta_px
         )
-        tail_paths, tail_diagnostics, floor_point = fit_terminal_tail(
+        tail_paths, tail_diagnostics, _ = fit_terminal_tail(
             calibration, geometry, hits, observations, projection, metadata["fps"], last_path,
             args.pixel_loss, args.huber_delta_px,
         )
         assign_paths(coordinates, phases, segment_ids, tail_paths, tail=True)
-        floor_event = calibration["terminal_events"]["floor_contact"]
-        net_event = calibration["terminal_events"]["net_contact"]
-        floor_frame = int(floor_event["frame"]) if floor_event.get("status") == "manual" else None
-        net_frame = int(net_event["frame"]) if net_event.get("status") == "manual" else None
-        if (floor_point is not None and floor_frame is not None and floor_frame > hits[-1]["clip_frame_num"]
-                and (net_frame is None or floor_frame > net_frame)):
-            hold_terminal_marker(coordinates, phases, segment_ids, floor_frame, floor_point)
         all_paths = paths + tail_paths
         write_tracked_csv(outputs[0], observations)
         write_coordinates_csv(outputs[1], coordinates, phases, segment_ids, observations, projection)
         output_meta = render_h264_with_audio(
             video, outputs[3], output_dir, observations, coordinates, phases,
-            all_paths, players, projection, metadata["frame_count"],
+            all_paths, players, projection, metadata["frame_count"], player_tracks,
         )
         diagnostics = {
             "input_video": str(video),
@@ -1049,6 +1024,7 @@ def run_projection(args) -> None:
             "homography_row_id": geometry.row_id,
             "input_metadata": metadata,
             "annotated_hits": len(hits),
+            "player_positions": player_provenance,
             "pixel_loss": args.pixel_loss,
             "huber_delta_px": args.huber_delta_px,
             "hit_to_hit_segments_attempted": len(hit_diagnostics),
@@ -1060,7 +1036,7 @@ def run_projection(args) -> None:
             "hit_to_hit_segments": hit_diagnostics,
             "terminal_extension": tail_diagnostics,
             "output_video": output_meta,
-            "interpretation": "Annotated hit/landing positions are soft horizontal fit references; only the missing first serve hit uses its player's location. A carried fitted 3D endpoint takes precedence at the next start. Agreement with these priors is not independent accuracy evidence, and a plausible top-down path does not verify reconstructed height.",
+            "interpretation": "Current and next hitters' player positions are soft horizontal fit references. Shuttle hit/landing labels are display-only and manual terminal contacts do not enter reconstruction. A carried fitted 3D endpoint takes precedence at the next start. Estimates stop at the final hit; a plausible top-down path does not verify reconstructed height.",
             "mono_track_source": {"repository": "https://github.com/jhwang7628/monotrack", "commit": SOURCE_COMMIT, "license": "Adobe Research License; noncommercial research only"},
         }
         with outputs[2].open("w", encoding="utf-8", newline="\n") as stream:
@@ -1089,6 +1065,7 @@ def build_parser() -> argparse.ArgumentParser:
         sub.add_argument("--calibration", type=Path, required=True, help="Output JSON in calibrate mode; input JSON in run mode")
         sub.add_argument("--output-dir", type=Path, default=HERE)
         if name == "run":
+            sub.add_argument("--player-positions-csv", type=Path, help="Saved smoothed keypoint CSV with review metadata; otherwise use annotated player positions")
             sub.add_argument("--checkpoint", type=Path, default=DEFAULT_CHECKPOINT)
             sub.add_argument("--pixel-loss", choices=("mse", "huber"), default="mse", help="Pixel residual loss")
             sub.add_argument("--huber-delta-px", type=float, default=10.0, help="Huber threshold in cleaned-video pixels")
@@ -1112,7 +1089,6 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Camera fit reprojection RMSE: {document['camera_calibration']['calibration_reprojection_rmse_px']:.2f}px")
         else:
             calibration_path = inside_test(repo_path(args.calibration))
-            args.output_dir = ensure_output_dir(args.output_dir)
             if not calibration_path.is_file():
                 raise FileNotFoundError(f"Calibration JSON not found: {calibration_path}")
             args.calibration = calibration_path

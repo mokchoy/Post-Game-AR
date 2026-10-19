@@ -24,6 +24,8 @@ python runner.py evaluate --run-id <FINAL_RUN_ID> --split test
 python runner.py overlay --run-id <FINAL_RUN_ID> --match <MATCH_FOLDER> --game 1 --rally 1
 python runner.py review-test --run-id <FINAL_RUN_ID> --check
 python runner.py review-test --run-id <FINAL_RUN_ID>
+python runner.py review-test --run-id <FINAL_RUN_ID> --smooth --check
+python runner.py review-test --run-id <FINAL_RUN_ID> --smooth
 ~~~
 
 `check` verifies pretrained transfer, model output, independent initialization, checkpoint reload, gradient flow, and one synthetic optimization step. `self_check.py` adds source-filter, coordinate, fold, configuration, missing-prediction, and synthetic review-render checks. Neither command prepares the full dataset or trains on badminton footage.
@@ -41,6 +43,23 @@ Every automatic source-quality failure excludes the complete rally and is writte
 Final training uses all development matches for the rounded median selected epoch count and keeps the held-out matches out of training and checkpoint selection. `evaluate` runs the full held-out evaluation once. `review-test` selects up to three held-out rallies from different matches before inference, saves the selection, and writes fresh selected-rally diagnostics. It does not replace the full-test results. Its video shows the normal camera image beside a 600-pixel court panel, predicted A/B points, and reference crosses only at the annotated frames. It preserves source FPS and decoded frame count, exports two position rows per frame, records annotation-time errors, and verifies the encoded video by decoding it.
 
 ## Configuration
+
+### Optional review smoothing
+
+`review-test --smooth` keeps the raw review and exports intact and adds `review_smoothed.mp4`, `player_positions_smoothed.csv`, `shot_errors_smoothed.csv`, and `metrics_smoothed.json` in each rally directory. Inference runs once per frame; a second video read renders the smoothed results. Both views use the same filtered court trajectory, with inverse projection for the camera marker. Training, full-test evaluation, and `overlay` are unchanged.
+
+Edit the separate `review_config.yaml` to tune `smoothing.median_window` (default 5) and `smoothing.savgol_window` (default 9). These are odd integer **frame counts**, not seconds: median must be at least 1, Savgol at least 3. Savgol uses a fixed quadratic polynomial. Median 1 bypasses median cleanup; Savgol 3 fits all three samples exactly, so use at least 5 for Savgol smoothing. Windows shorten for short available segments; Savgol is skipped below three frames. Larger windows smooth more but may soften genuine turns. `--smooth --check` validates these settings before inference. Each review saves the resolved settings in `review_smoothing.json`; saved training settings are never edited.
+
+The filter rejects nonfinite court points, positions more than 3 m outside the court rectangle, positions more than 1 m into the opposite court half, and points more than 1 m from the local coordinate-wise median. These are exploratory rejection heuristics, not calibrated confidence thresholds. It applies median cleanup followed by Savgol and never clamps coordinates to court boundaries.
+
+Set `smoothing.gap_policy` to either:
+
+- `conservative` (default): interpolate gaps of at most 0.2 seconds with valid points on both sides. Longer and endpoint gaps remain unavailable and their markers disappear.
+- `continuous`: interpolate every interior gap and hold the nearest valid position at endpoints. A completely unavailable trajectory remains unavailable.
+
+Smoothed CSVs retain two rows per frame and include `filter_status`, `rejection_reason`, and `gap_filled`. Status distinguishes smoothing, short/long interpolation, endpoint holds, and unavailable points. The original heatmap score remains a raw-model diagnostic. Filled markers are labelled in the video. Smoothed metrics report annotation-time errors and coverage, all-frame position coverage, filled-point counts, and rejection/status counts. Unavailable annotation-time predictions remain failures in success-rate denominators; continuous-mode errors can include guessed positions. Compare coverage as well as error before claiming improvement. Smoothing can preserve sustained wrong predictions and cannot establish foot-position or movement-measurement accuracy. These selected held-out rallies are exploratory diagnostics, not an unbiased score after tuning.
+
+### Training settings
 
 Edit `config.yaml` without changing Python:
 

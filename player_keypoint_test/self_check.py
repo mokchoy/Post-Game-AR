@@ -23,6 +23,11 @@ class GeometryStub:
             point[1] / runner.REFERENCE_HEIGHT * runner.COURT_LENGTH_M,
         ])
 
+    @staticmethod
+    def world_to_annotation_floor(point):
+        return np.asarray([point[0] / runner.COURT_WIDTH_M * runner.REFERENCE_WIDTH,
+                           point[1] / runner.COURT_LENGTH_M * runner.REFERENCE_HEIGHT])
+
 
 def check_coordinates_targets_and_alignment() -> None:
     original = (639.0, 359.0)
@@ -252,13 +257,17 @@ def check_deterministic_review_and_render() -> None:
     class FakeModel(torch.nn.Module):
         def __init__(self):
             super().__init__()
+            self.calls = 0
+            self.bad_frames = set()
             logits = torch.full((1, 2, 32, 40), -20.0)
             logits[0, 0, 10, 20] = 20
             logits[0, 1, 25, 24] = 20
             self.register_buffer("logits", logits)
 
         def forward(self, image):
-            return self.logits.expand(image.shape[0], -1, -1, -1)
+            self.calls += 1
+            logits = self.logits.flip(1) if self.calls in self.bad_frames else self.logits
+            return logits.expand(image.shape[0], -1, -1, -1)
 
     with tempfile.TemporaryDirectory(prefix="point_review_", dir=runner.ROOT / "checks") as temp:
         root = Path(temp)
@@ -298,6 +307,47 @@ def check_deterministic_review_and_render() -> None:
         assert result["video_info"]["decoded_frames"] == 4
         assert result["video_info"]["fps"] == 12.5
         assert (result["video_info"]["width"], result["video_info"]["height"]) == (1880, 720)
+        assert not (root / "review" / "review_smoothed.mp4").exists()
+        rally = {"key": runner.stable_key(rally_rows[0]), "clip_path": str(clip), "rows": rally_rows}
+        model.logits.copy_(model.logits.flip(1))
+        missing = runner.render_review_rally(rally, root / "missing", model, GeometryStub(), config,
+                                             torch.device("cpu"), runner.load_review_smoothing())
+        assert missing["smoothed"]["metrics"]["position_coverage"] == 0.0
+        assert missing["smoothed"]["metrics"]["combined"]["missing_predictions"] == 4
+        missing_rows = runner.read_csv(root / "missing" / "player_positions_smoothed.csv")
+        assert len(missing_rows) == 8 and all(row["x_native"] == "" for row in missing_rows)
+        model.logits.copy_(model.logits.flip(1))
+        baseline = runner.render_review_rally(rally, root / "raw_reference", model, GeometryStub(),
+                                              config, torch.device("cpu"))
+        calls = model.calls
+        smoothed = runner.render_review_rally(rally, root / "smoothed", model, GeometryStub(),
+                                              config, torch.device("cpu"), runner.load_review_smoothing())
+        assert model.calls - calls == 4
+        assert smoothed["metrics"] == baseline["metrics"]
+        for name in ("player_positions.csv", "shot_errors.csv", "metrics.json"):
+            assert (root / "smoothed" / name).read_bytes() == (root / "raw_reference" / name).read_bytes()
+        assert smoothed["smoothed"]["video_info"] == baseline["video_info"]
+        assert smoothed["smoothed"]["metrics"]["position_coverage"] == 1.0
+        smooth_rows = runner.read_csv(root / "smoothed" / "player_positions_smoothed.csv")
+        assert len(smooth_rows) == 8
+        assert {r["player"] for r in smooth_rows} == {"A", "B"}
+        smooth_errors = runner.read_csv(root / "smoothed" / "shot_errors_smoothed.csv")
+        assert len(smooth_errors) == 4
+        assert {int(r["clip_frame_num"]) for r in smooth_errors} == {0, 2}
+        for row in smooth_rows:
+            image = (float(row["x_native"]), float(row["y_native"]))
+            world = (float(row["x_court_m"]), float(row["y_court_m"]))
+            assert np.allclose(runner.projected_world(GeometryStub(), image, 1280, 720), world)
+            assert row["filter_status"] == "smoothed" and row["gap_filled"] == "False"
+        model.bad_frames = {model.calls + 2}
+        filled = runner.render_review_rally(rally, root / "filled", model, GeometryStub(), config,
+                                            torch.device("cpu"), runner.load_review_smoothing())
+        assert filled["smoothed"]["metrics"]["position_coverage"] == 1.0
+        assert filled["smoothed"]["metrics"]["filled_points"] == 2
+        filled_rows = runner.read_csv(root / "filled" / "player_positions_smoothed.csv")
+        assert sum(row["gap_filled"] == "True" for row in filled_rows) == 2
+        assert all(row["filter_status"] == "short_interpolation"
+                   for row in filled_rows if row["clip_frame_num"] == "1")
 
     failures = runner.error_summary([
         {"available": True, "error_px": 10.0, "error_m": 0.2},
@@ -308,6 +358,101 @@ def check_deterministic_review_and_render() -> None:
     assert failures["coverage"] == 1 / 3 and failures["within_1_m"]["denominator"] == 3
 
 
+def check_review_smoothing() -> None:
+    settings = {**runner.load_review_smoothing(), "median_window": 5,
+                "savgol_window": 9, "gap_policy": "conservative"}
+    with tempfile.TemporaryDirectory(prefix="smoothing_config_", dir=runner.ROOT / "checks") as temp:
+        path = Path(temp) / "review.yaml"
+        for key, values in (("median_window", [0, 2, True, 3.0]),
+                            ("savgol_window", [1, 4, False, 5.0]),
+                            ("gap_policy", ["unknown", None])):
+            for value in values:
+                config = {k: settings[k] for k in ("median_window", "savgol_window", "gap_policy")}
+                config[key] = value
+                path.write_text(yaml.safe_dump({"smoothing": config}), encoding="utf-8")
+                try:
+                    runner.load_review_smoothing(path)
+                except ValueError:
+                    pass
+                else:
+                    raise AssertionError(f"Accepted invalid {key}: {value!r}")
+        for config in ([], {}, {"smoothing": None}, {"smoothing": {"median_window": 5}}):
+            path.write_text(yaml.safe_dump(config), encoding="utf-8")
+            try:
+                runner.load_review_smoothing(path)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError("Accepted invalid review settings")
+        path.write_text(yaml.safe_dump({"smoothing": {
+            "median_window": 1, "savgol_window": 3, "gap_policy": "continuous"}}), encoding="utf-8")
+        assert runner.load_review_smoothing(path)["median_window"] == 1
+    args = runner.parser().parse_args(["review-test", "--run-id", "synthetic", "--smooth", "--check"])
+    assert args.smooth and args.check
+    for world in ((3.0, 3.0), (3.0, 10.0)):
+        native = runner.native_point(GeometryStub().world_to_annotation_floor(world), 1280, 720)
+        half = runner.court_half(GeometryStub(), native, 1280, 720)
+        accepted, _, _ = runner.smooth_court_track(np.tile(world, (9, 1)), half, 25, settings)
+        assert np.allclose(accepted, world)
+        other_half = "near" if half == "far" else "far"
+        rejected, _, reasons = runner.smooth_court_track(np.tile(world, (9, 1)), other_half, 25, settings)
+        assert np.isnan(rejected).all() and set(reasons) == {"court_half"}
+    with patch.object(runner, "load_review_smoothing", side_effect=ValueError("bad window")), \
+            patch.object(runner, "review_test_context") as context:
+        try:
+            runner.review_test_command("synthetic", check_only=True, smooth=True)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Invalid smoothing config did not stop preflight")
+        context.assert_not_called()
+
+    rng = np.random.default_rng(42)
+    stationary = np.tile([3.0, 3.0], (61, 1)) + rng.normal(0, 0.04, (61, 2))
+    smooth, statuses, _ = runner.smooth_court_track(stationary, "far", 25, settings)
+    assert np.mean((smooth - 3) ** 2) < np.mean((stationary - 3) ** 2)
+    assert set(statuses) == {"smoothed"}
+    unfiltered, _, _ = runner.smooth_court_track(
+        stationary, "far", 25, {**settings, "median_window": 1, "savgol_window": 3})
+    assert np.allclose(unfiltered, stationary)
+    assert not np.allclose(unfiltered, smooth)
+    moving = np.column_stack((2 + np.arange(61) * 0.02, np.full(61, 3.0)))
+    smooth, _, _ = runner.smooth_court_track(moving, "far", 25, settings)
+    assert np.allclose(smooth, moving)
+    turning = np.column_stack((2 + np.abs(np.arange(61) - 30) * 0.02, np.full(61, 3.0)))
+    smooth, _, _ = runner.smooth_court_track(turning, "far", 25, settings)
+    assert np.max(np.abs(smooth - turning)) < 0.05
+    near, _, _ = runner.smooth_court_track(moving + [0, 7], "near", 25, settings)
+    assert np.allclose(near, moving + [0, 7])
+
+    gaps = np.tile([3.0, 3.0], (40, 1))
+    gaps[[0, 5, 6, 39]] = np.nan
+    gaps[12:18] = np.nan
+    gaps[25], gaps[27], gaps[30], gaps[35] = [100, 3], [3, 12], [4.5, 3], [np.inf, 3]
+    conservative, statuses, reasons = runner.smooth_court_track(gaps, "far", 25, settings)
+    assert np.isnan(conservative[[0, 39]]).all() and np.isnan(conservative[12:18]).all()
+    assert list(statuses[5:7]) == ["short_interpolation"] * 2
+    assert reasons[25] == "court_bounds" and reasons[27] == "court_half"
+    assert reasons[30] == "temporal_outlier" and reasons[35] == "nonfinite_projection"
+    continuous, statuses, _ = runner.smooth_court_track(
+        gaps, "far", 25, {**settings, "gap_policy": "continuous"})
+    assert np.allclose(continuous, 3)
+    assert list(statuses[12:18]) == ["long_interpolation"] * 6
+    assert list(statuses[[0, 39]]) == ["endpoint_hold"] * 2
+    # Gap length is measured in seconds, while filter windows stay in frames.
+    faster, statuses, _ = runner.smooth_court_track(gaps, "far", 30, settings)
+    assert np.isfinite(faster[12:18]).all() and set(statuses[12:18]) == {"short_interpolation"}
+    for length in (1, 2, 3, 4):
+        short = moving[:length]
+        smooth, _, _ = runner.smooth_court_track(
+            short, "far", 25, {**settings, "median_window": 101, "savgol_window": 101})
+        assert smooth.shape == short.shape and np.allclose(smooth, short)
+    for policy in ("conservative", "continuous"):
+        missing, statuses, _ = runner.smooth_court_track(
+            np.full((12, 2), np.nan), "far", 25, {**settings, "gap_policy": policy})
+        assert np.isnan(missing).all() and set(statuses) == {"unavailable"}
+
+
 def main() -> None:
     (runner.ROOT / "checks").mkdir(parents=True, exist_ok=True)
     check_coordinates_targets_and_alignment()
@@ -316,6 +461,7 @@ def main() -> None:
     config = check_splits_and_config()
     check_training_progress()
     check_deterministic_review_and_render()
+    check_review_smoothing()
     model_summary = runner.run_model_checks(config)
     print(json.dumps({"status": "passed", "checks": [
         "coordinate scaling and pixel-centre conversions", "A/B alignment and far/near target channels",
@@ -324,6 +470,7 @@ def main() -> None:
         "match-grouped split disjointness and fold validation", "training config reaches AdamW",
         "sparse flushed batch progress, epoch summaries, and early stopping in CV/final training",
         "deterministic point-only review rendering and failure accounting",
+        "review smoothing, YAML windows, gap policies, inverse projection, and raw export compatibility",
         "complete pretrained transfer, gradients, independent initialization, checkpoint reload",
     ], "model": model_summary}, indent=2))
 
