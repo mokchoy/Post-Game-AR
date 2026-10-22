@@ -1,0 +1,4 @@
+# Install only in .venv-depth; normal tracking does not import PyTorch.
+-r requirements.txt
+torch>=2.2,<3
+torchvision>=0.17,<1

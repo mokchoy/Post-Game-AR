@@ -1,5 +1,9 @@
 # First-pass implementation and verification
 
+These are the original first-pass notes. The current Logitech configuration,
+tracking diagnostics/replay workflow, and acceptance-gated depth prototype are
+documented in [WORKFLOW.md](WORKFLOW.md); research links are in [RESEARCH.md](RESEARCH.md).
+
 Implemented in `ar_projection/`: strict typed configuration, camera/preprocessing,
 geometry and shared records, tag candidates, grid ORB and forward/backward LK,
 bounded map bootstrap and sparse joint bundle refinement, pose estimation,

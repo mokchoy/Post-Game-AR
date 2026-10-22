@@ -8,21 +8,21 @@ from unittest.mock import patch
 import cv2
 import numpy as np
 from ar_projection.camera import Capture, Preprocessor, backend, load_calibration
-from ar_projection.config import DEFAULT_PATH, load_config
+from ar_projection.config import load_config
 from ar_projection.diagnostics import RunLogger
-from ar_projection.features import FeatureTracker, feature_mask, match_descriptors
+from ar_projection.features import FeatureTracker, feature_mask, group_match_descriptors, match_descriptors
 from ar_projection.geometry import camera_position, inverse, panel_points, project, projection_jacobian, retract, tag_points, transform, triangulate
-from ar_projection.landmarks import MapBuilder, associate, load_map, map_metadata, save_map
+from ar_projection.landmarks import MapBuilder, associate, guided_matches, load_map, map_metadata, save_map
 from ar_projection.pipeline import Pipeline, run
 from ar_projection.pose import PoseSolver, covariance
-from ar_projection.rendering import PoseSmoother, panel_covariance, visible_panel
+from ar_projection.rendering import PoseSmoother, annotate, panel_covariance, visible_panel
 from ar_projection.tags import TagDetector
 from ar_projection.types import CameraModel, FeatureObservation, FramePacket, LandmarkMap, TagObservation
 
 
 class TrackingTests(unittest.TestCase):
     def setUp(self):
-        self.c = load_config()
+        self.c = load_config(Path(__file__).parent/"fixtures"/"tracking-config.json")
         self.rng = np.random.default_rng(7)
         cv2.setRNGSeed(7)
         self.cam = CameraModel(np.array([[800., 0, 320], [0, 800., 240], [0, 0, 1]]), np.zeros(5), (640, 480),
@@ -214,6 +214,41 @@ class TrackingTests(unittest.TestCase):
         disabled = replace(config, uncertainty=replace(config.uncertainty, enabled=False))
         self.assertIsNone(covariance(self.T, self.X, U, np.ones(60), self.cam, disabled)[0])
 
+    def test_group_match_descriptors_avoids_flat_ratio_test_false_ambiguity(self):
+        def with_distance(n_bits):
+            byte_full, rem = divmod(n_bits, 8)
+            d = np.zeros(32, np.uint8)
+            d[:byte_full] = 0xFF
+            if rem:
+                d[byte_full] = (1 << rem)-1
+            return d
+        query = np.zeros((1, 32), np.uint8)
+        same_landmark_view = with_distance(5)  # landmark 0, primary view: distance 5 from query
+        same_landmark_other_view = with_distance(6)  # landmark 0, extra view: distance 6
+        other_landmark = with_distance(20)  # a genuinely different landmark: distance 20
+        train = np.stack([same_landmark_view, same_landmark_other_view, other_landmark])
+        train_ids = np.array([0, 0, 1], np.int64)
+        grouped = group_match_descriptors(query, train, train_ids, self.c.features)
+        self.assertEqual(grouped, [(0, 0, 5.0, .25)])  # correct: best 5 vs the true second landmark's 20
+        flat = match_descriptors(query, train, self.c.features)
+        self.assertEqual(flat, [])  # the bug this fixes: 5 vs landmark 0's own second row (6) looks ambiguous
+
+    def test_group_match_descriptors_rejects_non_reciprocal_landmark_match(self):
+        def with_distance(n_bits):
+            byte_full, rem = divmod(n_bits, 8)
+            d = np.zeros(32, np.uint8)
+            d[:byte_full] = 0xFF
+            if rem:
+                d[byte_full] = (1 << rem)-1
+            return d
+        train = np.stack([with_distance(0), with_distance(40)])  # landmark 0 close to query0; landmark 1 far from both
+        train_ids = np.array([0, 1], np.int64)
+        closer_query = np.zeros((1, 32), np.uint8)  # exact match to landmark 0
+        farther_query = with_distance(10)  # also closest to landmark 0, but less close than closer_query
+        cfg = replace(self.c.features, mutual_matching=True)
+        both = group_match_descriptors(np.vstack([closer_query, farther_query]), train, train_ids, cfg)
+        self.assertEqual([(q, id) for q, id, _, _ in both], [(0, 0)])  # query 1 loses landmark 0's reciprocity to query 0
+
     def test_map_safe_roundtrip_compatibility_and_no_overwrite(self):
         m = self.ready_map()
         with tempfile.TemporaryDirectory() as directory:
@@ -233,10 +268,165 @@ class TrackingTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Object arrays"):
                 load_map(file, m.metadata, self.c)
 
+    def test_multiview_descriptor_bank_roundtrips_and_old_format_still_loads(self):
+        extra = np.zeros((60, 2, 32), np.uint8)
+        extra[0, 0] = self.rng.integers(0, 256, 32, dtype=np.uint8)
+        counts = np.zeros(60, np.int64)
+        counts[0] = 1
+        m = LandmarkMap(self.X.copy(), self.desc.copy(), np.arange(60, dtype=np.int64), np.full(60, 3, np.int64), np.zeros(60),
+                        map_metadata(self.c, self.cam), extra, counts)
+        with tempfile.TemporaryDirectory() as directory:
+            file = Path(directory)/"map.npz"
+            save_map(file, m)
+            loaded = load_map(file, m.metadata, self.c)
+            np.testing.assert_array_equal(loaded.extra_descriptors, extra)
+            np.testing.assert_array_equal(loaded.extra_descriptor_counts, counts)
+            old = self.ready_map()  # no extra fields: simulates a map saved before this feature existed
+            file2 = Path(directory)/"old.npz"
+            save_map(file2, old)
+            loaded_old = load_map(file2, old.metadata, self.c)
+            self.assertIsNone(loaded_old.extra_descriptors)
+            self.assertIsNone(loaded_old.extra_descriptor_counts)
+
+    def test_descriptor_bank_selects_most_angularly_separated_views(self):
+        builder = MapBuilder(self.c, self.cam)
+        point = self.X[0]
+
+        class _KF:
+            def __init__(self, T):
+                self.T = T
+        poses = [self.T]
+        for dx in (.05, .2, .4):
+            T = self.T.copy()
+            T[0, 3] += dx
+            poses.append(T)
+        builder.keyframes = [_KF(T) for T in poses]
+        obs = [(j, FeatureObservation(j, np.zeros(2), np.full(32, j+1, np.uint8))) for j in range(len(poses))]
+        chosen, count = builder._descriptor_bank(point, obs, 2)
+        self.assertEqual(count, 2)
+        primary_dir = point-camera_position(poses[0])
+        primary_dir = primary_dir/np.linalg.norm(primary_dir)
+        angles = []
+        for j, T in enumerate(poses[1:], start=1):
+            direction = point-camera_position(T)
+            direction = direction/np.linalg.norm(direction)
+            angles.append((float(np.arccos(np.clip(primary_dir@direction, -1, 1))), j))
+        expected_ids = sorted(angles, reverse=True)[:2]
+        expected = np.array([np.full(32, j+1, np.uint8) for _, j in expected_ids])
+        np.testing.assert_array_equal(sorted(chosen.tolist()), sorted(expected.tolist()))
+
+    def test_associate_matches_via_extra_descriptor_bank_entry(self):
+        extra = np.zeros((60, 1, 32), np.uint8)
+        extra[5, 0] = self.rng.integers(0, 256, 32, dtype=np.uint8)
+        counts = np.zeros(60, np.int64)
+        counts[5] = 1
+        m = LandmarkMap(self.X.copy(), self.desc.copy(), np.arange(60, dtype=np.int64), np.full(60, 3, np.int64), np.zeros(60),
+                        map_metadata(self.c, self.cam), extra, counts)
+        feature = FeatureObservation(999, self.generate(self.T, self.X[5:6])[0], extra[5, 0].copy())
+        X, U = associate([feature], m, self.c.features)
+        self.assertEqual(feature.landmark_id, 5)
+        self.assertEqual(feature.association_source, "orb_map")
+        self.assertEqual(len(X), 1)
+
+    def test_guided_matches_prefers_descriptor_over_closer_pixel_and_respects_radius(self):
+        m = LandmarkMap(self.X[:1].copy(), self.desc[:1].copy(), np.array([7], np.int64), np.array([3], np.int64),
+                        np.zeros(1), map_metadata(self.c, self.cam))
+        proj = self.generate(self.T, self.X[:1])[0]
+        correct = FeatureObservation(0, proj+[5, 0], self.desc[0].copy())  # 5px away, correct descriptor
+        wrong = FeatureObservation(1, proj+[1, 0], self.desc[5].copy())  # 1px away (closer!), wrong descriptor
+        cfg = replace(self.c.features.guided_matching, search_radius_px=12.)
+        matches = guided_matches([wrong, correct], m, self.T, self.cam, cfg, used=set())
+        self.assertEqual(len(matches), 1)
+        k, id, distance, ratio = matches[0]
+        self.assertEqual(id, 7)
+        self.assertIs([wrong, correct][k], correct)
+        far = FeatureObservation(2, proj+[100, 0], self.desc[0].copy())  # correct descriptor but outside the radius
+        self.assertEqual(guided_matches([far], m, self.T, self.cam, cfg, used=set()), [])
+
+    def test_guided_matches_loose_limit_and_geometry_first(self):
+        m = LandmarkMap(self.X[:1].copy(), self.desc[:1].copy(), np.array([7], np.int64), np.array([3], np.int64),
+                        np.zeros(1), map_metadata(self.c, self.cam))
+        proj = self.generate(self.T, self.X[:1])[0]
+        near = FeatureObservation(0, proj+[1, 0], self.desc[5].copy())  # nearest in pixels, descriptor of another landmark
+        base = replace(self.c.features.guided_matching, search_radius_px=12., max_hamming_distance=10)
+        self.assertEqual(guided_matches([near], m, self.T, self.cam, base, used=set()), [])  # tight limit rejects it
+        loose = replace(base, max_hamming_distance=256)
+        self.assertEqual(guided_matches([near], m, self.T, self.cam, loose, used=set())[0][1], 7)  # loosened limit accepts
+        far = FeatureObservation(1, proj+[8, 0], self.desc[0].copy())  # exact descriptor, but farther in pixels
+        self.assertEqual(guided_matches([near, far], m, self.T, self.cam, loose, used=set())[0][0], 1)  # descriptor ranking
+        geometry = replace(loose, geometry_first=True)
+        self.assertEqual(guided_matches([near, far], m, self.T, self.cam, geometry, used=set())[0][0], 0)  # nearest pixel wins
+        tie = FeatureObservation(2, proj+[-1, 0], self.desc[0].copy())  # same pixel distance as `near`, correct descriptor
+        self.assertEqual(guided_matches([near, tie], m, self.T, self.cam, geometry, used=set())[0][0], 1)  # descriptor breaks the tie
+
+    def test_geometry_margin_drops_ambiguous_picks_only(self):
+        m = LandmarkMap(self.X[:1].copy(), self.desc[:1].copy(), np.array([7], np.int64), np.array([3], np.int64),
+                        np.zeros(1), map_metadata(self.c, self.cam))
+        proj = self.generate(self.T, self.X[:1])[0]
+        near = FeatureObservation(0, proj+[2, 0], self.desc[0].copy())
+        rival = FeatureObservation(1, proj+[0, 3], self.desc[0].copy())  # 3 px vs 2 px: ratio 1.5
+        base = replace(self.c.features.guided_matching, search_radius_px=12., max_hamming_distance=256, geometry_first=True)
+        self.assertEqual(len(guided_matches([near, rival], m, self.T, self.cam, base, used=set())), 1)  # margin off (default 1.0)
+        self.assertEqual(guided_matches([near, rival], m, self.T, self.cam, replace(base, geometry_margin=2.0), used=set()), [])  # ambiguous
+        self.assertEqual(len(guided_matches([near], m, self.T, self.cam, replace(base, geometry_margin=2.0), used=set())), 1)  # unique pick kept
+
+    def test_guided_matches_one_to_one_per_feature_and_per_landmark(self):
+        m = LandmarkMap(self.X[:2].copy(), self.desc[:2].copy(), np.array([7, 8], np.int64), np.array([3, 3], np.int64),
+                        np.zeros(2), map_metadata(self.c, self.cam))
+        proj = self.generate(self.T, self.X[:2])
+        feature = FeatureObservation(0, proj[0], self.desc[0].copy())  # only candidate; near landmark 7's projection
+        cfg = replace(self.c.features.guided_matching, search_radius_px=12.)
+        matches = guided_matches([feature], m, self.T, self.cam, cfg, used=set())
+        self.assertEqual(len(matches), 1)
+        self.assertEqual(matches[0][1], 7)  # landmark 8 found no available candidate once 7 claimed the only feature
+        matches = guided_matches([feature], m, self.T, self.cam, cfg, used={7})  # 7 already claimed elsewhere this frame
+        self.assertEqual(matches, [])
+
+    def test_associate_uses_guided_matching_when_enabled_and_falls_back_globally(self):
+        m = self.ready_map()
+        guided_cfg = replace(self.c.features, guided_matching=replace(self.c.features.guided_matching, enabled=True, search_radius_px=12.))
+        features = self.features(self.T)  # landmark_id=None for all, pixels/descriptors from self.X/self.desc via self.T
+        X, U = associate(features, m, guided_cfg, prior_T_CW=self.T, camera=self.cam)
+        self.assertEqual(len(X), 60)
+        self.assertTrue(all(f.association_source == "guided" for f in features))
+
+    def test_associate_guided_matching_default_off_ignores_prior(self):
+        m = self.ready_map()
+        features_with_prior = self.features(self.T)
+        features_without_prior = self.features(self.T)
+        X1, U1 = associate(features_with_prior, m, self.c.features, prior_T_CW=self.T, camera=self.cam)
+        X2, U2 = associate(features_without_prior, m, self.c.features)
+        self.assertTrue(all(f.association_source == "orb_map" for f in features_with_prior))
+        np.testing.assert_array_equal(X1, X2)
+        np.testing.assert_array_equal(U1, U2)
+
+    def test_guided_revalidation_clears_wrong_inherited_id_and_rematches_it(self):
+        m = self.ready_map()
+        features = self.features(self.T)
+        for f in features:
+            f.association_source = "lk"
+        wrong, right = features[0], features[1]
+        wrong.landmark_id, right.landmark_id = int(m.ids[2]), int(m.ids[1])  # id 2 projects far from feature 0; id 1 is correct
+        guided = replace(self.c.features.guided_matching, enabled=True, revalidate_existing=True)
+        cfg = replace(self.c.features, guided_matching=guided)
+        stats = {}
+        associate(features, m, cfg, stats, prior_T_CW=self.T, camera=self.cam)
+        self.assertEqual(stats["ids_cleared_by_guided_revalidation"], 1)
+        self.assertEqual(right.landmark_id, int(m.ids[1]))  # correct inherited id kept
+        self.assertEqual(wrong.landmark_id, int(m.ids[0]))  # cleared, then matched to its own landmark by the guided pass
+        self.assertEqual(wrong.association_source, "guided")
+        ids = [f.landmark_id for f in features if f.landmark_id is not None]
+        self.assertEqual(len(ids), len(set(ids)))  # one-to-one
+        off = replace(cfg, guided_matching=replace(guided, revalidate_existing=False))
+        features = self.features(self.T)
+        features[0].landmark_id, features[0].association_source = int(m.ids[2]), "lk"
+        associate(features, m, off, {}, prior_T_CW=self.T, camera=self.cam)
+        self.assertEqual(features[0].landmark_id, int(m.ids[2]))  # default off leaves the wrong id alone
+
     def test_strict_config_combinations_paths_and_types(self):
         with tempfile.TemporaryDirectory() as directory:
             file = Path(directory)/"config.json"
-            original = json.loads(DEFAULT_PATH.read_text())
+            original = json.loads((Path(__file__).parent/"fixtures"/"tracking-config.json").read_text())
             invalid = [("features", "backend", "xfeat"), ("camera", "backend", "unknown"), ("pose", "mode", "unknown"),
                        ("tags", "size_m", -.1), ("features", "max_features", True), ("features", "enabled", False),
                        ("tags", "enabled", False), ("camera", "demo_approx", True), ("mapping", "min_confirming_views", 2),
@@ -263,14 +453,38 @@ class TrackingTests(unittest.TestCase):
         for enabled in (True, False):
             tracker = FeatureTracker(replace(cfg, lk=replace(cfg.lk, enabled=enabled)))
             a = tracker.update(gray, [self.tag], 0)
+            first_stats = tracker.frame_stats
+            self.assertTrue(first_stats["orb"]["ran"])
+            self.assertEqual(first_stats["orb"]["keypoints"], len(a))
+            self.assertEqual(first_stats["orb"]["new_tracks"], len(a))
             b = tracker.update(gray, [self.tag], 1)
+            stats = tracker.frame_stats
             self.assertLessEqual(len(b), 120)
             self.assertGreater(len(set(f.track_id for f in a)&set(f.track_id for f in b)), 40)
             self.assertEqual(len(b), len({f.track_id for f in b}))
             self.assertTrue(all(mask[int(f.pixel[1]), int(f.pixel[0])] for f in b))
+            self.assertEqual(stats["tracks_after_update"], len(b))
+            self.assertEqual(stats["lk"]["retained"]+stats["lk"]["dropped"], stats["lk"]["input"])
+            self.assertEqual(stats["orb"]["ran"], not enabled)
+            if enabled:
+                self.assertEqual(stats["lk"]["retained"], len(b))
         pairs = match_descriptors(self.desc, self.desc, cfg)
         self.assertEqual(len(pairs), 60)
-        self.assertTrue(all(a == b for a, b in pairs))
+        self.assertTrue(all(a == b for a, b, _, _ in pairs))
+
+    def test_feature_tracking_diagnostics_reach_frame_and_overlay(self):
+        config = replace(self.c, mapping=replace(self.c.mapping, mode="off"),
+                         display=replace(self.c.display, enabled=False))
+        pipe = Pipeline(config, self.cam)
+        gray = self.rng.integers(0, 256, (480, 640), dtype=np.uint8)
+        bgr = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+        packet = FramePacket(0, 0., bgr, bgr.copy(), gray, self.cam)
+        result = pipe.process(packet, tags=[])
+        stats = result.diagnostics["feature_tracking"]
+        self.assertTrue(stats["enabled"])
+        self.assertTrue(stats["orb"]["ran"])
+        self.assertEqual(stats["tracks_after_update"], result.diagnostics["tracked_features"])
+        self.assertEqual(annotate(packet, result, [], pipe.last_features, config.display).shape, bgr.shape)
 
     def test_occlusion_loss_recovery_and_headless_observation_logs(self):
         with tempfile.TemporaryDirectory() as directory:

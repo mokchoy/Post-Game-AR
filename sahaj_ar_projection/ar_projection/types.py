@@ -20,6 +20,8 @@ class FramePacket:
     bgr: np.ndarray
     gray: np.ndarray
     camera: CameraModel
+    capture_read_ms: float = 0.0
+    acquired_monotonic: Optional[float] = None
 
 
 @dataclass
@@ -42,16 +44,23 @@ class FeatureObservation:
     landmark_id: Optional[int] = None
     flow_error: Optional[float] = None
     valid: bool = True
+    age_frames: int = 1
+    association_source: Optional[str] = None
+    match_distance: Optional[float] = None  # set only when landmark_id was freshly assigned this frame (orb_map)
+    match_ratio: Optional[float] = None
+    frames_since_confirmed: int = 0  # frames since this id last passed the valid-pose reprojection check; used by id_revalidation.age_expire
 
 
 @dataclass
 class LandmarkMap:
     points: np.ndarray  # (N,3) in W, metres
-    descriptors: np.ndarray  # (N,32), uint8
+    descriptors: np.ndarray  # (N,32), uint8; primary (first-confirming-view) descriptor
     ids: np.ndarray  # (N,), unique int64
     support: np.ndarray  # (N,), independent keyframe counts
     rms: np.ndarray  # (N,), pixel RMS
     metadata: dict
+    extra_descriptors: Optional[np.ndarray] = None  # (N,K,32) uint8, zero-padded; additional per-landmark descriptors from other views
+    extra_descriptor_counts: Optional[np.ndarray] = None  # (N,), how many of the K extra slots are valid (0..K)
 
 
 @dataclass
@@ -68,6 +77,7 @@ class PoseEstimate:
     covariance_reason: Optional[str] = None
     reason: Optional[str] = None
     covariance_ms: float = 0.0
+    diagnostics: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -80,3 +90,4 @@ class FrameResult:
     pixel_covariance: Optional[np.ndarray]
     diagnostics: dict
     timings: dict
+    association_observations: Optional[list] = None  # opt-in; see logging.association_dump

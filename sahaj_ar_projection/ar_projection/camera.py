@@ -1,6 +1,7 @@
 """Capture and one coherent preprocessing path; calibration NPZ remains compatible."""
 from pathlib import Path
 import hashlib
+import json
 import sys
 import time
 import cv2
@@ -67,7 +68,10 @@ class Capture:
     def __init__(self, cfg):
         self.cfg = cfg
         video = cfg.source_type == "video"
-        self.cap = cv2.VideoCapture(cfg.video_path if video else cfg.index, backend(cfg.backend, video))
+        # A recording retains its live backend in config for provenance, but
+        # FFV1 files need a file decoder rather than the MSMF camera interface.
+        api = backend("auto", True) if video and cfg.timestamps_path else backend(cfg.backend, video)
+        self.cap = cv2.VideoCapture(cfg.video_path if video else cfg.index, api)
         self.index = 0
         self.preprocessor = None
         if not self.cap.isOpened():
@@ -81,18 +85,42 @@ class Capture:
             self.close()
             raise ValueError("video has invalid source FPS; deterministic timestamps unavailable")
         self.timestamp_basis = "frame_index/source_fps" if video else "monotonic acquisition (not exposure)"
+        self.timestamps = None
+        if cfg.timestamps_path is not None:
+            if not video:
+                self.close()
+                raise ValueError("camera.timestamps_path requires a video source")
+            try:
+                rows = [json.loads(line) for line in Path(cfg.timestamps_path).read_text(encoding="utf-8").splitlines()]
+                if not rows or any(type(r["frame_index"]) is not int or r["frame_index"] != i or type(r["source_time_s"]) not in (int, float)
+                                   or not np.isfinite(r["source_time_s"]) for i, r in enumerate(rows)):
+                    raise ValueError("timestamps must contain contiguous frame indices and finite source times")
+                self.timestamps = [float(r["source_time_s"]) for r in rows]
+                self.timestamp_basis = "recorded source_time_s from frame JSONL"
+            except (OSError, KeyError, TypeError, ValueError):
+                self.close()
+                raise
 
     def read(self):
+        before = time.monotonic()
         ok, bgr = self.cap.read()
         acquired = time.monotonic()
         if not ok:
             if self.index == 0 or self.cfg.source_type == "camera":
                 raise ValueError("capture returned no frame")
+            if self.timestamps is not None and self.index != len(self.timestamps):
+                raise ValueError("recorded frame/timestamp counts differ")
             return None
         if self.preprocessor is None:
             self.preprocessor = Preprocessor(self.cfg, (bgr.shape[1], bgr.shape[0]))
         timestamp = self.index/self.fps if self.cfg.source_type == "video" else acquired
+        if self.timestamps is not None:
+            if self.index >= len(self.timestamps):
+                raise ValueError("recorded video has more frames than timestamps")
+            timestamp = self.timestamps[self.index]
         packet = self.preprocessor.packet(self.index, timestamp, bgr)
+        packet.capture_read_ms = (acquired-before)*1000
+        packet.acquired_monotonic = acquired
         self.index += 1
         return packet
 

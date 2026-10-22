@@ -3,6 +3,7 @@ from collections import Counter
 from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
+import hashlib
 import json
 import logging
 import platform
@@ -10,7 +11,7 @@ import uuid
 import cv2
 import numpy as np
 import scipy
-from .geometry import camera_position
+from .geometry import camera_position, project
 
 
 COVARIANCE_ASSUMPTIONS = {
@@ -37,7 +38,34 @@ def json_value(value):
 
 
 def write_json(path, data):
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
     Path(path).write_text(json.dumps(json_value(data), indent=2, allow_nan=False), encoding="utf-8")
+
+
+def code_sha256():
+    """Identity of the tracking code: SHA-256 over every ar_projection/*.py (names and bytes, sorted)."""
+    digest = hashlib.sha256()
+    for path in sorted(Path(__file__).parent.glob("*.py")):
+        digest.update(path.name.encode()+path.read_bytes())
+    return digest.hexdigest()
+
+
+def association_rows(features, landmark_map, pose, camera, threshold_px):
+    """One row per currently mapped observation; predicted pixel/inlier flag need a valid solver pose."""
+    lookup = {int(id): p for id, p in zip(landmark_map.ids, landmark_map.points)} if landmark_map is not None else {}
+    rows = []
+    for f in features:
+        if f.landmark_id is None:
+            continue
+        predicted, inlier = None, None
+        if pose.valid and f.landmark_id in lookup:
+            predicted = project(pose.T_CW, lookup[f.landmark_id][None], camera)[0]
+            inlier = bool(np.linalg.norm(predicted-f.pixel) <= threshold_px)
+        rows.append({"track_id": f.track_id, "landmark_id": int(f.landmark_id), "association_source": f.association_source,
+                     "inherited": f.association_source in ("lk", "orb_redetection"),
+                     "match_distance": f.match_distance, "match_ratio": f.match_ratio, "age_frames": f.age_frames,
+                     "pixel": f.pixel, "predicted_pixel": predicted, "ransac_inlier": inlier})
+    return rows
 
 
 class RunLogger:
@@ -45,6 +73,7 @@ class RunLogger:
         self.config = config
         self.path = None
         self.file = None
+        self.assoc_file = None
         self.writers = {}
         self.source_fps = source_fps
         self.counts = Counter()
@@ -52,6 +81,7 @@ class RunLogger:
         self.failure_start = None
         self.failure_durations = []
         self.last_time = None
+        self.bootstrap = None
         if config.logging.enabled:
             self.path = Path(config.logging.output_dir) / (datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")+"-"+uuid.uuid4().hex[:8])
             self.path.mkdir(parents=True, exist_ok=False)
@@ -64,9 +94,11 @@ class RunLogger:
                                                   "scipy": scipy.__version__, "calibration": camera.identity, "input": input_identity,
                                                   "actual_dimensions": camera.size, "timestamp_basis": timestamp_basis, "source_fps": source_fps,
                                                   "map": map_metadata, "covariance": COVARIANCE_ASSUMPTIONS,
-                                                  "reproducibility": "seeded sequential replay; not bitwise across versions/backends",
-                                                  "recording": "MJPG AVI; live invalid FPS fallback 30; JSONL acquisition times authoritative"})
+                                                  "reproducibility": "seeded sequential replay; not bitwise across versions/backends", "code_sha256": code_sha256(),
+                                                  "recording": f"{config.logging.input_codec} lossless input AVI; MJPG annotation; JSONL acquisition times authoritative"})
             self.file = (self.path/"frames.jsonl").open("x", encoding="utf-8")
+            if config.logging.association_dump:
+                self.assoc_file = (self.path/"assoc.jsonl").open("x", encoding="utf-8")
 
     def frame(self, packet, result):
         if self.file is None:
@@ -85,8 +117,15 @@ class RunLogger:
                "diagnostics": result.diagnostics, "timings_ms": result.timings}
         self.file.write(json.dumps(json_value(row), allow_nan=False)+"\n")
         self.file.flush()
+        if self.assoc_file is not None and result.association_observations is not None:
+            self.assoc_file.write(json.dumps(json_value({"frame_index": packet.index, "source_time_s": timestamp,
+                                                         "observations": result.association_observations}), allow_nan=False)+"\n")
+            self.assoc_file.flush()
         self.counts[pose.source] += 1
         self.times.append(result.timings["total"])
+        if result.diagnostics.get("mapping_mode") == "build":
+            self.bootstrap = {key: result.diagnostics.get(key) for key in
+                              ("bootstrap_reason", "bootstrap_refinement", "bootstrap_worker", "stable_landmarks", "keyframes", "map_ready")}
         if timestamp is not None:
             if not pose.valid and self.failure_start is None:
                 self.failure_start = timestamp
@@ -102,7 +141,8 @@ class RunLogger:
             fps = self.source_fps
             if fps is None or not np.isfinite(fps) or fps <= 0:
                 fps = 30.
-            writer = cv2.VideoWriter(str(self.path/f"{name}.avi"), cv2.VideoWriter_fourcc(*"MJPG"), fps, (image.shape[1], image.shape[0]))
+            codec = self.config.logging.input_codec if name == "input" else "MJPG"
+            writer = cv2.VideoWriter(str(self.path/f"{name}.avi"), cv2.VideoWriter_fourcc(*codec), fps, (image.shape[1], image.shape[0]))
             if not writer.isOpened():
                 writer.release()
                 raise ValueError(f"cannot open {name} video writer")
@@ -121,11 +161,15 @@ class RunLogger:
                        "median_processing_ms": float(np.median(self.times)) if n else None,
                        "p95_processing_ms": float(np.percentile(self.times, 95)) if n else None,
                        "throughput_fps": 1000/float(np.mean(self.times)) if n and np.mean(self.times) > 0 else None,
-                       "throughput_note": "processing throughput, not capture-to-display latency", "map": map_metadata, "exit_reason": exit_reason}
+                       "throughput_note": "processing including video encoding, not capture-to-display latency",
+                       "map": map_metadata, "bootstrap_at_last_frame": self.bootstrap, "exit_reason": exit_reason}
             write_json(self.path/"summary.json", summary)
             logging.info("Run saved to %s; valid poses %.1f%%", self.path, summary["valid_pose_percent"] or 0)
         finally:
             self.file.close()
             self.file = None
+            if self.assoc_file is not None:
+                self.assoc_file.close()
+                self.assoc_file = None
             for writer in self.writers.values():
                 writer.release()

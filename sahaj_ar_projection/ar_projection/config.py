@@ -1,5 +1,5 @@
 """Single JSON source of defaults; strict typed validation before opening devices."""
-from dataclasses import dataclass, fields
+from dataclasses import MISSING, dataclass, fields
 from pathlib import Path
 from typing import Optional, get_type_hints, get_origin, get_args, Union
 import json
@@ -17,6 +17,7 @@ class Camera:
     calibration_path: str
     undistort: bool
     demo_approx: bool
+    timestamps_path: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -44,6 +45,24 @@ class LK:
 
 
 @dataclass(frozen=True)
+class IdRevalidation:
+    mode: str = "off"  # off, loss_clear, age_expire, descriptor_check
+    max_age_frames: int = 50  # age_expire: clear an inherited id after this many unconfirmed frames
+    max_descriptor_distance: int = 60  # descriptor_check: clear an inherited id if its live descriptor drifts past this Hamming distance from the map
+
+
+@dataclass(frozen=True)
+class GuidedMatching:
+    enabled: bool = False
+    search_radius_px: float = 12.0  # base window radius around the prior-pose projection
+    max_hamming_distance: int = 60
+    ratio_test: float = 0.75
+    revalidate_existing: bool = False  # clear inherited ids whose landmark projects farther than search_radius_px from the feature under the prior pose
+    geometry_margin: float = 1.0  # geometry_first: drop a pick if another window candidate is closer than margin x its pixel distance; 1.0 = off
+    geometry_first: bool = False  # rank window candidates by pixel distance; descriptor only breaks ties and rejects outliers
+
+
+@dataclass(frozen=True)
 class Features:
     enabled: bool
     backend: str
@@ -65,6 +84,9 @@ class Features:
     redetect_every_n_frames: int
     redetect_below_tracks: int
     lk: LK
+    redetection_match_radius_px: float = 5.0
+    id_revalidation: IdRevalidation = IdRevalidation()
+    guided_matching: GuidedMatching = GuidedMatching()
 
 
 @dataclass(frozen=True)
@@ -82,6 +104,10 @@ class Mapping:
     max_reprojection_rms_px: float
     refine_bootstrap_map: bool
     refinement_max_nfev: int
+    refinement_time_budget_s: float = 5.0  # unused for stopping since refinement_max_evaluations replaced it (deterministic); kept for old configs
+    refinement_retry_interval_s: float = 2.0
+    refinement_max_evaluations: int = 2000  # deterministic residual-evaluation cap; replaces the old wall-clock deadline (non-reproducible under load)
+    multiview_descriptor_bank: int = 0  # extra descriptors per landmark from other confirming views, beyond the primary; 0 = off (baseline)
 
 
 @dataclass(frozen=True)
@@ -100,6 +126,7 @@ class Pose:
     max_linear_speed_m_s: float
     max_angular_speed_deg_s: float
     max_prediction_gap_s: float
+    prior_grace_s: float = 0.0  # keep the last valid pose as a seed (never rendered) this long after failures; 0 = drop at once
 
 
 @dataclass(frozen=True)
@@ -142,6 +169,8 @@ class Logging:
     output_dir: str
     save_input_video: bool
     save_annotated_video: bool
+    input_codec: str = "FFV1"
+    association_dump: bool = False
 
 
 @dataclass(frozen=True)
@@ -175,6 +204,10 @@ DEFAULT_PATH = Path(__file__).resolve().parents[1] / "config.json"
 def typed(cls, data, prefix=""):
     if not isinstance(data, dict):
         raise ValueError(f"{prefix}: expected object")
+    data = dict(data)
+    for f in fields(cls):
+        if f.name not in data and f.default is not MISSING:
+            data[f.name] = f.default
     names = {f.name for f in fields(cls)}
     if set(data) != names:
         raise ValueError(f"{prefix}: unknown {sorted(set(data)-names)}, missing {sorted(names-set(data))}")
@@ -199,12 +232,15 @@ def typed(cls, data, prefix=""):
 def validate(c: Config) -> None:
     enums = {"camera.source_type": ("camera", "video"), "camera.backend": ("auto", "dshow", "msmf", "v4l2", "avfoundation", "ffmpeg"),
              "tags.family": ("APRILTAG_36h11",), "features.backend": ("orb",), "mapping.mode": ("off", "build", "localize"),
-             "pose.mode": ("tag_only", "landmark_only", "joint"), "pose.robust_loss": ("linear", "huber", "soft_l1", "cauchy", "arctan"), "filter.mode": ("ema",)}
+             "pose.mode": ("tag_only", "landmark_only", "joint"), "pose.robust_loss": ("linear", "huber", "soft_l1", "cauchy", "arctan"), "filter.mode": ("ema",),
+             "logging.input_codec": ("FFV1", "HFYU"), "features.id_revalidation.mode": ("off", "loss_clear", "age_expire", "descriptor_check")}
     for label, choices in enums.items():
-        section, name = label.split(".")
-        if getattr(getattr(c, section), name) not in choices:
+        obj = c
+        for part in label.split("."):
+            obj = getattr(obj, part)
+        if obj not in choices:
             raise ValueError(f"{label}: supported values {choices}")
-    nonnegative = {"index", "anchor_id", "fast_threshold", "edge_threshold", "tag_mask_margin_px", "redetect_below_tracks", "max_level", "offset_y_m", "ambiguity_error_gap_px", "ambiguity_rotation_gap_deg", "seed"}
+    nonnegative = {"index", "anchor_id", "fast_threshold", "edge_threshold", "tag_mask_margin_px", "redetect_below_tracks", "max_level", "offset_y_m", "ambiguity_error_gap_px", "ambiguity_rotation_gap_deg", "seed", "multiview_descriptor_bank", "max_age_frames", "max_descriptor_distance", "refinement_max_evaluations", "prior_grace_s"}
     signed = {"tilt_x_deg"}
     def bounds(obj, prefix=""):
         for f in fields(obj):
@@ -217,13 +253,15 @@ def validate(c: Config) -> None:
     bounds(c)
     if c.schema_version != 1 or c.seed > 2**31-1:
         raise ValueError("schema_version must be 1; seed must fit signed int32")
-    for label, value in (("features.ratio_test", c.features.ratio_test), ("pose.ransac_confidence", c.pose.ransac_confidence)):
+    for label, value in (("features.ratio_test", c.features.ratio_test), ("pose.ransac_confidence", c.pose.ransac_confidence),
+                        ("features.guided_matching.ratio_test", c.features.guided_matching.ratio_test)):
         if not 0 < value < 1:
             raise ValueError(f"{label}: must be between 0 and 1")
     if not 0 < c.filter.measurement_weight <= 1 or not 0 < c.uncertainty.min_scaled_singular_value_ratio < 1:
         raise ValueError("filter.measurement_weight or uncertainty.min_scaled_singular_value_ratio: invalid fraction")
-    if c.features.scale_factor <= 1 or c.features.max_hamming_distance > 256:
-        raise ValueError("features.scale_factor must exceed 1; max_hamming_distance <= 256")
+    if (c.features.scale_factor <= 1 or c.features.max_hamming_distance > 256 or c.features.id_revalidation.max_descriptor_distance > 256
+            or c.features.guided_matching.max_hamming_distance > 256):
+        raise ValueError("features.scale_factor must exceed 1; max_hamming_distance fields <= 256")
     if c.features.patch_size < 3 or c.features.patch_size % 2 == 0 or c.features.lk.window_size_px % 2 == 0:
         raise ValueError("features.patch_size and features.lk.window_size_px must be odd")
     if c.mapping.min_depth_m >= c.mapping.max_depth_m:
@@ -247,6 +285,8 @@ def validate(c: Config) -> None:
         raise ValueError("camera.demo_approx requires tag_only, mapping off, uncertainty disabled")
     if c.camera.source_type == "video" and not c.camera.video_path:
         raise ValueError("camera.video_path is required for video")
+    if c.camera.timestamps_path is not None and (c.camera.source_type != "video" or not c.camera.timestamps_path):
+        raise ValueError("camera.timestamps_path requires a video source and nonempty JSONL path")
     if c.calibration.columns < 2 or c.calibration.rows < 2 or c.calibration.views < 8:
         raise ValueError("calibration requires >=2 inner corners per dimension and >=8 views")
     for label in ("camera.calibration_path", "mapping.map_path", "logging.output_dir"):
@@ -258,6 +298,16 @@ def validate(c: Config) -> None:
 def load_config(filename=DEFAULT_PATH, overrides=None) -> Config:
     filename = Path(filename).resolve()
     data = json.loads(filename.read_text(encoding="utf-8-sig"), parse_constant=lambda x: (_ for _ in ()).throw(ValueError(f"nonfinite JSON value: {x}")))
+    data["camera"].setdefault("timestamps_path", None)
+    data["features"].setdefault("redetection_match_radius_px", 5.0)
+    data["features"].setdefault("id_revalidation", {"mode": "off", "max_age_frames": 50, "max_descriptor_distance": 60})
+    data["features"].setdefault("guided_matching", {"enabled": False, "search_radius_px": 12.0, "max_hamming_distance": 60, "ratio_test": 0.75, "geometry_first": False, "revalidate_existing": False, "geometry_margin": 1.0})
+    data["mapping"].setdefault("refinement_time_budget_s", 5.0)
+    data["mapping"].setdefault("refinement_retry_interval_s", 2.0)
+    data["mapping"].setdefault("refinement_max_evaluations", 2000)
+    data["mapping"].setdefault("multiview_descriptor_bank", 0)
+    data["logging"].setdefault("input_codec", "FFV1")
+    data["logging"].setdefault("association_dump", False)
     for label, value in (overrides or {}).items():
         section, name = label.split(".")
         if section not in data or name not in data[section]:
@@ -265,7 +315,7 @@ def load_config(filename=DEFAULT_PATH, overrides=None) -> Config:
         data[section][name] = value
     c = typed(Config, data)
     validate(c)
-    for section, name in (("camera", "video_path"), ("camera", "calibration_path"), ("mapping", "map_path"), ("logging", "output_dir")):
+    for section, name in (("camera", "video_path"), ("camera", "timestamps_path"), ("camera", "calibration_path"), ("mapping", "map_path"), ("logging", "output_dir")):
         value = data[section][name]
         if value is not None:
             data[section][name] = str((filename.parent / value).resolve())

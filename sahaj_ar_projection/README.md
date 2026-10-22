@@ -1,5 +1,10 @@
 # Anchor-referenced AR tracking, first pass
 
+**Current Logitech workflow:** see [WORKFLOW.md](WORKFLOW.md) for the separate
+17 cm / MSMF configuration, lossless timestamp-preserving replay, tracking
+comparisons, physical acceptance, and the optional gated RGB-depth prototype.
+Research references and their roles are in [RESEARCH.md](RESEARCH.md).
+
 Python **3.10+**, NumPy, OpenCV contrib and SciPy. A calibrated RGB camera observes
 AprilTag 36h11 ID 0 and a small frozen map of static natural landmarks. The app
 renders the original opaque green panel using one jointly refined camera pose.
@@ -16,7 +21,8 @@ python -m pip install -r requirements.txt
 
 Avoid an environment with incompatible NumPy/SciPy versions. A local `.venv` was
 created for this implementation; the system Anaconda installation was untouched.
-Generate a marker with a white margin, and print the outer black square at 100 mm:
+Generate a marker with a white margin, and print the outer black square at the
+measured `tags.size_m` (170 mm for the current Logitech setup):
 
 ```powershell
 python -c "import cv2; d=cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_APRILTAG_36h11); m=cv2.aruco.generateImageMarker(d,0,800); cv2.imwrite('tag36h11-id0.png',cv2.copyMakeBorder(m,80,80,80,80,cv2.BORDER_CONSTANT,value=255))"
@@ -30,11 +36,10 @@ backends fail before opening a camera. CLI flags override only their correspondi
 fields; the resolved effective config is saved with each logged run. Relative
 config and CLI data paths resolve against the configuration file's directory.
 
-All initial tracking defaults from the brief are retained. A typed `calibration`
-section matches the supplied board: 6 inner corners across, 8 inner corners down,
-square size 0.020 m, 15 views. The checkerboard has 7 by 9 printed squares;
-OpenCV's pattern size counts inner corner intersections, so subtract one square
-in each direction. Change camera `width`/`height` here for calibration and runtime.
+The typed `calibration` section counts inner corner intersections, not printed
+squares. The confirmed Logitech board has 7 by 9 inner corners with 0.020 m
+squares; `config-logitech.json` requests 15 views. Change camera `width`/`height`
+in the selected config for calibration and runtime.
 
 Capture backends: `auto`, `dshow`, `msmf`, `v4l2`, `avfoundation`, `ffmpeg`.
 `auto` uses DirectShow on Windows live capture and OpenCV auto selection elsewhere
@@ -80,7 +85,8 @@ python .\april-tag-projection.py --self-check
 with a rough 60-degree-FOV camera. It is a labelled visual demo, unsuitable for
 metric mapping/localisation or uncertainty claims. Explicit contradictory mode
 flags are rejected. Panel projection remains floating point; only drawing rounds.
-The panel hides on invalid tracking, nonpositive depth or any off-image corner.
+The panel hides on invalid tracking, nonpositive depth, or no image intersection.
+Partially off-image panels are raster-clipped rather than hidden entirely.
 
 ## Bootstrap, save and load
 
@@ -93,17 +99,20 @@ python .\april-tag-projection.py --mapping-mode localize --pose-mode joint --map
 python .\april-tag-projection.py --mapping-mode localize --pose-mode landmark_only --map data/landmark-map.npz
 ```
 
-Bootstrap accepts unambiguous validated anchor poses, takes at most 20 useful
+Bootstrap accepts unambiguous validated anchor poses, takes at most 50 useful
 keyframes, reconstructs at most 500 landmarks, and requires at least three
 confirming views with depth, baseline, parallax and reprojection gates. At least
-40 stable landmarks are required to freeze the map. Optional one-time sparse
+80 stable landmarks are required by the current config to freeze the map. Optional sparse
 bundle refinement jointly optimizes keyframe poses and points with the fixed
 known-size anchor removing gauge freedom. The frozen map never grows at runtime.
-The live window shows the accepted stable-landmark count toward 40 and keyframe
-count toward 20; features with fewer than three confirming views do not count yet.
-The 20-keyframe default gives a small workspace more chances to collect translated
-views: a prior camera run filled eight keyframes by frame 85 but had only 25 stable
-landmarks. If the configured limit is reached, the window prompts you to press R.
+The live window shows the configured stable-landmark and keyframe targets;
+features with fewer than three confirming views do not count yet. Live/visible
+runs build and refine snapshots in one cancellable background worker; headless
+file replay stays sequential. Refinement has a five-second budget and can retry
+after another accepted keyframe and a two-second cooldown. The GUI/logs report
+worker status and optimizer failure details. If capacity is reached, the window prompts
+you to press R. A prior saved 40-point map belongs to a different calibration and
+10 cm tag; it is not compatible with the current Logitech setup.
 
 `--save-map` explicitly saves once ready; a run ending before readiness fails with
 a clear message. Alternatively press **S** to save. Existing maps are protected;
@@ -138,7 +147,10 @@ Recordings must match the calibrated camera mode and dimensions. `--max-frames N
 limits a run. Video time is frame index/source FPS, independent of processing
 wall time; invalid FPS is rejected. Live time is monotonic acquisition time, not
 necessarily sensor exposure time. Nonincreasing times invalidate tracking; a
-large source-time gap resets motion/filter/LK state. NumPy/OpenCV are seeded and
+large source-time gap expires the pose prior and resets the smoother while
+retaining LK identities for geometric checks and forcing ORB recovery.
+`--record-input` saves lossless input; `--replay-run RUN` reuses the original
+JSONL acquisition times rather than nominal FPS. NumPy/OpenCV are seeded and
 frames run sequentially. Exact bitwise reproduction across versions/backends is
 not promised.
 
@@ -152,7 +164,9 @@ Summary includes tracking availability, source counts, failure durations and
 median/p95 processing durations. Throughput is not capture-to-display latency.
 
 Set `logging.save_input_video` or `save_annotated_video` in the same JSON to record
-MJPG AVI. Valid source FPS is used, with 30 FPS fallback for live devices lacking
+lossless FFV1/Huffyuv input AVI or MJPG annotated AVI. The Logitech config uses
+Huffyuv for cheaper encoding; existing configs default to FFV1. Encoding has its
+own frame timing and contributes to total processing time. Valid source FPS is used, with 30 FPS fallback for live devices lacking
 FPS; frame JSONL timestamps remain authoritative. `logging.enabled=false` creates
 no run directory and disables video writes. `display.enabled=false` or `--headless`
 avoids all window calls. Debug/features/uncertainty overlays are separately
@@ -182,7 +196,7 @@ measured. Per-corner 2-by-2 pixel matrices use `G @ Sigma @ G.T`. Optional ellip
 show raw conditional approximately 2-sigma predictions; predicted uncertainty is
 not jitter or registration accuracy. Disabling uncertainty makes it unavailable.
 
-The optional fixed EMA is **disabled by default**. When enabled it smooths camera
+The optional fixed EMA is disabled in the Logitech diagnostic config. When enabled it smooths camera
 position and geodesic orientation in T_WC, then inverts for rendering. It resets
 on session changes/loss/recovery or time gaps and does not smooth panel corners
 independently. Its fixed measurement weight depends on frame rate; compare at
@@ -219,6 +233,8 @@ Tune noise, baseline/parallax, support, coverage, residual and speed thresholds
 from recorded data; the supplied values are starting settings.
 
 This pass supports temporary tag absence within previously mapped static coverage.
-It does not promise an unrestricted 360-degree pan. No hand occlusion, textures,
-badminton reconstruction, learned features, unlimited mapping/SLAM, loop closure
-or adaptive filtering is implemented.
+It does not promise an unrestricted 360-degree pan. The optional depth prototype
+adds a diagnostic texture and scene-depth visibility after physical tracking
+acceptance; it has not yet been validated on the new Logitech scene. Video
+playback, badminton reconstruction, learned feature tracking, unlimited SLAM,
+loop closure and adaptive filtering are outside this prototype.

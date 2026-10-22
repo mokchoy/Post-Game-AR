@@ -58,6 +58,21 @@ class PoseSolver:
         self.config = config
 
     def estimate(self, tags, landmark_world, landmark_pixels, camera, previous=None, dt=None):
+        self.last_diagnostics = {"mapped_input": len(landmark_world), "ransac_attempted": False,
+                                 "ransac_inliers": 0, "occupied_cells": 0,
+                                 "landmark_gate_reason": "insufficient mapped observations",
+                                 "policy": "landmarks must pass standalone PnP before fusion"}
+        estimate = self._estimate(tags, landmark_world, landmark_pixels, camera, previous, dt)
+        estimate.diagnostics.update(self.last_diagnostics)
+        estimate.diagnostics["final_landmark_inliers"] = estimate.landmark_inliers
+        if self.last_diagnostics["landmark_gate_reason"] is None:
+            if not estimate.valid:
+                estimate.diagnostics["landmark_gate_reason"] = "pose rejected: "+str(estimate.reason)
+            elif not estimate.landmark_inliers:
+                estimate.diagnostics["landmark_gate_reason"] = "landmarks rejected during refinement"
+        return estimate
+
+    def _estimate(self, tags, landmark_world, landmark_pixels, camera, previous=None, dt=None):
         c = self.config
         p = c.pose
         X = np.asarray(landmark_world, np.float64).reshape(-1, 3)
@@ -66,21 +81,29 @@ class PoseSolver:
             raise ValueError("pose: invalid landmark observation arrays")
         inside = np.all((U >= 0) & (U < camera.size), axis=1)
         X, U = X[inside], U[inside]
+        self.last_diagnostics["in_image_input"] = len(X)
         if p.mode == "tag_only" or not c.features.enabled:
             X, U = X[:0], U[:0]
+            self.last_diagnostics["landmark_gate_reason"] = "disabled by pose mode or feature configuration"
         tag = next((t for t in tags if t.id == c.tags.anchor_id and t.valid), None) if p.mode != "landmark_only" and c.tags.enabled else None
         seeds = []
         if len(X) >= p.min_landmark_inliers:
+            self.last_diagnostics.update(ransac_attempted=True, landmark_gate_reason="PnP RANSAC failed")
             ok, rv, tv, inliers = cv2.solvePnPRansac(X, U, camera.K, camera.distortion,
                                                   iterationsCount=p.ransac_iterations, reprojectionError=p.ransac_reprojection_threshold_px,
                                                   confidence=p.ransac_confidence, flags=cv2.SOLVEPNP_EPNP)
             if ok and inliers is not None:
                 selected = inliers.ravel()
                 X, U = X[selected], U[selected]
-                if len(X) >= p.min_landmark_inliers and coverage(U, camera.size, c.features) >= p.min_occupied_grid_cells:
+                cells = coverage(U, camera.size, c.features)
+                self.last_diagnostics.update(ransac_inliers=len(X), occupied_cells=cells,
+                                             landmark_gate_reason="insufficient RANSAC inliers" if len(X) < p.min_landmark_inliers else
+                                             "insufficient image coverage" if cells < p.min_occupied_grid_cells else "invalid landmark pose/depth")
+                if len(X) >= p.min_landmark_inliers and cells >= p.min_occupied_grid_cells:
                     candidate = transform(rv, tv)
                     if valid_transform(candidate) and np.all(depths(candidate, X) > 0):
                         seeds.append(candidate)
+                        self.last_diagnostics["landmark_gate_reason"] = None
         if not seeds:
             X, U = X[:0], U[:0]
         if tag is not None and tag.ambiguous and not len(X):
@@ -95,7 +118,7 @@ class PoseSolver:
             rejected_tag = True
         if tag is not None:
             seeds += tag.candidates if len(X) else tag.candidates[:1]
-        if previous is not None and dt is not None and 0 < dt <= p.max_prediction_gap_s and seeds:
+        if previous is not None and dt is not None and 0 < dt <= max(p.max_prediction_gap_s, p.prior_grace_s) and seeds:
             seeds.append(previous)
         if not seeds:
             return PoseEstimate(reason=tag_reason)
@@ -109,7 +132,7 @@ class PoseSolver:
             for other, _, _, _, score in accepted:
                 if rotation_gap(other.T_CW, estimate.T_CW) > np.deg2rad(c.tags.ambiguity_rotation_gap_deg) and abs(score-cost) < c.tags.ambiguity_error_gap_px:
                     return PoseEstimate(reason="mapped evidence did not resolve planar ambiguity")
-        if previous is not None and dt is not None and 0 < dt <= p.max_prediction_gap_s:
+        if previous is not None and dt is not None and 0 < dt <= max(p.max_prediction_gap_s, p.prior_grace_s):
             linear = np.linalg.norm(camera_position(estimate.T_CW)-camera_position(previous))/dt
             angular = np.rad2deg(rotation_gap(estimate.T_CW, previous))/dt
             if linear > p.max_linear_speed_m_s or angular > p.max_angular_speed_deg_s:
@@ -123,6 +146,7 @@ class PoseSolver:
 
     def _refine(self, seed, tag, X, U, camera):
         c, p = self.config, self.config.pose
+        input_landmarks = len(X)
         Tw = tag.world if tag is not None else np.empty((0, 3))
         Tu = tag.pixels if tag is not None else np.empty((0, 2))
         status = None
@@ -170,6 +194,10 @@ class PoseSolver:
         source = "joint" if len(Tw) and enough else "tag" if len(Tw) else "landmark"
         estimate = PoseEstimate(T_CW=T if reason is None else None, valid=reason is None, source=source if reason is None else "none",
                                 landmark_inliers=len(X), tag_inliers=len(Tw), landmark_rms=feature_rms, tag_rms=tag_rms,
-                                optimization_status=status, reason=reason or ("tag rejected by joint residuals" if tag_rejected else None))
+                                optimization_status=status, reason=reason or ("tag rejected by joint residuals" if tag_rejected else None),
+                                diagnostics={"refinement_occupied_cells": coverage(U, camera.size, c.features),
+                                             "refinement_landmarks_rejected": input_landmarks-len(X),
+                                             "refinement_landmark_rms_px": feature_rms,
+                                             "refinement_reason": reason})
         cost = float(np.mean(((errors/sigma[:, None])**2)))
         return estimate, world, pixels, sigma, cost
