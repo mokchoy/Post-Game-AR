@@ -2,7 +2,7 @@ from collections import deque
 from time import monotonic
 
 import numpy as np
-
+# TODO: Improve distance change detection
 
 ZOOM_THRESHOLD_LOWER = 3
 ZOOM_THRESHOLD_UPPER = 6
@@ -11,6 +11,9 @@ COMMAND_COOLDOWN_SECONDS = 1.0
 HAND_DISTANCE_THRESHOLD_LOWER = 1.5
 HAND_DISTANCE_THRESHOLD_UPPER = 2.0
 HAND_DISTANCE_PERIOD_SECONDS = 0.5
+HAND_DISTANCE_METHOD = "depth"  # "size" or "depth"
+DEPTH_CHANGE_LOWER = 0.02
+DEPTH_CHANGE_UPPER = 0.20
 DOWNWARD_TAP_DISTANCE_PIXELS = 15
 DOUBLE_TAP_INTERVAL_SECONDS = 0.75
 PAUSE_FINGER_ADJACENCY_RATIO = 0.6
@@ -35,6 +38,9 @@ class GestureRecognition:
                  hand_distance_threshold_lower=HAND_DISTANCE_THRESHOLD_LOWER,
                  hand_distance_threshold_upper=HAND_DISTANCE_THRESHOLD_UPPER,
                  hand_distance_period_seconds=HAND_DISTANCE_PERIOD_SECONDS,
+                 hand_distance_method=HAND_DISTANCE_METHOD,
+                 depth_change_lower=DEPTH_CHANGE_LOWER,
+                 depth_change_upper=DEPTH_CHANGE_UPPER,
                  downward_tap_distance=DOWNWARD_TAP_DISTANCE_PIXELS,
                  double_tap_interval_seconds=DOUBLE_TAP_INTERVAL_SECONDS,
                  pause_finger_adjacency_ratio=PAUSE_FINGER_ADJACENCY_RATIO,
@@ -45,6 +51,8 @@ class GestureRecognition:
                 not 1 < hand_distance_threshold_lower <
                 hand_distance_threshold_upper or
                 hand_distance_period_seconds <= 0 or
+                hand_distance_method not in ("size", "depth") or
+                not 0 < depth_change_lower < depth_change_upper or
                 downward_tap_distance <= 0 or
                 double_tap_interval_seconds <= 0 or
                 pause_finger_adjacency_ratio <= 0 or
@@ -59,14 +67,20 @@ class GestureRecognition:
         self.hand_distance_threshold_lower = hand_distance_threshold_lower
         self.hand_distance_threshold_upper = hand_distance_threshold_upper
         self.hand_distance_period_seconds = hand_distance_period_seconds
+        self.hand_distance_method = hand_distance_method
+        self.depth_change_lower = depth_change_lower
+        self.depth_change_upper = depth_change_upper
         self.downward_tap_distance = downward_tap_distance
         self.double_tap_interval_seconds = double_tap_interval_seconds
         self.pause_finger_adjacency_ratio = pause_finger_adjacency_ratio
         self.pause_bent_finger_max_extension = pause_bent_finger_max_extension
         self.distance_history = deque()
         self.hand_span_history = deque()
+        self.hand_depth_history = deque()
         self.last_command = None
         self.last_command_time = None
+        self.last_hand_distance = "STATIONARY"
+        self.last_hand_distance_time = None
         self.tap_start_y = None
         self.tap_bottom_y = None
         self.tap_in_progress = False
@@ -77,6 +91,24 @@ class GestureRecognition:
         self.tap_bottom_y = None
         self.tap_in_progress = False
         self.first_tap_time = None
+
+    def latch_hand_distance(self, hand_distance, now):
+        if hand_distance == "STATIONARY":
+            if (self.last_hand_distance != "STATIONARY" and
+                    now - self.last_hand_distance_time <
+                    self.zoom_direction_cooldown_seconds):
+                return self.last_hand_distance
+            self.last_hand_distance = "STATIONARY"
+            self.last_hand_distance_time = None
+            return hand_distance
+        if (self.last_hand_distance != hand_distance and
+                self.last_hand_distance_time is not None and
+                now - self.last_hand_distance_time <
+                self.zoom_direction_cooldown_seconds):
+            return self.last_hand_distance
+        self.last_hand_distance = hand_distance
+        self.last_hand_distance_time = now
+        return hand_distance
 
     def is_pause_hand_shape(self, fingertips, landmarks):
         if landmarks is None:
@@ -122,7 +154,8 @@ class GestureRecognition:
         return False
 
     def update(self, gesture, right_fingertips=None, motion_gesture=None,
-               hand_span=None, now=None, right_landmarks=None):
+               hand_span=None, now=None, right_landmarks=None,
+               hand_depth=None):
         self.history.append(gesture)
         if gesture != self.current_gesture:
             self.current_gesture = gesture
@@ -138,7 +171,7 @@ class GestureRecognition:
             self.distance_history.append((now, separation))
 
             hand_distance = "STATIONARY"
-            if hand_span is not None:
+            if self.hand_distance_method == "size" and hand_span is not None:
                 self.hand_span_history.append((now, hand_span))
                 hand_cutoff = now - self.hand_distance_period_seconds
                 while (len(self.hand_span_history) > 1 and
@@ -153,6 +186,20 @@ class GestureRecognition:
                         hand_distance = "CLOSER"
                     elif (self.hand_distance_threshold_lower < further_factor <
                           self.hand_distance_threshold_upper):
+                        hand_distance = "FURTHER"
+            elif self.hand_distance_method == "depth" and hand_depth is not None:
+                self.hand_depth_history.append((now, hand_depth))
+                hand_cutoff = now - self.hand_distance_period_seconds
+                while (len(self.hand_depth_history) > 1 and
+                       self.hand_depth_history[1][0] <= hand_cutoff):
+                    self.hand_depth_history.popleft()
+                hand_baseline_time, hand_baseline = self.hand_depth_history[0]
+                if hand_baseline_time <= hand_cutoff:
+                    closer_change = hand_baseline - hand_depth
+                    further_change = hand_depth - hand_baseline
+                    if self.depth_change_lower < closer_change < self.depth_change_upper:
+                        hand_distance = "CLOSER"
+                    elif self.depth_change_lower < further_change < self.depth_change_upper:
                         hand_distance = "FURTHER"
 
             cutoff = now - self.zoom_period_seconds
@@ -200,12 +247,13 @@ class GestureRecognition:
             elif command != "NONE":
                 self.last_command = command
                 self.last_command_time = now
+            display_hand_distance = self.latch_hand_distance(hand_distance, now)
             output = (
                 f"\rIndex: ({index[0]:3d},{index[1]:3d}) | distances: "
                 f"{thumb_index:6.1f}px, "
                 f"{index_middle:6.1f}px, "
                 f"{thumb_middle:6.1f}px | "
-                f"Hand: {hand_distance:10s} | Command: {command:13s}"
+                f"Hand: {display_hand_distance:10s} | Command: {command:13s}"
             )
 
             print(f"{output:<100}", end="", flush=True)

@@ -188,10 +188,14 @@ def main(gesture_callback=None, args=None):
                     hand_span = (np.linalg.norm(
                         np.subtract(landmark_list[0], landmark_list[9]))
                         if is_right_hand else None)
+                    hand_depth = (float(np.median(
+                        [landmark.z for landmark in hand_landmarks.landmark]))
+                        if is_right_hand else None)
                     gesture_callback(hand_sign_text, right_fingertips,
                                      motion_gesture, hand_span,
                                      right_landmarks=(landmark_list
-                                                      if is_right_hand else None))
+                                                      if is_right_hand else None),
+                                     hand_depth=hand_depth)
 
                 # Drawing part
                 debug_image = draw_bounding_rect(use_brect, debug_image, brect)
