@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "seed": 7,
+  "camera": {
+    "source_type": "camera", "index": 0, "video_path": null, "timestamps_path": null,
+    "backend": "msmf", "width": 640, "height": 480,
+    "calibration_path": "logitech-camera-calibration.npz", "undistort": true, "demo_approx": false
+  },
+  "tags": {
+    "enabled": true, "family": "APRILTAG_36h11", "anchor_id": 0, "size_m": 0.17,
+    "corner_refinement_window_px": 3, "corner_sigma_px": 1.0,
+    "max_reprojection_rms_px": 3.0, "min_side_px": 40.0,
+    "ambiguity_error_gap_px": 0.3, "ambiguity_rotation_gap_deg": 5.0
+  },
+  "features": {
+    "enabled": true, "backend": "orb", "max_features": 500,
+    "grid_rows": 4, "grid_cols": 6, "scale_factor": 1.2, "nlevels": 8,
+    "fast_threshold": 20, "edge_threshold": 31, "patch_size": 31,
+    "ratio_test": 0.75, "max_hamming_distance": 60, "mutual_matching": true,
+    "observation_sigma_px": 1.5, "exclude_tag_regions": true, "tag_mask_margin_px": 10,
+    "exclude_rectangles": [], "redetect_every_n_frames": 15, "redetect_below_tracks": 80,
+    "redetection_match_radius_px": 5.0,
+    "lk": {"enabled": true, "window_size_px": 21, "max_level": 3, "max_iterations": 30,
+           "epsilon": 0.01, "forward_backward_max_error_px": 5.0}
+  },
+  "mapping": {
+    "mode": "build", "map_path": "data/logitech-landmark-map.npz",
+    "max_keyframes": 50, "max_landmarks": 500, "min_ready_landmarks": 80,
+    "min_baseline_m": 0.04, "min_parallax_deg": 1.5, "min_confirming_views": 3,
+    "min_depth_m": 0.10, "max_depth_m": 5.0, "max_reprojection_rms_px": 2.0,
+    "refine_bootstrap_map": true, "refinement_max_nfev": 100,
+    "refinement_time_budget_s": 5.0, "refinement_retry_interval_s": 2.0
+  },
+  "pose": {
+    "mode": "joint", "min_landmark_inliers": 12, "min_occupied_grid_cells": 4,
+    "ransac_iterations": 100, "ransac_reprojection_threshold_px": 3.0,
+    "ransac_confidence": 0.99, "robust_loss": "huber", "robust_f_scale": 2.5,
+    "max_nfev": 40, "max_landmark_rms_px": 3.0, "max_tag_rms_px": 3.0,
+    "max_linear_speed_m_s": 3.0, "max_angular_speed_deg_s": 300.0, "max_prediction_gap_s": 0.20
+  },
+  "uncertainty": {
+    "enabled": true, "project_to_panel_corners": true,
+    "translation_difference_step_m": 0.00001, "rotation_difference_step_rad": 0.000001,
+    "conditioning_translation_scale_m": 0.10, "conditioning_rotation_scale_rad": 0.10,
+    "min_scaled_singular_value_ratio": 0.000001
+  },
+  "filter": {"enabled": false, "mode": "ema", "measurement_weight": 0.40},
+  "panel": {"width_m": 0.20, "height_m": 0.12, "offset_y_m": 0.15, "tilt_x_deg": 90.0},
+  "display": {"enabled": true, "debug": true, "draw_features": true, "draw_uncertainty": true},
+  "calibration": {"columns": 7, "rows": 9, "square_size_m": 0.02, "views": 15},
+  "logging": {"enabled": true, "output_dir": "runs", "save_input_video": false, "save_annotated_video": false, "input_codec": "HFYU"}
+}
