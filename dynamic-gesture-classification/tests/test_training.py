@@ -195,6 +195,55 @@ class SharedInputFixture(unittest.TestCase):
         finally:
             review.write_bytes(original)
 
+    def test_eleven_class_subset_gets_new_cache_mapping_and_experiment_without_changing_folds(self):
+        config = td.load_config(self.training_config_path)
+        paths = config["_paths"]
+        review_path = paths["metadata"] / "class_review.csv"
+        manifest_path = paths["metadata"] / "clip_manifest.csv"
+        originals = {path: path.read_bytes() for path in (review_path, manifest_path)}
+        before = queue._experiment_snapshot(config, {}, self.feature_cache, "subset-test")
+        subset_cache = None
+        try:
+            rows = read_csv(review_path)
+            for row in rows:
+                row["compatibility_decision"] = "retain" if row["class_label"] in CLASSES[:11] else "exclude"
+                row["reason"] = "Outside selected gesture set"
+            jp._write_csv(review_path, tuple(rows[0]), rows)
+            jp.build_manifest(self.root / "jester_labels", paths["frames"], manifest_path,
+                              paths["metadata"] / "fold_assignments.csv", None, review_path)
+            self.assertEqual(len(read_csv(manifest_path)), 27 * 5)
+            stale = td.inspect_inputs(self.training_config_path)
+            self.assertTrue(stale["blockers"])
+            self.assertIsNone(stale["feature_cache"])
+            subset_path = td.build_feature_cache(self.training_config_path)
+            subset_cache = td.validate_feature_cache(subset_path)
+            self.assertNotEqual(subset_cache["identity"], self.feature_cache["identity"])
+            self.assertTrue(self.feature_cache_path.is_dir())
+            self.assertEqual(subset_cache["metadata"]["class_order"], CLASSES[:11])
+            self.assertEqual(subset_cache["features"].shape, (44, 8, 43))
+            self.assertEqual({row["class_label"] for row in subset_cache["index"]}, set(CLASSES[:11]))
+            self.assertFalse(any(row["official_split"] == "test" for row in subset_cache["index"]))
+            self.assertEqual(jp.sha256_file(paths["metadata"] / "fold_assignments.csv"), self.folds_before)
+            np.testing.assert_array_equal(training._class_ids(np.asarray(CLASSES[:11]), CLASSES[:11]), np.arange(11))
+            after = queue._experiment_snapshot(config, {}, subset_cache, "subset-test")
+            self.assertNotEqual(before["identity"], after["identity"])
+            experiment_path = self.root / "subset-experiment.json"
+            jp.write_json(experiment_path, before)
+            with self.assertRaisesRegex(ValueError, "resume rejected"):
+                queue._check_experiment(experiment_path, after)
+            predictions = self.root / "subset-predictions.csv"
+            labels = np.asarray([CLASSES[10]], dtype=object)
+            training._write_predictions(predictions, ["fixture"], labels, {
+                "probabilities": np.eye(11, dtype=np.float32)[[10]], "predicted": np.asarray([10]),
+            }, CLASSES[:11], "gru", "subset-test")
+            training._validate_predictions(predictions, ["fixture"], labels, CLASSES[:11], "gru", "subset-test")
+            self.assertEqual(read_csv(predictions)[0]["predicted_class"], CLASSES[10])
+        finally:
+            if subset_cache is not None:
+                subset_cache["features"]._mmap.close()
+            for path, content in originals.items():
+                path.write_bytes(content)
+
     def test_preparation_still_verifies_raw_sources(self):
         with patch.object(jp, "validate_frame_completion", side_effect=RuntimeError("raw source changed")):
             with self.assertRaisesRegex(RuntimeError, "raw source changed"):
@@ -287,13 +336,14 @@ class TrainingUnitTests(unittest.TestCase):
         try:
             x = torch.rand(2, 8, 43)
             x[..., 42] = 1
-            for name in ("gru", "lstm", "ddnet"):
-                model = classifiers.build_model(name, 27)
-                logits = model(x)
-                self.assertEqual(logits.shape, (2, 27))
-                self.assertFalse(torch.allclose(logits.sum(dim=1), torch.ones(2)))
-                logits.square().mean().backward()
-                self.assertTrue(all(p.grad is None or torch.isfinite(p.grad).all() for p in model.parameters()))
+            for count in (27, 11):
+                for name in ("gru", "lstm", "ddnet"):
+                    model = classifiers.build_model(name, count)
+                    logits = model(x)
+                    self.assertEqual(logits.shape, (2, count))
+                    self.assertFalse(torch.allclose(logits.sum(dim=1), torch.ones(2)))
+                    logits.square().mean().backward()
+                    self.assertTrue(all(p.grad is None or torch.isfinite(p.grad).all() for p in model.parameters()))
         finally:
             torch.set_num_threads(old_threads)
 

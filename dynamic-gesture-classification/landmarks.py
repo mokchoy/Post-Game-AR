@@ -42,14 +42,17 @@ def _model_info(path: Path) -> dict:
     return {"path": str(path.resolve()), "size_bytes": path.stat().st_size, "sha256": jp.sha256_file(path)}
 
 
-def _package_info(extractor: str, models: dict[str, Path]) -> dict:
+def _package_info(extractor: str, models: dict[str, Path], device: str = "cpu") -> dict:
+    if device not in ("cpu", "cuda") or (extractor != "rtmlib" and device != "cpu"):
+        raise ValueError("CUDA extraction is supported only for RTMLib")
+    runtime = _pkg_version("onnxruntime-gpu") if extractor == "rtmlib" else "unknown"
     return {
         "extractor": extractor,
         "package_version": _pkg_version("rtmlib" if extractor == "rtmlib" else "mediapipe"),
-        "runtime_version": _pkg_version("onnxruntime" if extractor == "rtmlib" else "mediapipe"),
-        "runtime_backend": "onnxruntime-cpu" if extractor == "rtmlib" else "mediapipe-cpu",
+        "runtime_version": runtime if runtime != "unknown" else _pkg_version("onnxruntime" if extractor == "rtmlib" else "mediapipe"),
+        "runtime_backend": f"onnxruntime-{device}" if extractor == "rtmlib" else "mediapipe-cpu",
         "models": {name: _model_info(path) for name, path in models.items()},
-        "settings": SETTINGS[extractor],
+        "settings": SETTINGS[extractor] | ({"device": device} if extractor == "rtmlib" else {}),
         "joints": list(JOINTS),
         "frame_rate_fps": FPS,
         "coordinates": "image-normalized x,y; origin top-left; no mirroring or wrist/scale normalization",
@@ -57,11 +60,20 @@ def _package_info(extractor: str, models: dict[str, Path]) -> dict:
 
 
 class RTMLibHand:
-    def __init__(self, detector_model: Path, pose_model: Path):
+    def __init__(self, detector_model: Path, pose_model: Path, device: str = "cpu"):
+        if device not in ("cpu", "cuda"):
+            raise ValueError("RTMLib device must be cpu or cuda")
+        if device == "cuda":
+            import torch  # Load the installed PyTorch CUDA/cuDNN DLLs on Windows.
+            import onnxruntime as ort
+            if "CUDAExecutionProvider" not in ort.get_available_providers():
+                raise RuntimeError("CUDAExecutionProvider unavailable; install compatible onnxruntime-gpu")
         from rtmlib import RTMDet, RTMPose
 
-        self.detector = RTMDet(str(detector_model), model_input_size=(320, 320), det_mode=None, score_thr=0.3, nms_thr=0.45, backend="onnxruntime", device="cpu")
-        self.pose = RTMPose(str(pose_model), model_input_size=(256, 256), to_openpose=False, backend="onnxruntime", device="cpu")
+        self.detector = RTMDet(str(detector_model), model_input_size=(320, 320), det_mode=None, score_thr=0.3, nms_thr=0.45, backend="onnxruntime", device=device)
+        self.pose = RTMPose(str(pose_model), model_input_size=(256, 256), to_openpose=False, backend="onnxruntime", device=device)
+        if device == "cuda" and any("CUDAExecutionProvider" not in model.session.get_providers() for model in (self.detector, self.pose)):
+            raise RuntimeError("RTMLib CUDA initialization failed; refusing silent CPU fallback")
 
     def close(self) -> None:
         return None
@@ -150,9 +162,9 @@ def normalize_pixel_xy(points: np.ndarray, width: int, height: int) -> np.ndarra
     return xy
 
 
-def _adapter(extractor: str, models: dict[str, Path]):
+def _adapter(extractor: str, models: dict[str, Path], device: str = "cpu"):
     if extractor == "rtmlib":
-        return RTMLibHand(models["detector"], models["pose"])
+        return RTMLibHand(models["detector"], models["pose"], device=device)
     return MediaPipeHand(models["task"])
 
 
@@ -176,7 +188,9 @@ def _selected_ids(path: Path | None, config: dict, records: dict[str, dict], tra
     ]
     if unknown or mismatched or non_train:
         raise ValueError(f"inputs contain unknown or mismatched clip metadata: unknown={sorted(unknown)[:5]}, mismatched={mismatched[:5]}, non-training={non_train[:5]}")
-    return ids
+    classes = list(dict.fromkeys(row["class_label"] for row in records.values() if row["class_label"]))
+    review = jp.read_class_review(classes, jp.cache_paths(config)["metadata"] / "class_review.csv")
+    return jp.filter_preparation_ids(ids, records, review)
 
 
 def _ids_hash(ids: list[str]) -> str:
@@ -312,7 +326,7 @@ def _extract_clip(clip_id: str, clip_dir: Path, extractor: str, models: dict[str
     started = time.perf_counter()
     owns_adapter = adapter is None
     if owns_adapter:
-        adapter = _adapter(extractor, models)
+        adapter = _adapter(extractor, models, device=package_info.get("settings", {}).get("device", "cpu"))
     offsets = [0]
     xy_parts, joint_score_parts = [], []
     handedness, handedness_scores, detection_scores, visibility_parts, presence_parts = [], [], [], [], []
@@ -357,7 +371,7 @@ def _extract_clip(clip_id: str, clip_dir: Path, extractor: str, models: dict[str
         "clip_id": clip_id,
         "source_frame_set_sha256": frame_marker["frame_set_sha256"],
         "source_frame_count": len(entries),
-        "runtime_backend": "onnxruntime-cpu" if extractor == "rtmlib" else "mediapipe-cpu",
+        "runtime_backend": package_info.get("runtime_backend", "onnxruntime-cpu" if extractor == "rtmlib" else "mediapipe-cpu"),
         "candidate_storage": "concatenated hand candidates; frame_hand_offsets maps candidates to source frames",
         "score_note": "RTMLib joint scores and MediaPipe handedness scores have different meanings and are not comparable.",
     }
@@ -396,7 +410,8 @@ def extract(args, config: dict) -> dict:
         models = {"task": args.model}
     if any(path is None for path in models.values()):
         raise ValueError("local model paths are required; downloads never start automatically")
-    package_info = _package_info(args.extractor, models)
+    device = getattr(args, "device", "cpu")
+    package_info = _package_info(args.extractor, models, device=device)
     package_key = hashlib.sha256(json.dumps(package_info, sort_keys=True).encode("utf-8")).hexdigest()
     cache_root = jp.cache_paths(config)["root"]
     # shortcut: accounting assumes one cache writer; add shared reservations before parallel extraction.
@@ -420,7 +435,7 @@ def extract(args, config: dict) -> dict:
     failures = []
     reused = 0
     written = 0
-    shared_adapter = None
+    shared_adapter = _adapter(args.extractor, models, device=device) if device == "cuda" else None
     try:
         for clip_id in ids:
             clip_dir = frames_root / clip_id
@@ -446,7 +461,7 @@ def extract(args, config: dict) -> dict:
                 adapter = None
                 if args.extractor == "rtmlib":
                     if shared_adapter is None:
-                        shared_adapter = _adapter(args.extractor, models)
+                        shared_adapter = _adapter(args.extractor, models, device=device)
                     adapter = shared_adapter
                 arrays, seconds = _extract_clip(clip_id, clip_dir, args.extractor, models, package_info, adapter)
                 metadata = json.loads(str(arrays["metadata_json"].item()))
@@ -861,7 +876,7 @@ def benchmark(args, config: dict) -> dict:
             "mediapipe_threads": "runtime default; installed HandLandmarkerOptions exposes no thread-count setting" if extractor == "mediapipe" else None,
             "runtime_backend": info["runtime_backend"] if "runtime_backend" in info else ("onnxruntime-cpu" if extractor == "rtmlib" else "mediapipe-cpu"),
             "extractor_version": info["package_version"],
-            "runtime_version": _pkg_version("onnxruntime" if extractor == "rtmlib" else "mediapipe"),
+            "runtime_version": info["runtime_version"],
             "settings": SETTINGS[extractor],
             "models": info["models"],
             "cloud_transfer_included": False,

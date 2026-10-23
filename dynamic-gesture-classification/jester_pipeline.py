@@ -248,10 +248,12 @@ def _write_csv(path: Path, fields: tuple[str, ...], rows: list[dict], preserve_e
         raise
 
 
-def select_pilot(labels_dir: Path, output: Path, per_class: int = 200, seed: int = 42) -> dict:
+def select_pilot(labels_dir: Path, output: Path, per_class: int = 500, seed: int = 42, review_path: Path | None = None) -> dict:
     if per_class < 1:
         raise ValueError("per_class must be positive")
     classes, records = read_labels(labels_dir)
+    review = read_class_review(classes, review_path)
+    classes = [label for label in classes if review[label]["compatibility_decision"] != "exclude"]
     by_class: dict[str, list[str]] = defaultdict(list)
     for clip_id, row in records.items():
         if row["official_split"] == "train":
@@ -358,6 +360,16 @@ def create_review_template(labels_dir: Path, output: Path) -> None:
         rows,
         preserve_existing=True,
     )
+
+
+def filter_preparation_ids(ids: list[str], records: dict[str, dict], review: dict[str, dict]) -> list[str]:
+    excluded = {label for label, row in review.items() if row["compatibility_decision"] == "exclude"}
+    if excluded and any(not records[cid]["class_label"] for cid in ids):
+        raise ValueError("unlabeled test clips cannot be filtered by gesture; use labeled train/validation IDs")
+    selected = [cid for cid in ids if records[cid]["class_label"] not in excluded]
+    if not selected:
+        raise ValueError("selection contains no non-excluded clip IDs")
+    return selected
 
 
 def read_class_review(classes: list[str], path: Path | None) -> dict[str, dict]:
@@ -720,6 +732,8 @@ def _archive_stats(parts: list[Path], selected: set[str]) -> dict[str, dict]:
 
 def _staging_root(frames_root: Path) -> Path:
     root = frames_root / ".staging"
+    if root.resolve().parent != frames_root.resolve():
+        raise RuntimeError(f"staging directory escapes the frame cache: {root}")
     owner = root / ".jester_pipeline_owner.json"
     if root.exists() and not owner.is_file():
         raise RuntimeError(f"refusing to clean unmarked staging directory: {root}")
@@ -729,18 +743,41 @@ def _staging_root(frames_root: Path) -> Path:
     return root
 
 
+def _promote_frame_clip(partial: Path, final: Path) -> None:
+    for attempt in range(4):
+        if final.exists():
+            raise FileExistsError(f"output path appeared during extraction; preserved existing output: {final}")
+        try:
+            os.rename(partial, final)
+            return
+        except PermissionError as exc:
+            if getattr(exc, "winerror", None) not in (5, 32, 33) or attempt == 3:
+                raise
+            time.sleep(0.25 * (attempt + 1))
+
+
 def extract_frames(config: dict, labels_dir: Path, pilot_path: Path | None, extract_all: bool, ids_path: Path | None = None) -> dict:
     if sum((pilot_path is not None, bool(extract_all), ids_path is not None)) != 1:
         raise ValueError("choose exactly one of --pilot, --ids-file, or --all")
     classes, records = read_labels(labels_dir)
+    paths = cache_paths(config)
+    review = read_class_review(classes, paths["metadata"] / "class_review.csv")
+    active_classes = [label for label in classes if review[label]["compatibility_decision"] != "exclude"]
     if extract_all:
+        if len(active_classes) != len(classes):
+            raise ValueError("--all is unavailable with excluded classes; use --pilot or --ids-file with labeled train/validation IDs")
         selected = set(records)
     elif pilot_path is not None:
         if not pilot_path or not pilot_path.is_file():
             raise FileNotFoundError(f"pilot selection is required before frame extraction: {pilot_path}")
         selected_rows = []
+        requested_counts = set()
         with pilot_path.open("r", encoding="utf-8-sig", newline="") as stream:
             for row in csv.DictReader(stream):
+                try:
+                    requested_counts.add(int(row.get("requested_per_class", "")))
+                except ValueError:
+                    raise ValueError("pilot rows must declare an integer requested_per_class") from None
                 if row.get("official_split") != "train":
                     raise ValueError("pilot frame extraction accepts training clips only")
                 clip_id = row.get("clip_id", "")
@@ -749,9 +786,13 @@ def extract_frames(config: dict, labels_dir: Path, pilot_path: Path | None, extr
                 selected_rows.append(clip_id)
         if len(selected_rows) != len(set(selected_rows)):
             raise ValueError("pilot selection contains duplicate clip IDs")
-        counts = {label: sum(records[cid]["class_label"] == label for cid in selected_rows) for label in classes}
-        if any(count != 200 for count in counts.values()):
-            raise ValueError(f"pilot selection must contain exactly 200 clips per official class: {counts}")
+        selected_rows = filter_preparation_ids(selected_rows, records, review)
+        counts = {label: sum(records[cid]["class_label"] == label for cid in selected_rows) for label in active_classes}
+        if len(requested_counts) != 1 or next(iter(requested_counts)) < 1:
+            raise ValueError("pilot rows must declare one positive requested_per_class")
+        per_class = next(iter(requested_counts))
+        if any(count != per_class for count in counts.values()):
+            raise ValueError(f"pilot selection must contain exactly {per_class} clips per non-excluded class: {counts}")
         selected = set(selected_rows)
         if not selected:
             raise ValueError("pilot selection contains no clip IDs")
@@ -771,14 +812,13 @@ def extract_frames(config: dict, labels_dir: Path, pilot_path: Path | None, extr
         ]
         if unknown or mismatched:
             raise ValueError(f"selection has unknown IDs or mismatched split/class metadata: unknown={sorted(unknown)[:5]}, mismatched={mismatched[:3]}")
-        selected = set(selected_rows)
+        selected = set(filter_preparation_ids(selected_rows, records, review))
     unknown = selected - records.keys()
     if unknown:
         raise ValueError(f"selection contains unknown clip IDs: {sorted(unknown, key=_numeric_key)[:5]}")
     if pilot_path is not None and any(records[cid]["official_split"] != "train" for cid in selected):
         raise ValueError("pilot selection includes non-training data")
 
-    paths = cache_paths(config)
     parts, stage_report, archive_identity = _archive_stage_identity(config)
     stats = _archive_stats(parts, selected)
     missing = selected - stats.keys()
@@ -791,9 +831,15 @@ def extract_frames(config: dict, labels_dir: Path, pilot_path: Path | None, extr
         raise RuntimeError(f"{len(failures)} selected clip ID(s) are absent from the archive; see {failure_path}")
 
     completed = set()
+    ready = set()
     required_bytes = 0
     failures = []
     archive_invalid = set()
+    frames_root = paths["frames"]
+    # Check staging ownership before trusting or modifying any staged clip.
+    staging = frames_root / ".staging"
+    if staging.exists() and not (staging / ".jester_pipeline_owner.json").is_file():
+        raise RuntimeError(f"refusing to reuse unmarked staging directory: {staging}")
     for clip_id in selected:
         final = paths["frames"] / clip_id
         if final.exists():
@@ -810,44 +856,57 @@ def extract_frames(config: dict, labels_dir: Path, pilot_path: Path | None, extr
                 failures.append({"clip_id": clip_id, "reason": f"archive frame indices missing={missing_indices[:50]} duplicate={duplicate_indices[:50]}"})
                 archive_invalid.add(clip_id)
             else:
-                required_bytes += expected["bytes"]
-    pending = selected - completed - archive_invalid
+                partial = staging / clip_id
+                valid, _, _ = validate_frame_completion(partial, archive_identity, expected["frame_count"])
+                if valid:
+                    ready.add(clip_id)
+                else:
+                    required_bytes += expected["bytes"]
+    pending = selected - completed - archive_invalid - ready
     ensure_capacity(paths["root"], config["cache_limit_gb"], required_bytes + 4096 * max(1, len(pending)))
     claim_cache(paths["root"])
-    frames_root = paths["frames"]
     frames_root.mkdir(parents=True, exist_ok=True)
     staging = _staging_root(frames_root)
-    for clip_id in pending:
+    for clip_id in pending | ready:
         partial = staging / clip_id
+        if clip_id in ready:
+            try:
+                _promote_frame_clip(partial, frames_root / clip_id)
+            except OSError as exc:
+                failures.append({"clip_id": clip_id, "reason": f"staged clip preserved; promotion failed: {type(exc).__name__}: {exc}"})
+            continue
+        if partial.resolve().parent != staging.resolve() or partial.is_symlink():
+            raise RuntimeError(f"staged clip escapes the staging directory: {partial}")
         if partial.exists():
             shutil.rmtree(partial)
         partial.mkdir()
 
-    reader, archive = _open_tar(parts)
     started = time.perf_counter()
-    try:
-        for member in archive:
-            item = _tar_frame(member)
-            if item is None:
-                continue
-            clip_id, frame_index, frame_name = item
-            if clip_id not in pending:
-                continue
-            target = staging / clip_id / frame_name
-            source = archive.extractfile(member)
-            if source is None:
-                failures.append({"clip_id": clip_id, "reason": f"archive member could not be read: {member.name}"})
-                continue
-            try:
-                with source, target.open("xb") as output:
-                    shutil.copyfileobj(source, output, 1024 * 1024)
-            except Exception as exc:
-                failures.append({"clip_id": clip_id, "reason": f"{member.name}: {type(exc).__name__}: {exc}"})
-    except Exception as exc:
-        failures.append({"clip_id": "", "reason": f"archive stream failed: {type(exc).__name__}: {exc}"})
-    finally:
-        archive.close()
-        reader.close()
+    if pending:
+        reader, archive = _open_tar(parts)
+        try:
+            for member in archive:
+                item = _tar_frame(member)
+                if item is None:
+                    continue
+                clip_id, frame_index, frame_name = item
+                if clip_id not in pending:
+                    continue
+                target = staging / clip_id / frame_name
+                source = archive.extractfile(member)
+                if source is None:
+                    failures.append({"clip_id": clip_id, "reason": f"archive member could not be read: {member.name}"})
+                    continue
+                try:
+                    with source, target.open("xb") as output:
+                        shutil.copyfileobj(source, output, 1024 * 1024)
+                except Exception as exc:
+                    failures.append({"clip_id": clip_id, "reason": f"{member.name}: {type(exc).__name__}: {exc}"})
+        except Exception as exc:
+            failures.append({"clip_id": "", "reason": f"archive stream failed: {type(exc).__name__}: {exc}"})
+        finally:
+            archive.close()
+            reader.close()
     elapsed = time.perf_counter() - started
 
     for clip_id in pending:
@@ -886,10 +945,10 @@ def extract_frames(config: dict, labels_dir: Path, pilot_path: Path | None, extr
         }
         write_json(partial / "complete.json", marker)
         final = frames_root / clip_id
-        if final.exists():
-            failures.append({"clip_id": clip_id, "reason": "output path appeared during extraction; preserved existing output"})
-            continue
-        os.replace(partial, final)
+        try:
+            _promote_frame_clip(partial, final)
+        except OSError as exc:
+            failures.append({"clip_id": clip_id, "reason": f"staged clip preserved; promotion failed: {type(exc).__name__}: {exc}"})
 
     failure_path = paths["metadata"] / "frame_extraction_failures.csv"
     _write_csv(failure_path, ("clip_id", "reason"), failures)
@@ -898,6 +957,7 @@ def extract_frames(config: dict, labels_dir: Path, pilot_path: Path | None, extr
     return {
         "selected_clips": len(selected),
         "already_complete": len(completed),
+        "recovered_staged": len(ready),
         "newly_extracted": len(pending) - sum(1 for row in failures if row["clip_id"] in pending),
         "frame_payload_bytes": required_bytes,
         "extraction_seconds_excludes_cloud_transfer": elapsed,
@@ -1123,9 +1183,9 @@ def _parser() -> argparse.ArgumentParser:
     p.add_argument("--labels-dir", type=Path)
     p.add_argument("--seed", type=int, default=42)
 
-    p = commands.add_parser("pilot", help="select 200 training clips per class without replacement")
+    p = commands.add_parser("pilot", help="select training clips per class without replacement (default: 500)")
     p.add_argument("--labels-dir", type=Path)
-    p.add_argument("--per-class", type=int, default=200)
+    p.add_argument("--per-class", type=int, default=500)
     p.add_argument("--seed", type=int, default=42)
 
     p = commands.add_parser("review-template", help="create the editable class compatibility review table")
@@ -1143,6 +1203,7 @@ def _parser() -> argparse.ArgumentParser:
 
     p = commands.add_parser("extract-landmarks", help="extract a selected clip list using one supported backend")
     p.add_argument("--extractor", choices=("rtmlib", "mediapipe"), required=True)
+    p.add_argument("--device", choices=("cpu", "cuda"), default="cpu", help="RTMLib extraction device; benchmark stays CPU")
     p.add_argument("--ids-file", type=Path)
     p.add_argument("--model", type=Path, help="MediaPipe Hand Landmarker .task model")
     p.add_argument("--rtm-det-model", type=Path, help="local RTMDet hand ONNX file")
@@ -1189,7 +1250,8 @@ def main(argv: list[str] | None = None) -> int:
             ensure_capacity(paths["root"], config["cache_limit_gb"], 1024 * 1024)
             claim_cache(paths["root"])
             result = select_pilot(
-                labels_dir, paths["metadata"] / "pilot_ids.csv", args.per_class, args.seed
+                labels_dir, paths["metadata"] / "pilot_ids.csv", args.per_class, args.seed,
+                paths["metadata"] / "class_review.csv",
             )
         elif args.command == "review-template":
             ensure_capacity(paths["root"], config["cache_limit_gb"], 1024 * 1024)

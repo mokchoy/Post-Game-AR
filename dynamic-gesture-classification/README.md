@@ -70,10 +70,25 @@ These commands write metadata only. Folds use all official training clips, seed 
 py -3.14 .\jester_pipeline.py --config .\config.json validate-labels
 py -3.14 .\jester_pipeline.py --config .\config.json folds --seed 42
 py -3.14 .\jester_pipeline.py --config .\config.json review-template
-py -3.14 .\jester_pipeline.py --config .\config.json pilot --per-class 200 --seed 42
 ```
 
-The pilot command saves 200 unique official training IDs per original class to `cache\metadata\pilot_ids.csv` (expected 5,400). It reports insufficient class counts instead of reducing the sample. Pilot membership is independent of CV fold assignment.
+Keep all 27 rows in `cache\metadata\class_review.csv`. This file controls selection for preparation and training. The current subset retains these 11 classes:
+
+- Swiping Left, Swiping Right
+- Turning Hand Clockwise, Turning Hand Counterclockwise
+- Zooming In With Full Hand, Zooming Out With Full Hand
+- Thumb Up, Thumb Down, Stop Sign
+- No gesture, Doing other things
+
+Set these rows to `retain`, and the other 16 to `exclude` with reason `Outside selected gesture set`. Preserve existing review notes. Both background classes must remain `retain`. Selection is not evidence that landmark quality has passed review. Preparation includes `pending` and `flag` classes unless excluded; training still blocks pending reviews. Official label files, complete manifests, and fold assignments continue to include all 27 classes. Existing folds do not need regeneration.
+
+The review file is local cache metadata and is not tracked by Git. On a fresh cache, create it with `review-template` and apply the selection above before generating pilot IDs. Existing review tables are preserved rather than overwritten by that command.
+
+```powershell
+py -3.14 .\jester_pipeline.py --config .\config.json pilot --per-class 500 --seed 42
+```
+
+The pilot command saves 500 unique official training IDs per non-excluded class to `cache\metadata\pilot_ids.csv`: **5,500 clips** for this subset. Increase `--per-class` later to use more existing Jester clips. It reports insufficient selected-class counts instead of reducing the sample. Before regenerating a different pilot, move existing `pilot_ids.csv` and `pilot_ids.report.json` into a dated backup folder; generation refuses to overwrite a different ID list. Without exclusions, the original 27-class behavior remains available. Pilot membership is independent of CV fold assignment. Frame extraction validates the declared per-class count, including earlier 200-per-class pilots, after filtering excluded classes.
 
 Write the combined clip manifest after generating folds, pilot IDs, or review decisions. Rerun it after frame extraction to refresh frame integrity and status:
 
@@ -89,12 +104,25 @@ This is the opt-in pilot frame command. It reads only the previously saved pilot
 py -3.14 .\jester_pipeline.py --config .\config.json extract-frames --pilot
 ```
 
-These are separate, explicit later operations. The `--ids-file` command extracts all official training clips from the CV assignment list. `--all` extracts every official split, including validation and unlabeled test.
+Rerun the same extraction command after an interruption. Completed final clips are skipped. Staged clips with valid completion markers, matching archive identity and frame count, and verified frame hashes are promoted without re-extraction. Unmarked or invalid staged clips are re-extracted. Windows access/sharing errors during promotion get four attempts with brief delays; persistent failures preserve staging and appear in `cache\metadata\frame_extraction_failures.csv` while other clips continue. Resume still scans archive metadata to validate the selection. Run only one frame extraction process at a time.
+
+These are separate, explicit later operations. The `--ids-file` command filters the CV assignment list to non-excluded training classes. Frame and landmark extraction, reports, and benchmarks apply the same filter to supplied ID lists. Empty filtered selections are rejected. While exclusions are active, `--all` and explicit unlabeled test IDs are rejected because test gestures are unknown. Without exclusions, `--all` retains its original behavior of extracting every official split.
 
 ```powershell
 py -3.14 .\jester_pipeline.py --config .\config.json extract-frames --ids-file .\cache\metadata\fold_assignments.csv
-py -3.14 .\jester_pipeline.py --config .\config.json extract-frames --all
 ```
+
+Training needs every retained official training and validation clip, not only the pilot. To prepare both labeled splits, export a labeled ID list from the complete manifest:
+
+```powershell
+Import-Csv .\cache\metadata\clip_manifest.csv |
+    Where-Object { $_.official_split -in @('train', 'validation') } |
+    Select-Object clip_id, class_label, official_split |
+    Export-Csv .\cache\metadata\labeled_ids.csv -NoTypeInformation -Encoding utf8
+py -3.14 .\jester_pipeline.py --config .\config.json extract-frames --ids-file .\cache\metadata\labeled_ids.csv
+```
+
+Use the same `labeled_ids.csv` with `extract-landmarks --ids-file` when preparing full training inputs. Refresh the manifest after extraction. Reports and benchmarks remain training-only.
 
 Use the exact `.onnx` paths printed by `Get-ChildItem` above. The same pilot list is passed to either extractor:
 
@@ -112,7 +140,19 @@ py -3.14 .\jester_pipeline.py --config .\config.json extract-landmarks --extract
 
 Both extractors retain all candidates and one row per source frame. Cache coordinates are image-normalized `(x, y)` in the documented wrist, thumb, index, middle, ring, pinky 21-joint order. They preserve translation, apparent scale, direction, frame indices, 12 FPS timestamps, dimensions, detection counts/masks, and supported scores or handedness. No mirroring, wrist centering, scale normalization, smoothing, or interpolation is applied. RTMLib's public detector returns boxes without detection scores; its joint scores are retained. MediaPipe's handedness score is stored separately. These score types are not comparable.
 
-By default the extractor uses `pilot_ids.csv`. A supplied CSV needs a `clip_id` header; official validation or test IDs can be selected explicitly when needed, and each feature file records its official split. CV fold assignments remain training-only manifest metadata.
+RTMLib extraction supports explicit NVIDIA GPU acceleration on Windows. Use `onnxruntime-gpu==1.24.4` instead of `onnxruntime`, plus the installed CUDA-enabled PyTorch to load compatible CUDA/cuDNN DLLs. Do not install both ONNX Runtime packages together. To configure another environment, first install the normal requirements, then run `py -3.14 -m pip uninstall -y onnxruntime` and `py -3.14 -m pip install onnxruntime-gpu==1.24.4`. This workspace has already been configured. Run:
+
+```powershell
+$detModel = (Get-ChildItem .\models\rtmdet -Filter *.onnx -Recurse | Select-Object -First 1).FullName
+$poseModel = (Get-ChildItem .\models\rtmpose -Filter *.onnx -Recurse | Select-Object -First 1).FullName
+py -3.14 .\jester_pipeline.py --config .\config.json extract-landmarks --extractor rtmlib --device cuda --ids-file .\cache\metadata\pilot_ids.csv --rtm-det-model "$detModel" --rtm-pose-model "$poseModel"
+```
+
+Omitting `--device` retains CPU extraction. CUDA requests fail if either model falls back to CPU. Backend and device are recorded in cache identities; incompatible existing RTMLib caches are preserved and reported rather than overwritten or reused. MediaPipe extraction and the `benchmark` command remain CPU-only. GPU extraction speed is separate from the CPU latency comparison.
+
+RTMLib 0.0.16 declares the CPU `onnxruntime` distribution as a dependency, so `pip check` reports it missing when using the GPU replacement. Actual CUDA detector and pose inference were verified in this environment with GPU runtime 1.24.4. Do not install the CPU distribution alongside it to silence that metadata warning; reinstalling the normal `requirements.txt` also requires repeating the GPU replacement steps above.
+
+By default the extractor uses `pilot_ids.csv`. A supplied CSV needs a `clip_id` header; official validation IDs can be selected explicitly, and each feature file records its official split. Unlabeled test IDs are accepted only when no classes are excluded. CV fold assignments remain training-only manifest metadata.
 
 ## Reports, benchmark, backup
 
@@ -135,7 +175,7 @@ py -3.14 -m unittest discover -s tests -v
 py -3.14 .\jester_pipeline.py --config .\config.json validate-labels
 ```
 
-The unit tests use tiny synthetic labels, JPEGs, cache files, multipart tar bytes, and CPU optimizer steps. Real archive extraction, model inference, the 5,400-clip pilot, full extraction, and real-data classifier training are intentionally not part of verification. Python 3.14 works here, so no Python 3.12 fallback is needed.
+The unit tests use tiny synthetic labels, JPEGs, cache files, multipart tar bytes, and CPU optimizer steps. Real archive extraction, extractor model inference, the 5,500-clip pilot extraction, full extraction, and real-data classifier training are intentionally not part of verification. Python 3.14 works here, so no Python 3.12 fallback is needed.
 
 ## GRU, LSTM, and DD-Net comparison
 
@@ -157,6 +197,8 @@ py -3.14 .\prepare_training_inputs.py --config .\training_config.json --build
 ```
 
 Input preparation verifies raw frames and landmarks before freezing the shared cache. Queue jobs validate that cache's hashes and its manifest, fold, class, extractor, and sequence-length identities without reopening RGB frames or raw landmark files. Re-run input preparation to verify changed raw sources; training does not silently switch frozen inputs. Ambiguous matching caches block preflight.
+
+After changing the class review, rebuild the shared inputs and use a new experiment ID. The review and retained class mapping change cache and experiment identities, so old checkpoints cannot resume as the new subset. Compatible raw frame and landmark caches can be reused; keep existing feature caches and results. All three classifiers derive their output count from the retained mapping, giving 11 outputs for this subset. Live-camera false triggers still require separate evaluation, including unwanted gestures and idle movement.
 
 Landmark extraction counts managed-cache usage once, then accounts for committed outputs while checking free disk space per clip. Run one cache-writing operation at a time; parallel writers need shared space reservations.
 
