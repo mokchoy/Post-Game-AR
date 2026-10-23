@@ -2,7 +2,6 @@
 .venv-depth/
 third_party/
 models/
-*calibration.npz
 __pycache__/
 *.pyc
 runs/

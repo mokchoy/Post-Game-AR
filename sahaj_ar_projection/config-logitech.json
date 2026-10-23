@@ -21,14 +21,16 @@
     "exclude_rectangles": [], "redetect_every_n_frames": 15, "redetect_below_tracks": 80,
     "redetection_match_radius_px": 5.0,
     "lk": {"enabled": true, "window_size_px": 21, "max_level": 3, "max_iterations": 30,
-           "epsilon": 0.01, "forward_backward_max_error_px": 5.0}
+           "epsilon": 0.01, "forward_backward_max_error_px": 5.0},
+    "guided_matching": {"enabled": true, "search_radius_px": 12.0, "max_hamming_distance": 128, "ratio_test": 0.75,
+                        "geometry_first": true, "geometry_margin": 1.5, "revalidate_existing": false}
   },
   "mapping": {
     "mode": "build", "map_path": "data/logitech-landmark-map.npz",
-    "max_keyframes": 50, "max_landmarks": 500, "min_ready_landmarks": 80,
+    "max_keyframes": 120, "max_landmarks": 800, "min_ready_landmarks": 500,
     "min_baseline_m": 0.04, "min_parallax_deg": 1.5, "min_confirming_views": 3,
     "min_depth_m": 0.10, "max_depth_m": 5.0, "max_reprojection_rms_px": 2.0,
-    "refine_bootstrap_map": true, "refinement_max_nfev": 100,
+    "refine_bootstrap_map": true, "refinement_max_nfev": 100, "refinement_max_evaluations": 6000,
     "refinement_time_budget_s": 5.0, "refinement_retry_interval_s": 2.0
   },
   "pose": {
