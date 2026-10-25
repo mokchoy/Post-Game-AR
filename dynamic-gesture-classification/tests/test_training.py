@@ -48,7 +48,7 @@ class SharedInputFixture(unittest.TestCase):
         train, validation, test = [], [], []
         clip_id = 1
         for label in CLASSES:
-            for _ in range(3):
+            for _ in range(6):
                 train.append(f"{clip_id};{label}\n")
                 clip_id += 1
             validation.append(f"{clip_id};{label}\n")
@@ -162,11 +162,114 @@ class SharedInputFixture(unittest.TestCase):
         paths = jp.cache_paths({"_cache_root": self.cache_root})
         self.assertEqual(jp.sha256_file(paths["metadata"] / "fold_assignments.csv"), self.folds_before)
         index = self.feature_cache["index"]
-        self.assertEqual(len(index), 27 * 4)
+        self.assertEqual(len(index), 27 * 7)
         self.assertTrue(all(row["official_split"] != "test" for row in index))
         self.assertEqual({row["compatibility_decision"] for row in index}, {"retain"})
         self.assertEqual(td.build_feature_cache(self.training_config_path), self.feature_cache_path)
-        self.assertEqual(self.feature_cache["features"].shape, (108, 8, 43))
+        self.assertEqual(self.feature_cache["features"].shape, (189, 8, 43))
+        self.assertNotIn("ids_file_sha256", self.feature_cache["metadata"]["identity_inputs"])
+
+    def comparison_config(self):
+        rows, seen = [], set()
+        for row in self.feature_cache["index"]:
+            key = (row["class_label"], row["official_split"], row["fold"])
+            if key not in seen:
+                rows.append({name: row[name] for name in ("clip_id", "class_label", "official_split")})
+                seen.add(key)
+        ids = self.root / "comparison_ids.csv"
+        jp._write_csv(ids, tuple(rows[0]), rows)
+        config = json.loads(self.training_config_path.read_text(encoding="utf-8"))
+        config["ids_file"] = ids.name
+        path = self.root / "comparison_config.json"
+        jp.write_json(path, config)
+        return path, ids, rows
+
+    def test_clip_subset_ignores_unselected_raw_sources_and_freezes_selection(self):
+        path, ids, rows = self.comparison_config()
+        selected = {row["clip_id"] for row in rows}
+        config = td.load_config(path)
+        self.assertEqual(config["_ids_file"], ids.resolve())
+        unselected = next(row["clip_id"] for row in self.feature_cache["index"] if row["clip_id"] not in selected)
+        raw = self.cache_root / "landmarks" / "rtmlib" / f"{unselected}.npz"
+        hidden = raw.with_suffix(".unused")
+        manifest = self.cache_root / "metadata" / "clip_manifest.csv"
+        original_manifest = manifest.read_bytes()
+        raw.rename(hidden)
+        subset = None
+        try:
+            manifest_rows = read_csv(manifest)
+            for row in manifest_rows:
+                if row["clip_id"] == unselected:
+                    row["extraction_status"] = "not_extracted"
+            jp._write_csv(manifest, tuple(manifest_rows[0]), manifest_rows)
+            source = td.inspect_inputs(path, require_features=False)
+            self.assertEqual(source["blockers"], [])
+            self.assertEqual(source["source"]["retained_ids"], selected)
+            subset_path = td.build_feature_cache(path)
+            subset = td.validate_feature_cache(subset_path)
+            self.assertEqual(subset["features"].shape, (108, 8, 43))
+            self.assertEqual({row["clip_id"] for row in subset["index"]}, selected)
+            self.assertNotEqual(subset["identity"], self.feature_cache["identity"])
+            self.assertEqual(jp.sha256_file(config["_paths"]["metadata"] / "fold_assignments.csv"), self.folds_before)
+            with patch.object(jp, "validate_frame_completion", side_effect=AssertionError("RGB reopened")):
+                frozen = td.inspect_inputs(path)
+            self.assertEqual(frozen["blockers"], [])
+            frozen["feature_cache"]["features"]._mmap.close()
+            ids.write_bytes(ids.read_bytes() + b"\n")
+            stale = td.inspect_inputs(path)
+            self.assertTrue(stale["blockers"])
+            self.assertIsNone(stale["feature_cache"])
+            rows.append(next({name: row[name] for name in ("clip_id", "class_label", "official_split")}
+                             for row in self.feature_cache["index"] if row["clip_id"] == unselected))
+            jp._write_csv(ids, tuple(rows[0]), rows)
+            expanded = td.inspect_inputs(path, require_features=False)
+            self.assertTrue(expanded["blockers"])
+            self.assertIn(unselected, expanded["source"]["retained_ids"])
+            self.assertNotEqual(td._source_settings(config, CLASSES)["ids_file_sha256"], subset["metadata"]["identity_inputs"]["ids_file_sha256"])
+        finally:
+            if subset is not None:
+                subset["features"]._mmap.close()
+            hidden.rename(raw)
+            manifest.write_bytes(original_manifest)
+
+    def test_clip_subset_rejects_invalid_ids_metadata_and_missing_fold_or_holdout(self):
+        path, ids, rows = self.comparison_config()
+        test_id = next(row["clip_id"] for row in read_csv(self.cache_root / "metadata" / "clip_manifest.csv") if row["official_split"] == "test")
+        for extra, message in (
+            ({"clip_id": rows[0]["clip_id"]}, "unique"),
+            ({"clip_id": ""}, "nonempty"),
+            ({"clip_id": "9999999"}, "unknown"),
+            ({"clip_id": test_id}, "non-training/validation"),
+        ):
+            with self.subTest(extra=extra):
+                jp._write_csv(ids, ("clip_id", "class_label", "official_split"), rows + [extra])
+                with self.assertRaisesRegex(ValueError, message):
+                    td.inspect_inputs(path, require_features=False)
+        for key in ("class_label", "official_split"):
+            changed = [rows[0] | {key: "wrong"}, *rows[1:]]
+            jp._write_csv(ids, tuple(rows[0]), changed)
+            with self.assertRaisesRegex(ValueError, "mismatched"):
+                td.inspect_inputs(path, require_features=False)
+        for split, message in (("train", "in fold"), ("validation", "lacks official validation")):
+            removed = next(row for row in rows if row["official_split"] == split)
+            jp._write_csv(ids, tuple(rows[0]), [row for row in rows if row != removed])
+            with self.assertRaisesRegex(ValueError, message):
+                td.inspect_inputs(path, require_features=False)
+        ids.unlink()
+        self.assertIn("missing clip ID selection", td.inspect_inputs(path)["blockers"][0])
+
+    def test_clip_subset_rejects_excluded_classes(self):
+        path, ids, rows = self.comparison_config()
+        review = self.cache_root / "metadata" / "class_review.csv"
+        original = review.read_bytes()
+        try:
+            classes = read_csv(review)
+            classes[-1]["compatibility_decision"] = "exclude"
+            jp._write_csv(review, tuple(classes[0]), classes)
+            with self.assertRaisesRegex(ValueError, "excluded classes"):
+                td.inspect_inputs(path, require_features=False)
+        finally:
+            review.write_bytes(original)
 
     def test_all_missing_clip_is_kept_with_zero_coordinates_and_flag(self):
         index = next(row for row in self.feature_cache["index"] if row["clip_id"] == "1")
@@ -211,7 +314,7 @@ class SharedInputFixture(unittest.TestCase):
             jp._write_csv(review_path, tuple(rows[0]), rows)
             jp.build_manifest(self.root / "jester_labels", paths["frames"], manifest_path,
                               paths["metadata"] / "fold_assignments.csv", None, review_path)
-            self.assertEqual(len(read_csv(manifest_path)), 27 * 5)
+            self.assertEqual(len(read_csv(manifest_path)), 27 * 8)
             stale = td.inspect_inputs(self.training_config_path)
             self.assertTrue(stale["blockers"])
             self.assertIsNone(stale["feature_cache"])
@@ -220,7 +323,7 @@ class SharedInputFixture(unittest.TestCase):
             self.assertNotEqual(subset_cache["identity"], self.feature_cache["identity"])
             self.assertTrue(self.feature_cache_path.is_dir())
             self.assertEqual(subset_cache["metadata"]["class_order"], CLASSES[:11])
-            self.assertEqual(subset_cache["features"].shape, (44, 8, 43))
+            self.assertEqual(subset_cache["features"].shape, (77, 8, 43))
             self.assertEqual({row["class_label"] for row in subset_cache["index"]}, set(CLASSES[:11]))
             self.assertFalse(any(row["official_split"] == "test" for row in subset_cache["index"]))
             self.assertEqual(jp.sha256_file(paths["metadata"] / "fold_assignments.csv"), self.folds_before)

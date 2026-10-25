@@ -516,6 +516,27 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(len(test_rows), 27)
         self.assertTrue(all(row["class_label"] == "" and row["compatibility_decision"] == "not_applicable" for row in test_rows))
 
+    def test_selected_manifest_refresh_scans_only_selected_clips_and_preserves_other_statuses(self):
+        output = self.root / "manifest.csv"
+        frames = self.root / "cache" / "frames"
+        jp.build_manifest(self.labels, frames, output, None, None, None)
+        before = read_csv(output)
+        before[1]["frame_count"] = "17"
+        before[1]["extraction_status"] = "partial"
+        jp._write_csv(output, tuple(before[0]), before)
+        (frames / "1").mkdir(parents=True)
+        (frames / "2").mkdir()
+        ids = self.root / "selected.csv"
+        ids.write_text("clip_id\n1\n", encoding="utf-8")
+        scan = {"valid_frame_count": 3, "integrity_status": "ok"}
+        with patch.object(jp, "validate_frame_completion", return_value=(True, {"frame_count": 3}, scan)) as validate:
+            jp.build_manifest(self.labels, frames, output, None, None, None, ids)
+        validate.assert_called_once_with(frames / "1")
+        after = read_csv(output)
+        self.assertEqual(after[0]["frame_count"], "3")
+        self.assertEqual(after[0]["extraction_status"], "complete")
+        self.assertEqual(after[1:], before[1:])
+
     def test_bundle_contains_completed_frames_and_preserves_local_outputs(self):
         cache_root = self.root / "cache"
         jp.claim_cache(cache_root)

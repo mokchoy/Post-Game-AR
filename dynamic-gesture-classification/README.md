@@ -85,10 +85,10 @@ Set these rows to `retain`, and the other 16 to `exclude` with reason `Outside s
 The review file is local cache metadata and is not tracked by Git. On a fresh cache, create it with `review-template` and apply the selection above before generating pilot IDs. Existing review tables are preserved rather than overwritten by that command.
 
 ```powershell
-py -3.14 .\jester_pipeline.py --config .\config.json pilot --per-class 500 --seed 42
+py -3.14 .\jester_pipeline.py --config .\config.json pilot --per-class 1000 --seed 42
 ```
 
-The pilot command saves 500 unique official training IDs per non-excluded class to `cache\metadata\pilot_ids.csv`: **5,500 clips** for this subset. Increase `--per-class` later to use more existing Jester clips. It reports insufficient selected-class counts instead of reducing the sample. Before regenerating a different pilot, move existing `pilot_ids.csv` and `pilot_ids.report.json` into a dated backup folder; generation refuses to overwrite a different ID list. Without exclusions, the original 27-class behavior remains available. Pilot membership is independent of CV fold assignment. Frame extraction validates the declared per-class count, including earlier 200-per-class pilots, after filtering excluded classes.
+This command saves 1,000 unique official training IDs per non-excluded class to `cache\metadata\pilot_ids.csv`: **11,000 clips** for this subset. Selection uses seed 42. The command's default remains 500 if `--per-class` is omitted. It reports insufficient selected-class counts instead of reducing the sample. Before regenerating a different pilot, move existing `pilot_ids.csv` and `pilot_ids.report.json` into a dated backup folder; generation refuses to overwrite a different ID list. Without exclusions, the original 27-class behavior remains available. Pilot membership is independent of CV fold assignment. Frame extraction validates the declared per-class count, including earlier 200-per-class pilots, after filtering excluded classes.
 
 Write the combined clip manifest after generating folds, pilot IDs, or review decisions. Rerun it after frame extraction to refresh frame integrity and status:
 
@@ -112,17 +112,36 @@ These are separate, explicit later operations. The `--ids-file` command filters 
 py -3.14 .\jester_pipeline.py --config .\config.json extract-frames --ids-file .\cache\metadata\fold_assignments.csv
 ```
 
-Training needs every retained official training and validation clip, not only the pilot. To prepare both labeled splits, export a labeled ID list from the complete manifest:
+The current comparison uses **1,000 training clips per class plus every official validation clip from the 11 retained classes**: **11,000 + 6,428 = 17,428 clips**. Export the combined selection after applying the class review and generating the 1,000-per-class pilot:
 
 ```powershell
-Import-Csv .\cache\metadata\clip_manifest.csv |
-    Where-Object { $_.official_split -in @('train', 'validation') } |
+$selectedClasses = @(Import-Csv .\cache\metadata\class_review.csv |
+    Where-Object { $_.compatibility_decision -in @('retain', 'flag') } |
+    Select-Object -ExpandProperty class_label)
+$trainingIds = @(Import-Csv .\cache\metadata\pilot_ids.csv)
+$validationIds = @(Import-Csv .\cache\metadata\clip_manifest.csv |
+    Where-Object { $_.official_split -eq 'validation' -and $_.class_label -in $selectedClasses })
+($trainingIds + $validationIds) |
     Select-Object clip_id, class_label, official_split |
-    Export-Csv .\cache\metadata\labeled_ids.csv -NoTypeInformation -Encoding utf8
-py -3.14 .\jester_pipeline.py --config .\config.json extract-frames --ids-file .\cache\metadata\labeled_ids.csv
+    Sort-Object { [int]$_.clip_id } |
+    Export-Csv .\cache\metadata\comparison_ids.csv -NoTypeInformation -Encoding utf8
 ```
 
-Use the same `labeled_ids.csv` with `extract-landmarks --ids-file` when preparing full training inputs. Refresh the manifest after extraction. Reports and benchmarks remain training-only.
+Existing extracted frames can be reused. If selected frames are missing, use `extract-frames --ids-file .\cache\metadata\comparison_ids.csv`. Keep the original `labeled_ids.csv`; it still contains all 133,349 labeled clips and is not the comparison selection.
+
+Use this command for the smaller MediaPipe extraction. Compatible completed landmark clips are skipped:
+
+```powershell
+py -3.14 .\jester_pipeline.py --config .\config.json extract-landmarks --extractor mediapipe --ids-file .\cache\metadata\comparison_ids.csv --model .\models\hand_landmarker.task
+```
+
+Refresh frame status only for the comparison IDs before preparing inputs. This retains the complete 27-class manifest and existing fold assignments, and preserves saved frame statuses outside the selection:
+
+```powershell
+py -3.14 .\jester_pipeline.py --config .\config.json manifest --ids-file .\cache\metadata\comparison_ids.csv
+```
+
+These are manual commands; changing metadata does not change an extraction process already running with the old list. Finish or stop that process before starting another cache writer. Reports and extractor benchmarks remain training-only; use `pilot_ids.csv` for them, not the combined train/validation selection. Omitting `manifest --ids-file` retains the full frame-refresh behavior.
 
 Use the exact `.onnx` paths printed by `Get-ChildItem` above. The same pilot list is passed to either extractor:
 
@@ -175,7 +194,7 @@ py -3.14 -m unittest discover -s tests -v
 py -3.14 .\jester_pipeline.py --config .\config.json validate-labels
 ```
 
-The unit tests use tiny synthetic labels, JPEGs, cache files, multipart tar bytes, and CPU optimizer steps. Real archive extraction, extractor model inference, the 5,500-clip pilot extraction, full extraction, and real-data classifier training are intentionally not part of verification. Python 3.14 works here, so no Python 3.12 fallback is needed.
+The unit tests use tiny synthetic labels, JPEGs, cache files, multipart tar bytes, and CPU optimizer steps. Real archive extraction, extractor model inference, the comparison extraction, full extraction, and real-data classifier training are intentionally not part of verification. Python 3.14 works here, so no Python 3.12 fallback is needed.
 
 ## GRU, LSTM, and DD-Net comparison
 
@@ -185,7 +204,9 @@ Training uses Python 3.14 and a separate dependency file. The extractor environm
 py -3.14 -m pip install -r .\training-requirements.txt
 ```
 
-Set `extractor` in `training_config.json` only after class review and extractor comparison. Keep the same frozen extractor, class review, saved folds, and `sequence_length` for all models. The default sequence length is 32; it must be even and at least 8. The current config intentionally leaves `extractor` unset.
+The current `training_config.json` selects `mediapipe` and sets `ids_file` to `cache/metadata/comparison_ids.csv`. Keep the same frozen extractor, class review, saved folds, and `sequence_length` for all models. Choosing this extractor and class set does not certify landmark quality. The default sequence length is 32; it must be even and at least 8.
+
+`ids_file` is optional and resolves relative to the training configuration. When present, preparation and all three classifiers use exactly those retained train/validation IDs, and require each retained class in every CV fold and in official validation. Unknown, duplicate, empty, mismatched, excluded-class, and test IDs are rejected. Unselected raw frames and landmarks are not required. Omit the field or set it to null to use every retained official training and validation clip as before. The selection file's SHA-256 is part of the shared-cache identity; changing it requires a new input cache and experiment ID. The fixed existing fold assignments are reused; sampling does not guarantee equal selected counts within each fold.
 
 Training uses four background data-loading workers (`"num_workers": 4` in `training_config.json`), reused across epochs. Each worker opens the shared feature cache read-only. Set this to `0` to load batches in the training process. Validation and model jobs remain sequential. Worker count is part of experiment settings, so changing it requires a new experiment ID. More workers are not guaranteed to improve throughput for these small landmark inputs.
 
@@ -196,7 +217,7 @@ py -3.14 .\prepare_training_inputs.py --config .\training_config.json --check
 py -3.14 .\prepare_training_inputs.py --config .\training_config.json --build
 ```
 
-Input preparation verifies raw frames and landmarks before freezing the shared cache. Queue jobs validate that cache's hashes and its manifest, fold, class, extractor, and sequence-length identities without reopening RGB frames or raw landmark files. Re-run input preparation to verify changed raw sources; training does not silently switch frozen inputs. Ambiguous matching caches block preflight.
+Input preparation verifies selected raw frames and landmarks before freezing the shared cache. Queue jobs validate that cache's hashes and its manifest, fold, class, selection, extractor, and sequence-length identities without reopening RGB frames or raw landmark files. Re-run input preparation to verify changed raw sources; training does not silently switch frozen inputs. Ambiguous matching caches block preflight.
 
 After changing the class review, rebuild the shared inputs and use a new experiment ID. The review and retained class mapping change cache and experiment identities, so old checkpoints cannot resume as the new subset. Compatible raw frame and landmark caches can be reused; keep existing feature caches and results. All three classifiers derive their output count from the retained mapping, giving 11 outputs for this subset. Live-camera false triggers still require separate evaluation, including unwanted gestures and idle movement.
 
@@ -205,7 +226,7 @@ Landmark extraction counts managed-cache usage once, then accounts for committed
 Check queue readiness and the exact 12-job order. Check mode starts no notebook kernels:
 
 ```powershell
-py -3.14 .\run_training_queue.py --config .\training_config.json --experiment-id jester-compare-v1
+py -3.14 .\run_training_queue.py --config .\training_config.json --experiment-id jester-11class-1000-mediapipe-v1
 ```
 
 Preflight also reserves managed cache and free disk for prediction exports, checkpoints, and reports.
@@ -213,20 +234,30 @@ Preflight also reserves managed cache and free disk for prediction exports, chec
 Run once only after preflight is clear. Use resume after an error or interruption; it requires the same data, classes, settings, source files, and runtime:
 
 ```powershell
-py -3.14 .\run_training_queue.py --config .\training_config.json --experiment-id jester-compare-v1 --train
-py -3.14 .\run_training_queue.py --config .\training_config.json --experiment-id jester-compare-v1 --train --resume
+py -3.14 .\run_training_queue.py --config .\training_config.json --experiment-id jester-11class-1000-mediapipe-v1 --train
+py -3.14 .\run_training_queue.py --config .\training_config.json --experiment-id jester-11class-1000-mediapipe-v1 --train --resume
 ```
 
 The queue runs three CV folds per model, derives each final-fit epoch count from the median best fold epoch, then fits and evaluates three final models. It creates comparison reports and the fixed 100-clip CPU benchmark after all jobs complete. Regenerate those reports from saved outputs without training:
 
 ```powershell
-py -3.14 .\run_training_queue.py --config .\training_config.json --experiment-id jester-compare-v1 --compare
+py -3.14 .\run_training_queue.py --config .\training_config.json --experiment-id jester-11class-1000-mediapipe-v1 --compare
 ```
 
 Inspect every saved class probability for one official validation clip:
 
 ```powershell
-py -3.14 .\inspect_probabilities.py --experiment .\cache\training\experiments\jester-compare-v1 --clip-id 12345
+py -3.14 .\inspect_probabilities.py --experiment .\cache\training\experiments\jester-11class-1000-mediapipe-v1 --clip-id 12345
 ```
 
 The queue creates a temporary `python3` kernelspec for the active Python interpreter, then removes it. Papermill needs local ZeroMQ sockets for each fresh kernel. Probabilities are softmax outputs, not calibrated confidence. DD-Net source and license are documented in `DDNET_REFERENCE.md` and `licenses\DD-Net-LICENSE.txt`.
+
+## Live webcam
+
+With a completed MediaPipe experiment and the local `models/hand_landmarker.task` file, run:
+
+```powershell
+py -3.14 .\webcam.py --experiment .\cache\training\experiments\jester-11class-1000-mediapipe-v1
+```
+
+Use `--model gru|lstm|ddnet`, `--camera 0`, or `--window-seconds 3` to set startup options. Press `1`, `2`, or `3` to switch models; `Q` or Escape exits. The preview and inference use unmirrored frames. Displayed probabilities are uncalibrated, and rolling windows can include frames from adjacent gestures.

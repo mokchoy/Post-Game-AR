@@ -41,12 +41,20 @@ def load_config(path: Path) -> dict:
     if not pipeline_path.is_absolute():
         pipeline_path = path.parent / pipeline_path
     pipeline = jp.load_config(pipeline_path)
+    ids_path = None
+    if value.get("ids_file") is not None:
+        if not isinstance(value["ids_file"], str) or not value["ids_file"].strip():
+            raise ValueError("ids_file must be a nonempty CSV path or null")
+        ids_path = Path(value["ids_file"])
+        if not ids_path.is_absolute():
+            ids_path = path.parent / ids_path
     return value | {
         "_training_config_path": path,
         "_pipeline": pipeline,
         "_paths": jp.cache_paths(pipeline),
         "_sequence_length": t,
         "_pipeline_config_path": pipeline_path.resolve(),
+        "_ids_file": ids_path.resolve() if ids_path is not None else None,
     }
 
 
@@ -81,7 +89,7 @@ def _class_review(path: Path) -> tuple[list[str], list[str], dict[str, dict]]:
 
 def _source_settings(config: dict, retained: list[str]) -> dict:
     paths = config["_paths"]
-    return {
+    settings = {
         "preprocessing": PREPROCESSING,
         "sequence_length": config["_sequence_length"],
         "extractor": config["extractor"],
@@ -90,6 +98,9 @@ def _source_settings(config: dict, retained: list[str]) -> dict:
         "class_review_sha256": _sha256(paths["metadata"] / "class_review.csv"),
         "retained_classes": retained,
     }
+    if config.get("_ids_file") is not None:
+        settings["ids_file_sha256"] = _sha256(config["_ids_file"])
+    return settings
 
 
 def _read_source(config: dict, verify_raw: bool = True) -> dict:
@@ -102,6 +113,8 @@ def _read_source(config: dict, verify_raw: bool = True) -> dict:
     ):
         if not path.is_file():
             blockers.append(f"missing {name}: {path}")
+    if config.get("_ids_file") is not None and not config["_ids_file"].is_file():
+        blockers.append(f"missing clip ID selection: {config['_ids_file']}")
     if blockers:
         return {"blockers": blockers, "paths": paths}
 
@@ -158,6 +171,18 @@ def _read_source(config: dict, verify_raw: bool = True) -> dict:
         cid for cid, row in manifest.items()
         if row.get("official_split") in {"train", "validation"} and row.get("class_label") in retained
     }
+    if config.get("_ids_file") is not None:
+        selected = set(jp.read_clip_ids(config["_ids_file"], manifest))
+        invalid = selected - retained_ids
+        if invalid:
+            raise ValueError(f"selection includes excluded classes or non-training/validation clips: {sorted(invalid, key=_numeric_key)[:5]}")
+        retained_ids = selected
+        for label in retained:
+            if not any(manifest[cid]["class_label"] == label for cid in selected & validation_ids):
+                raise ValueError(f"selection lacks official validation clips for {label!r}")
+            for fold in ("1", "2", "3"):
+                if not any(manifest[cid]["class_label"] == label and fold_by_id[cid] == fold for cid in selected & train_ids):
+                    raise ValueError(f"selection lacks training clips for {label!r} in fold {fold}")
     if not retained_ids:
         blockers.append("no retained labeled training or validation clips")
     incomplete_frames = []

@@ -362,6 +362,21 @@ def create_review_template(labels_dir: Path, output: Path) -> None:
     )
 
 
+def read_clip_ids(path: Path, records: dict[str, dict]) -> list[str]:
+    with path.open("r", encoding="utf-8-sig", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    ids = [(row.get("clip_id") or "").strip() for row in rows]
+    if not ids or any(not cid for cid in ids) or len(ids) != len(set(ids)):
+        raise ValueError("clip ID selection must contain unique, nonempty clip_id values")
+    unknown = set(ids) - records.keys()
+    if unknown:
+        raise ValueError(f"selection contains unknown clip IDs: {sorted(unknown)[:5]}")
+    for cid, row in zip(ids, rows):
+        if any(row.get(key) and row[key] != records[cid].get(key) for key in ("class_label", "official_split")):
+            raise ValueError(f"selection has mismatched split/class metadata: {cid}")
+    return ids
+
+
 def filter_preparation_ids(ids: list[str], records: dict[str, dict], review: dict[str, dict]) -> list[str]:
     excluded = {label for label, row in review.items() if row["compatibility_decision"] == "exclude"}
     if excluded and any(not records[cid]["class_label"] for cid in ids):
@@ -531,9 +546,14 @@ def validate_frame_completion(clip_dir: Path, archive_identity: str | None = Non
         return False, {}, {"integrity_status": "invalid_completion_marker"}
 
 
-def build_manifest(labels_dir: Path, frames_root: Path, output: Path, folds_path: Path | None, pilot_path: Path | None, review_path: Path | None) -> dict:
+def build_manifest(labels_dir: Path, frames_root: Path, output: Path, folds_path: Path | None, pilot_path: Path | None, review_path: Path | None, ids_path: Path | None = None) -> dict:
     classes, records = read_labels(labels_dir)
     review = read_class_review(classes, review_path)
+    selected = set(filter_preparation_ids(read_clip_ids(ids_path, records), records, review)) if ids_path is not None else None
+    previous = {}
+    if selected is not None and output.exists():
+        with output.open("r", encoding="utf-8-sig", newline="") as stream:
+            previous = {row["clip_id"]: row for row in csv.DictReader(stream)}
     folds = {}
     if folds_path and folds_path.exists():
         with folds_path.open("r", encoding="utf-8-sig", newline="") as stream:
@@ -568,7 +588,9 @@ def build_manifest(labels_dir: Path, frames_root: Path, output: Path, folds_path
     for clip_id in sorted(records, key=_numeric_key):
         record = records[clip_id]
         clip_dir = frames_root / clip_id
-        if clip_dir.is_dir():
+        if selected is not None and clip_id not in selected and clip_id in previous:
+            row = previous[clip_id] | record
+        elif (selected is None or clip_id in selected) and clip_dir.is_dir():
             complete, marker, scan = validate_frame_completion(clip_dir)
             status = "complete" if complete else "partial"
             rel = os.path.relpath(clip_dir, config_root_for(frames_root))
@@ -1193,6 +1215,7 @@ def _parser() -> argparse.ArgumentParser:
 
     p = commands.add_parser("manifest", help="write one clip manifest with split, fold, pilot, and frame status")
     p.add_argument("--labels-dir", type=Path)
+    p.add_argument("--ids-file", type=Path, help="refresh frames for selected IDs only; preserve other saved frame statuses")
 
     p = commands.add_parser("extract-frames", help="selectively extract frames from staged multipart archives")
     p.add_argument("--labels-dir", type=Path)
@@ -1267,6 +1290,7 @@ def main(argv: list[str] | None = None) -> int:
                 paths["metadata"] / "fold_assignments.csv",
                 paths["metadata"] / "pilot_ids.csv",
                 paths["metadata"] / "class_review.csv",
+                args.ids_file,
             )
         elif args.command == "extract-frames":
             result = extract_frames(
