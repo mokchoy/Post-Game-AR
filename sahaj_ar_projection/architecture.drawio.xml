@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-10-24T00:00:00.000Z" agent="claude-code" version="24.0.0">
+  <diagram name="ar_projection architecture" id="arch1">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1080" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title1" value="Post-Game AR Projection -- ar_projection module architecture (as of Step 31/35, 2026-10-24)" style="text;html=1;fontSize=18;fontStyle=1;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="10" width="1200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="legend1" value="Solid arrow = data passed this call, dashed arrow = reads-from / gate-check. Orange = occlusion/depth subsystem (this session's work). Grey-italic = data record (dataclass), not a function." style="text;html=1;fontSize=11;fontStyle=2;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="630" width="1200" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== Column A ===================== -->
+        <mxCell id="c_cli" value="cli.py  /  april-tag-projection.py  (entry point)" style="swimlane;whiteSpace=wrap;html=1;startSize=26;fontStyle=1;fontSize=12;align=center;verticalAlign=top;fillColor=#E1D5E7;strokeColor=#9673A6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="260" height="104" as="geometry" />
+        </mxCell>
+        <mxCell id="i_cli_1" value="main() -- parses CLI flags, builds Config, constructs occlusion.DepthPrototype if --depth-* given, calls pipeline.run()" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#F3EEF5;strokeColor=#9673A6;" vertex="1" parent="c_cli">
+          <mxGeometry x="10" y="30" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_cli_2" value="self_check() -- pure-geometry smoke test (--self-check); no torch, no camera" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#F3EEF5;strokeColor=#9673A6;" vertex="1" parent="c_cli">
+          <mxGeometry x="10" y="64" width="240" height="28" as="geometry" />
+        </mxCell>
+
+        <mxCell id="c_config" value="config.py" style="swimlane;whiteSpace=wrap;html=1;startSize=26;fontStyle=1;fontSize=12;align=center;verticalAlign=top;fillColor=#F5F5F5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="194" width="260" height="104" as="geometry" />
+        </mxCell>
+        <mxCell id="i_cfg_1" value="load_config(path, overrides) to Config -- JSON + dotted-path overrides, validated ranges" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#999999;" vertex="1" parent="c_config">
+          <mxGeometry x="10" y="30" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_cfg_2" value="Config (frozen dataclass tree): camera, tags, features{lk, id_revalidation, guided_matching}, mapping, pose, uncertainty, filter, panel, display, logging, calibration" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#EDEDED;strokeColor=#999999;fontStyle=2;" vertex="1" parent="c_config">
+          <mxGeometry x="10" y="64" width="240" height="28" as="geometry" />
+        </mxCell>
+
+        <mxCell id="c_types" value="types.py  (shared data records)" style="swimlane;whiteSpace=wrap;html=1;startSize=26;fontStyle=1;fontSize=12;align=center;verticalAlign=top;fillColor=#F5F5F5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="328" width="260" height="274" as="geometry" />
+        </mxCell>
+        <mxCell id="i_ty_1" value="CameraModel -- K, distortion, size, identity" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#EDEDED;strokeColor=#999999;fontStyle=2;" vertex="1" parent="c_types">
+          <mxGeometry x="10" y="30" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_ty_2" value="FramePacket -- index, timestamp, original/bgr/gray, camera" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#EDEDED;strokeColor=#999999;fontStyle=2;" vertex="1" parent="c_types">
+          <mxGeometry x="10" y="64" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_ty_3" value="TagObservation -- id, pixels(4,2), world(4,3), candidates[T_CW], valid, ambiguous" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#EDEDED;strokeColor=#999999;fontStyle=2;" vertex="1" parent="c_types">
+          <mxGeometry x="10" y="98" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_ty_4" value="FeatureObservation -- track_id, pixel, descriptor, landmark_id, association_source" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#EDEDED;strokeColor=#999999;fontStyle=2;" vertex="1" parent="c_types">
+          <mxGeometry x="10" y="132" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_ty_5" value="LandmarkMap -- points(N,3), descriptors(N,32), ids, support, rms, extra_descriptors" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#EDEDED;strokeColor=#999999;fontStyle=2;" vertex="1" parent="c_types">
+          <mxGeometry x="10" y="166" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_ty_6" value="PoseEstimate -- T_CW, valid, source, landmark/tag_inliers, covariance, diagnostics" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#EDEDED;strokeColor=#999999;fontStyle=2;" vertex="1" parent="c_types">
+          <mxGeometry x="10" y="200" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_ty_7" value="FrameResult -- state, raw_pose, render_pose, raw/render_panel, diagnostics, timings" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#EDEDED;strokeColor=#999999;fontStyle=2;" vertex="1" parent="c_types">
+          <mxGeometry x="10" y="234" width="240" height="28" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== Column B ===================== -->
+        <mxCell id="c_camera" value="camera.py" style="swimlane;whiteSpace=wrap;html=1;startSize=26;fontStyle=1;fontSize=12;align=center;verticalAlign=top;fillColor=#DAE8FC;strokeColor=#6C8EBF;" vertex="1" parent="1">
+          <mxGeometry x="340" y="60" width="260" height="138" as="geometry" />
+        </mxCell>
+        <mxCell id="i_cam_1" value="load_calibration(path, size) -- reads .npz K/distortion, strict size match" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_camera">
+          <mxGeometry x="10" y="30" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_cam_2" value="Preprocessor.packet(index, ts, bgr) to FramePacket -- undistort via remap" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_camera">
+          <mxGeometry x="10" y="64" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_cam_3" value="Capture.read() to FramePacket | None -- camera or video+timestamps.jsonl source" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_camera">
+          <mxGeometry x="10" y="98" width="240" height="28" as="geometry" />
+        </mxCell>
+
+        <mxCell id="c_tags" value="tags.py" style="swimlane;whiteSpace=wrap;html=1;startSize=26;fontStyle=1;fontSize=12;align=center;verticalAlign=top;fillColor=#DAE8FC;strokeColor=#6C8EBF;" vertex="1" parent="1">
+          <mxGeometry x="340" y="228" width="260" height="104" as="geometry" />
+        </mxCell>
+        <mxCell id="i_tag_1" value="TagDetector.detect(gray, camera) to list[TagObservation] -- ArUco 36h11 + IPPE-square PnP" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_tags">
+          <mxGeometry x="10" y="30" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_tag_2" value="TagDetector.observation(id, pixels, camera) -- builds candidates, flags planar ambiguity" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_tags">
+          <mxGeometry x="10" y="64" width="240" height="28" as="geometry" />
+        </mxCell>
+
+        <mxCell id="c_features" value="features.py" style="swimlane;whiteSpace=wrap;html=1;startSize=26;fontStyle=1;fontSize=12;align=center;verticalAlign=top;fillColor=#DAE8FC;strokeColor=#6C8EBF;" vertex="1" parent="1">
+          <mxGeometry x="340" y="362" width="260" height="172" as="geometry" />
+        </mxCell>
+        <mxCell id="i_feat_1" value="FeatureTracker.update(gray, tags, index) to list[FeatureObservation] -- LK flow + periodic ORB redetect, tag-region mask" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_features">
+          <mxGeometry x="10" y="30" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_feat_2" value="match_descriptors(query, train, cfg) -- Hamming ratio-test matching, mutual check" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_features">
+          <mxGeometry x="10" y="64" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_feat_3" value="group_match_descriptors(...) -- per-landmark best-distance before ratio test (multiview bank)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_features">
+          <mxGeometry x="10" y="98" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_feat_4" value="feature_mask(shape, tags, cfg) -- excludes tag-corner regions from ORB detection" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_features">
+          <mxGeometry x="10" y="132" width="240" height="28" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== Column C ===================== -->
+        <mxCell id="c_landmarks" value="landmarks.py" style="swimlane;whiteSpace=wrap;html=1;startSize=26;fontStyle=1;fontSize=12;align=center;verticalAlign=top;fillColor=#DAE8FC;strokeColor=#6C8EBF;" vertex="1" parent="1">
+          <mxGeometry x="640" y="60" width="260" height="206" as="geometry" />
+        </mxCell>
+        <mxCell id="i_lm_1" value="MapBuilder.add() / _build() -- background bootstrap: triangulate + refine + quality gate to LandmarkMap" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_landmarks">
+          <mxGeometry x="10" y="30" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_lm_2" value="associate(features, map, cfg) to (X, U) -- matches features to mapped landmarks (guided or global)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_landmarks">
+          <mxGeometry x="10" y="64" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_lm_3" value="guided_matches(fresh, map, prior_T_CW, camera, cfg) -- geometry-first radius-gated matching" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_landmarks">
+          <mxGeometry x="10" y="98" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_lm_4" value="revalidate_ids(features, map, cfg, lost) -- clears stale inherited landmark_id on mismatch" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_landmarks">
+          <mxGeometry x="10" y="132" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_lm_5" value="save_map() / load_map() -- .npz roundtrip, overwrite-protected, schema validated" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_landmarks">
+          <mxGeometry x="10" y="166" width="240" height="28" as="geometry" />
+        </mxCell>
+
+        <mxCell id="c_pose" value="pose.py" style="swimlane;whiteSpace=wrap;html=1;startSize=26;fontStyle=1;fontSize=12;align=center;verticalAlign=top;fillColor=#DAE8FC;strokeColor=#6C8EBF;" vertex="1" parent="1">
+          <mxGeometry x="640" y="296" width="260" height="138" as="geometry" />
+        </mxCell>
+        <mxCell id="i_pose_1" value="PoseSolver.estimate(tags, X, U, camera, previous, dt) to PoseEstimate -- joint/tag_only/landmark_only robust fit" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_pose">
+          <mxGeometry x="10" y="30" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_pose_2" value="robust_weights(residual, loss, f_scale) -- Huber IRLS weighting (scipy.optimize.least_squares)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_pose">
+          <mxGeometry x="10" y="64" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_pose_3" value="covariance(T, world, pixels, sigma, camera, cfg) -- local conditional pose covariance" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_pose">
+          <mxGeometry x="10" y="98" width="240" height="28" as="geometry" />
+        </mxCell>
+
+        <mxCell id="c_geometry" value="geometry.py  (shared math, used throughout)" style="swimlane;whiteSpace=wrap;html=1;startSize=26;fontStyle=1;fontSize=12;align=center;verticalAlign=top;fillColor=#F5F5F5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="640" y="464" width="260" height="138" as="geometry" />
+        </mxCell>
+        <mxCell id="i_geo_1" value="transform() / project() / depths() -- rvec,tvec to T_CW; project 3D to 2D; camera-Z of points" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#999999;" vertex="1" parent="c_geometry">
+          <mxGeometry x="10" y="30" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_geo_2" value="tag_points(size) / panel_points(w,h,elev,tilt) -- local-frame corner geometry" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#999999;" vertex="1" parent="c_geometry">
+          <mxGeometry x="10" y="64" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_geo_3" value="triangulate(T1, T2, u1, u2, camera, cfg) -- two-view point + baseline/parallax/RMS gates" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#999999;" vertex="1" parent="c_geometry">
+          <mxGeometry x="10" y="98" width="240" height="28" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== Column D : pipeline orchestrator ===================== -->
+        <mxCell id="c_pipeline" value="pipeline.py  (orchestrator)" style="swimlane;whiteSpace=wrap;html=1;startSize=26;fontStyle=1;fontSize=12;align=center;verticalAlign=top;fillColor=#FFF2CC;strokeColor=#D6B656;" vertex="1" parent="1">
+          <mxGeometry x="940" y="60" width="300" height="308" as="geometry" />
+        </mxCell>
+        <mxCell id="i_pl_1" value="Pipeline.process() step 1: tags.detect(gray, camera) to list[TagObservation]" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#D6B656;" vertex="1" parent="c_pipeline">
+          <mxGeometry x="10" y="30" width="280" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_pl_2" value="step 2: features.update(gray, tags, index) to list[FeatureObservation]" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#D6B656;" vertex="1" parent="c_pipeline">
+          <mxGeometry x="10" y="64" width="280" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_pl_3" value="step 3: landmarks.associate(features, map) to (X, U) correspondences" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#D6B656;" vertex="1" parent="c_pipeline">
+          <mxGeometry x="10" y="98" width="280" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_pl_4" value="step 4: pose.PoseSolver.estimate(tags, X, U, previous) to PoseEstimate" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#D6B656;" vertex="1" parent="c_pipeline">
+          <mxGeometry x="10" y="132" width="280" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_pl_5" value="step 5: rendering.PoseSmoother + visible_panel to render_pose, panel pixels" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#D6B656;" vertex="1" parent="c_pipeline">
+          <mxGeometry x="10" y="166" width="280" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_pl_6" value="step 6 [gated, default off]: occlusion.DepthPrototype.render(...) to composite layer" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFE6CC;strokeColor=#D79B00;" vertex="1" parent="c_pipeline">
+          <mxGeometry x="10" y="200" width="280" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_pl_7" value="step 7: rendering.annotate(...) to displayed / recorded frame" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#D6B656;" vertex="1" parent="c_pipeline">
+          <mxGeometry x="10" y="234" width="280" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_pl_8" value="run() -- capture loop: Capture.read() to process() to occlusion to annotate to RunLogger, per frame" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFF9E8;strokeColor=#D6B656;fontStyle=1;" vertex="1" parent="c_pipeline">
+          <mxGeometry x="10" y="268" width="280" height="28" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== Column E : rendering + occlusion ===================== -->
+        <mxCell id="c_rendering" value="rendering.py" style="swimlane;whiteSpace=wrap;html=1;startSize=26;fontStyle=1;fontSize=12;align=center;verticalAlign=top;fillColor=#DAE8FC;strokeColor=#6C8EBF;" vertex="1" parent="1">
+          <mxGeometry x="1280" y="60" width="300" height="172" as="geometry" />
+        </mxCell>
+        <mxCell id="i_rend_1" value="PoseSmoother.update(T_CW) to render_pose -- EMA filter (config.filter)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_rendering">
+          <mxGeometry x="10" y="30" width="280" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_rend_2" value="visible_panel(T, panel, camera) to pixel polygon -- clips off-image / behind-camera" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_rendering">
+          <mxGeometry x="10" y="64" width="280" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_rend_3" value="panel_covariance(T, panel, camera, cov, uncertainty) -- projects pose covariance to panel corners" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_rendering">
+          <mxGeometry x="10" y="98" width="280" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_rend_4" value="annotate(packet, result, tags, features, display, layer) to BGR -- HUD + occlusion composite" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_rendering">
+          <mxGeometry x="10" y="132" width="280" height="28" as="geometry" />
+        </mxCell>
+
+        <mxCell id="c_occlusion" value="occlusion.py  (gated, optional -- Steps 27-35 depth/occlusion work)" style="swimlane;whiteSpace=wrap;html=1;startSize=26;fontStyle=1;fontSize=12;align=center;verticalAlign=top;fillColor=#FFE6CC;strokeColor=#D79B00;" vertex="1" parent="1">
+          <mxGeometry x="1280" y="262" width="300" height="274" as="geometry" />
+        </mxCell>
+        <mxCell id="i_occ_1" value="require_tracking_acceptance(report, config) -- GATE: fingerprint-matched passed report required before torch/depth import" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFF2E0;strokeColor=#D79B00;" vertex="1" parent="c_occlusion">
+          <mxGeometry x="10" y="30" width="280" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_occ_2" value="MetricDepth.predict(bgr) to raw depth (H,W) -- Depth-Anything-V2 metric (Hypersim), torch/CUDA; only class that imports torch" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFF2E0;strokeColor=#D79B00;" vertex="1" parent="c_occlusion">
+          <mxGeometry x="10" y="64" width="280" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_occ_3" value="fit_affine_huber(anchor_z, anchor_raw) to (a, b) -- NEW: robust raw = a+b*Z fit via scipy least_squares(loss=huber), replaces plain np.polyfit" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFF2E0;strokeColor=#D79B00;" vertex="1" parent="c_occlusion">
+          <mxGeometry x="10" y="98" width="280" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_occ_4" value="tag_plane_scale(T_CW, raw, tag_size, camera) -- Step30 tag-based calibration, built + tested, NOT yet wired into DepthPrototype" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFF2E0;strokeColor=#D79B00;" vertex="1" parent="c_occlusion">
+          <mxGeometry x="10" y="132" width="280" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_occ_5" value="panel_layer(T, panel, camera, scene_depth, margin_m, invalid_occludes) to (texture, visible mask, virtual Z) -- ray-plane + margin rule" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFF2E0;strokeColor=#D79B00;" vertex="1" parent="c_occlusion">
+          <mxGeometry x="10" y="166" width="280" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_occ_6" value="DepthPrototype.render(packet, result, panel, map, features) -- orchestrates: predict to gather anchors to fit_affine_huber to 5-frame hold to panel_layer" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFD9A6;strokeColor=#D79B00;fontStyle=1;" vertex="1" parent="c_occlusion">
+          <mxGeometry x="10" y="200" width="280" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_occ_7" value="evaluate() / select_resolution() -- OFFLINE: mask IoU / boundary-F1 scoring against hand labels (Step32), input-size selection (Step33)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFF2E0;strokeColor=#D79B00;" vertex="1" parent="c_occlusion">
+          <mxGeometry x="10" y="234" width="280" height="28" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== Column F : diagnostics / experiments / storage ===================== -->
+        <mxCell id="c_diagnostics" value="diagnostics.py" style="swimlane;whiteSpace=wrap;html=1;startSize=26;fontStyle=1;fontSize=12;align=center;verticalAlign=top;fillColor=#DAE8FC;strokeColor=#6C8EBF;" vertex="1" parent="1">
+          <mxGeometry x="1620" y="60" width="280" height="138" as="geometry" />
+        </mxCell>
+        <mxCell id="i_diag_1" value="RunLogger -- per-frame frames.jsonl row + optional input/annotated video (HFYU/FFV1)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_diagnostics">
+          <mxGeometry x="10" y="30" width="260" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_diag_2" value="write_json(path, data) -- NaN/inf-safe, ndarray-aware JSON writer" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_diagnostics">
+          <mxGeometry x="10" y="64" width="260" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_diag_3" value="code_sha256() -- hashes ar_projection/*.py for provenance" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#6C8EBF;" vertex="1" parent="c_diagnostics">
+          <mxGeometry x="10" y="98" width="260" height="28" as="geometry" />
+        </mxCell>
+
+        <mxCell id="c_experiments" value="experiments.py  (offline CLI)" style="swimlane;whiteSpace=wrap;html=1;startSize=26;fontStyle=1;fontSize=12;align=center;verticalAlign=top;fillColor=#D5E8D4;strokeColor=#82B366;" vertex="1" parent="1">
+          <mxGeometry x="1620" y="228" width="280" height="172" as="geometry" />
+        </mxCell>
+        <mxCell id="i_exp_1" value="summarize(run_dir) -- pose sources, gates, reference error, occlusion stats, timing percentiles" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#82B366;" vertex="1" parent="c_experiments">
+          <mxGeometry x="10" y="30" width="260" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_exp_2" value="compare(recording, config) -- replays tag_only / lk_periodic / orb_only / lk_orb / joint variants" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#82B366;" vertex="1" parent="c_experiments">
+          <mxGeometry x="10" y="64" width="260" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_exp_3" value="tracking_acceptance(controlled, physical, soak) -- the Step35 LIVE GATE report (95% availability, 120s/300s continuous, latency)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#E8F5E0;strokeColor=#82B366;fontStyle=1;" vertex="1" parent="c_experiments">
+          <mxGeometry x="10" y="98" width="260" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_exp_4" value="hand_off(config, windows) -- tag-withheld window replay, guided on/off comparison" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFFFF;strokeColor=#82B366;" vertex="1" parent="c_experiments">
+          <mxGeometry x="10" y="132" width="260" height="28" as="geometry" />
+        </mxCell>
+
+        <mxCell id="c_storage" value="runs/&lt;run-id&gt;/  (disk)" style="swimlane;whiteSpace=wrap;html=1;startSize=26;fontStyle=1;fontSize=12;align=center;verticalAlign=top;dashed=1;fillColor=#FFF9C4;strokeColor=#BBA200;" vertex="1" parent="1">
+          <mxGeometry x="1620" y="430" width="280" height="172" as="geometry" />
+        </mxCell>
+        <mxCell id="i_store_1" value="frames.jsonl -- one row per frame: pose, diagnostics, timings" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFDE7;strokeColor=#BBA200;dashed=1;" vertex="1" parent="c_storage">
+          <mxGeometry x="10" y="30" width="260" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_store_2" value="config.json / metadata.json -- exact run provenance" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFDE7;strokeColor=#BBA200;dashed=1;" vertex="1" parent="c_storage">
+          <mxGeometry x="10" y="64" width="260" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_store_3" value="summary.json -- RunLogger's own quick aggregate" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFDE7;strokeColor=#BBA200;dashed=1;" vertex="1" parent="c_storage">
+          <mxGeometry x="10" y="98" width="260" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="i_store_4" value="input.avi / annotated.avi -- lossless source, optional annotated" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=4;fillColor=#FFFDE7;strokeColor=#BBA200;dashed=1;" vertex="1" parent="c_storage">
+          <mxGeometry x="10" y="132" width="260" height="28" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== Edges: entry / config ===================== -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_cli_1" target="i_cfg_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="Config" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_cfg_1" target="i_cli_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="Config, occlusion=DepthPrototype|None" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;strokeWidth=2;" edge="1" parent="1" source="i_cli_1" target="i_pl_8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e33" value="report path, Config  (gate before depth import)" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;dashed=1;strokeColor=#D79B00;" edge="1" parent="1" source="i_cli_1" target="i_occ_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== Edges: capture loop ===================== -->
+        <mxCell id="e4" value="(loop)" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_pl_8" target="i_cam_3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="raw bgr" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_cam_3" target="i_cam_2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" value="FramePacket" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_cam_2" target="i_pl_8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" value="FramePacket" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;strokeWidth=2;" edge="1" parent="1" source="i_pl_8" target="i_pl_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== Edges: per-frame detection/association/pose ===================== -->
+        <mxCell id="e8" value="gray, CameraModel" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_pl_1" target="i_tag_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" value="list[TagObservation]" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_tag_1" target="i_pl_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" value="gray, tags" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_pl_2" target="i_feat_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" value="list[FeatureObservation]" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_feat_1" target="i_pl_2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" value="features, LandmarkMap" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_pl_3" target="i_lm_2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" value="(X 3D pts, U 2D px) correspondences" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_lm_2" target="i_pl_3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e37" value="used by" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;dashed=1;" edge="1" parent="1" source="i_feat_2" target="i_lm_2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" value="tags, X, U, camera, previous" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_pl_4" target="i_pose_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" value="PoseEstimate (T_CW, inliers, covariance)" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_pose_1" target="i_pl_4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e35" value="project() / depths()" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;dashed=1;" edge="1" parent="1" source="i_geo_1" target="i_pose_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== Edges: render pose / panel ===================== -->
+        <mxCell id="e16" value="T_CW" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_pl_5" target="i_rend_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e17" value="T_CW, panel corners (from panel_points)" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_pl_5" target="i_rend_2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== Edges: occlusion subsystem detail ===================== -->
+        <mxCell id="e18" value="packet, FrameResult, panel, LandmarkMap, features" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;strokeWidth=2;strokeColor=#D79B00;" edge="1" parent="1" source="i_pl_6" target="i_occ_6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e19" value="bgr" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;strokeColor=#D79B00;" edge="1" parent="1" source="i_occ_6" target="i_occ_2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e20" value="raw depth (H,W) + inference stats" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;strokeColor=#D79B00;" edge="1" parent="1" source="i_occ_2" target="i_occ_6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e21" value="anchor_z[], anchor_raw[]  (&gt;=12 mapped landmarks visible this frame)" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;strokeColor=#D79B00;" edge="1" parent="1" source="i_occ_6" target="i_occ_3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e22" value="(a, b) Huber-robust affine fit" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;strokeColor=#D79B00;" edge="1" parent="1" source="i_occ_3" target="i_occ_6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e23" value="T_CW, panel, scene_depth=(raw-a)/b, margin" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;strokeColor=#D79B00;" edge="1" parent="1" source="i_occ_6" target="i_occ_5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e24" value="(texture, visible mask, virtual Z)" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;strokeColor=#D79B00;" edge="1" parent="1" source="i_occ_5" target="i_occ_6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e36" value="project() / depths()" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;dashed=1;" edge="1" parent="1" source="i_geo_1" target="i_occ_5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e34" value="reused by (Huber loss)" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;dashed=1;strokeColor=#D79B00;" edge="1" parent="1" source="i_pose_2" target="i_occ_3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e25" value="(color, visible) composite layer" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;strokeWidth=2;strokeColor=#D79B00;" edge="1" parent="1" source="i_occ_6" target="i_pl_7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== Edges: annotate / log ===================== -->
+        <mxCell id="e26" value="packet, FrameResult, occlusion layer" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_pl_7" target="i_rend_4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e27" value="annotated image" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_rend_4" target="i_pl_8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e28" value="FrameResult, timings, images" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_pl_8" target="i_diag_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e29" value="writes" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_diag_1" target="i_store_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e30" value="LandmarkMap (on Frozen map saved)" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_lm_1" target="i_lm_5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e31" value="data/*.npz" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;" edge="1" parent="1" source="i_lm_5" target="i_store_2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== Edges: offline analysis ===================== -->
+        <mxCell id="e32" value="reads frames.jsonl, config.json  (offline)" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;dashed=1;strokeColor=#82B366;" edge="1" parent="1" source="i_exp_1" target="i_store_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e38" value="reads 3 runs (controlled/physical/soak)" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;dashed=1;strokeColor=#82B366;" edge="1" parent="1" source="i_exp_3" target="i_store_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e39" value="produces tracking-acceptance.json consumed by cli's gate" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;dashed=1;strokeColor=#82B366;" edge="1" parent="1" source="i_exp_3" target="i_occ_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e40" value="produces annotation manifest, scores exported masks" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;dashed=1;strokeColor=#D79B00;" edge="1" parent="1" source="i_occ_7" target="i_store_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

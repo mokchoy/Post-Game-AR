@@ -11,16 +11,16 @@ from unittest.mock import patch
 import cv2
 import numpy as np
 from ar_projection.camera import Capture, Preprocessor
-from ar_projection.config import IdRevalidation, load_config
+from ar_projection.config import BackgroundPrior as PriorConfig, IdRevalidation, load_config
 from ar_projection.diagnostics import RunLogger, code_sha256
 from ar_projection.experiments import compare, provenance, summarize, tracking_acceptance, window_metrics, window_sources
 from ar_projection.features import FeatureTracker
-from ar_projection.geometry import panel_points, tag_points, transform
+from ar_projection.geometry import depths, panel_points, tag_points, transform
 from ar_projection.landmarks import associate, map_metadata, revalidate_ids, save_map
-from ar_projection.occlusion import DepthPrototype, evaluate, mask_metrics, panel_layer, require_tracking_acceptance, select_resolution
+from ar_projection.occlusion import DepthPrototype, anchor_sample, evaluate, mask_metrics, PlaneCorrector, PlaneParams, panel_layer, plane_depth, BackgroundPrior, RelativeLineOcclusion, require_tracking_acceptance, select_resolution, tag_plane_scale
 from ar_projection.pipeline import Pipeline, run
 from ar_projection.pose import PoseSolver
-from ar_projection.rendering import visible_panel
+from ar_projection.rendering import side_by_side, visible_panel
 from ar_projection.tags import TagDetector
 from ar_projection.types import CameraModel, FeatureObservation, FramePacket, LandmarkMap
 
@@ -229,6 +229,73 @@ class ExperimentTests(unittest.TestCase):
         self.assertTrue(np.any(visible[:, 320:]))
         self.assertEqual(color.dtype, np.uint8)
 
+    def test_plane_depth_matches_panel_layer_on_the_same_plane_but_is_not_clipped(self):
+        T = transform([0, 0, 0], [0, 0, 1.])
+        z, valid = plane_depth(T, np.zeros(3), np.array([0., 0, 1]), self.cam)
+        self.assertTrue(np.all(valid))  # whole image, not clipped to any polygon
+        np.testing.assert_allclose(z[valid], 1.)
+        panel = np.array([[-.15, -.15, 0], [.15, -.15, 0], [.15, .15, 0], [-.15, .15, 0]])
+        T2 = transform([0, .6, 0], [0, 0, 1.])
+        _, panel_mask, panel_z = panel_layer(T2, panel, self.cam)
+        z2, valid2 = plane_depth(T2, np.zeros(3), np.array([0., 0, 1]), self.cam)
+        np.testing.assert_allclose(z2[panel_mask], panel_z[panel_mask])  # same plane, same depth where panel_layer is also valid
+        self.assertGreater(np.count_nonzero(valid2), np.count_nonzero(panel_mask))  # but not clipped to the panel's own quad
+
+    def _tilted_table(self):
+        R = cv2.Rodrigues(np.array([np.pi-.6, 0, 0]))[0]  # camera at (0,-.8,1) looks down at the Z=0 table
+        T = np.eye(4)
+        T[:3, :3], T[:3, 3] = R, -R@np.array([0., -.8, 1.0])
+        panel = np.array([[-.05, -.05, 0], [.05, -.05, 0], [.05, .05, 0], [-.05, .05, 0]])
+        oracle, valid = plane_depth(T, np.zeros(3), np.array([0., 0, 1]), self.cam)
+        return T, panel, oracle, valid
+
+    def test_plane_correction_recovers_a_known_bias_and_ignores_objects(self):
+        T, panel, oracle, valid = self._tilted_table()
+        rows = (np.indices(oracle.shape)[0]/(oracle.shape[0]-1)*2-1)
+        params = dict(z_min_m=.1, z_max_m=5., min_pixels=1000, max_mad_m=.02, b_range=(.5, 2.))
+        table = valid.copy()
+        table[300:380, 100:200] = False
+        # full terms, table only: scale + offset + row tilt recovered (raw is a plane here, so only the sum is identifiable)
+        raw = (oracle-.05-.08*rows)/1.2
+        corrected, stats = PlaneCorrector(PlaneParams(terms="full", **params))(raw, T, panel, self.cam)
+        self.assertTrue(stats["plane_gate"])
+        self.assertLess(float(np.median(np.abs(corrected-oracle)[table])), .01)
+        # affine terms with an object in front of the table: the fit ignores it and the object stays nearer
+        raw = (oracle-.05)/1.2
+        raw[300:380, 100:200] = .3
+        corrected, stats = PlaneCorrector(PlaneParams(terms="affine", **params))(raw, T, panel, self.cam)
+        self.assertTrue(stats["plane_gate"])
+        self.assertLess(float(np.median(np.abs(corrected-oracle)[table])), .01)
+        self.assertLess(float(corrected[340, 150]), float(oracle[340, 150])-.1)
+
+    def test_plane_correction_fixed_slope_needs_a_prior_and_removes_the_row_bias(self):
+        T, panel, oracle, valid = self._tilted_table()
+        rows = (np.indices(oracle.shape)[0]/(oracle.shape[0]-1)*2-1)
+        raw = (oracle-.05-.08*rows)/1.2
+        raw[300:380, 100:200] = .3
+        corrector = PlaneCorrector(PlaneParams(terms="fixedb", z_min_m=.1, z_max_m=5., min_pixels=1000, max_mad_m=.02))
+        self.assertIsNone(corrector(raw, T, panel, self.cam)[0])
+        corrected, stats = corrector(raw, T, panel, self.cam, b_prior=1.2)
+        self.assertTrue(stats["plane_gate"])
+        table = valid.copy()
+        table[300:380, 100:200] = False
+        self.assertLess(float(np.median(np.abs(corrected-oracle)[table])), .01)
+        self.assertLess(float(corrected[340, 150]), float(oracle[340, 150])-.1)
+
+    def test_plane_correction_gate_failure_returns_none_and_clears_the_hold(self):
+        T, panel, oracle, _ = self._tilted_table()
+        corrector = PlaneCorrector(PlaneParams(z_min_m=.1, z_max_m=5., min_pixels=1000))
+        self.assertIsNotNone(corrector(oracle.copy(), T, panel, self.cam)[0])
+        self.assertTrue(len(corrector.held))
+        corrected, stats = PlaneCorrector(PlaneParams(z_min_m=9., z_max_m=10.))(oracle.copy(), T, panel, self.cam)
+        self.assertIsNone(corrected)
+        self.assertFalse(stats["plane_gate"])
+        bad = PlaneCorrector(PlaneParams(z_min_m=.1, z_max_m=5., min_pixels=1000, max_mad_m=1e-9))
+        bad.held.append(np.zeros(4))
+        raw = np.random.default_rng(0).uniform(1, 2, oracle.shape)
+        self.assertIsNone(bad(raw, T, panel, self.cam)[0])
+        self.assertEqual(len(bad.held), 0)  # never reuse a stale fit
+
     def test_tilted_panel_depth_varies_along_image_rays(self):
         panel = np.array([[-.15, -.15, 0], [.15, -.15, 0], [.15, .15, 0], [-.15, .15, 0]])
         T = transform([0, .6, 0], [0, 0, 1.])
@@ -239,6 +306,26 @@ class ExperimentTests(unittest.TestCase):
         xyz = rays*z[mask, None]
         normal = T[:3, 2]
         np.testing.assert_allclose((xyz-T[:3, 3])@normal, 0, atol=1e-10)
+
+    def test_tag_plane_scale_recovers_a_known_scale(self):
+        T = transform([0, 0, 0], [0, 0, 1.])
+        _, valid, z = panel_layer(T, tag_points(.17), self.cam)
+        raw = np.zeros_like(z)
+        raw[valid] = z[valid]/3.0  # model under-reports depth by a factor of 3
+        self.assertAlmostEqual(tag_plane_scale(T, raw, .17, self.cam), 3.0, places=6)
+
+    def test_tag_plane_scale_is_none_without_enough_valid_pixels(self):
+        T = transform([0, 0, 0], [0, 0, 1.])
+        self.assertIsNone(tag_plane_scale(T, np.zeros((480, 640)), .17, self.cam))
+
+    def test_invalid_depth_is_visible_by_default_and_occluded_when_requested(self):
+        panel = np.array([[-.15, -.15, 0], [.15, -.15, 0], [.15, .15, 0], [-.15, .15, 0]])
+        T = transform([0, 0, 0], [0, 0, 1.])
+        scene = np.full((480, 640), np.nan)  # depth unknown everywhere
+        _, visible_default, _ = panel_layer(T, panel, self.cam, scene)
+        _, visible_occludes, z = panel_layer(T, panel, self.cam, scene, invalid_occludes=True)
+        self.assertTrue(np.array_equal(visible_default, z > 0))  # unknown depth: current policy keeps the panel visible
+        self.assertFalse(np.any(visible_occludes))  # unknown depth treated as occluded when requested
 
     def test_mask_metrics_and_missing_acceptance_are_not_success(self):
         mask = np.zeros((80, 100), bool)
@@ -387,23 +474,89 @@ class ExperimentTests(unittest.TestCase):
             self.assertIn("unavailable", result.diagnostics["occlusion"]["status"])
             self.assertTrue((output/"000000.json").exists())
 
-    def test_metric_scale_uses_current_geometric_anchors_and_stops_when_lost(self):
-        class FixedDepth:
+    def test_depth_affine_fit_rejects_a_degenerate_non_decreasing_fit(self):
+        class ConstantDepth:
             def predict(self, image):
-                return np.ones(image.shape[:2]), {"inference_ms": 1.}
+                return np.ones(image.shape[:2]), {"inference_ms": 1.}  # raw doesn't vary with distance: unfittable
         with tempfile.TemporaryDirectory() as directory:
             pipe = Pipeline(self.config_with_map(directory), self.cam)
             packet = self.packet(0, 0.)
             result = pipe.process(packet, [], self.features())
+            prototype = DepthPrototype(ConstantDepth())
+            prototype.render(packet, result, pipe.panel, pipe.map, pipe.last_features)
+            stats = result.diagnostics["occlusion"]
+            self.assertIn("unavailable", stats["status"])
+            self.assertGreaterEqual(stats["scale_anchor_count"], 12)
+            self.assertFalse(prototype.fits)
+
+    def test_anchor_sample_patch_median_and_edge_rejection(self):
+        raw = np.full((20, 20), 5.0)
+        raw[8:12, 8:12] = 5.3  # a flat-ish patch, well within edge_range
+        self.assertAlmostEqual(anchor_sample(raw, 10, 10), 5.3, places=6)
+        edge = np.full((20, 20), 5.0)
+        edge[:, 10:] = 50.0  # a sharp depth edge running right through (10, 10)
+        self.assertIsNone(anchor_sample(edge, 10, 10))
+
+    def test_depth_slope_sign_controls_which_fit_direction_is_accepted(self):
+        with tempfile.TemporaryDirectory() as directory:
+            pipe = Pipeline(self.config_with_map(directory), self.cam)
+            packet = self.packet(0, 0.)
+            result = pipe.process(packet, [], self.features())
+            # Bake a POSITIVE slope this time (raw rises with true Z, the opposite of every
+            # checkpoint seen so far) to check the sign gate in isolation.
+            a0, b0 = 5.0, 3.0
+            z_true = depths(result.raw_pose.T_CW, self.X)
+            raw_at = {tuple(np.rint(p).astype(int)): a0+b0*z for p, z in zip(self.pixels(self.X), z_true)}
+
+            class FixedDepth:
+                def predict(self, image):
+                    raw = np.full(image.shape[:2], 1.0)
+                    for (x, y), v in raw_at.items():
+                        if 0 <= x < raw.shape[1] and 0 <= y < raw.shape[0]:
+                            raw[max(0, y-2):y+3, max(0, x-2):x+3] = v  # a flat patch, not a 1px spike: survives anchor_sample's edge rejection
+                    return raw, {"inference_ms": 1.}
+
+            default = DepthPrototype(FixedDepth())  # slope_sign=-1
+            default.render(packet, result, pipe.panel, pipe.map, pipe.last_features)
+            self.assertIn("unavailable", result.diagnostics["occlusion"]["status"])
+            self.assertFalse(default.fits)
+
+            positive = DepthPrototype(FixedDepth(), slope_sign=1)
+            positive.render(packet, result, pipe.panel, pipe.map, pipe.last_features)
+            stats = result.diagnostics["occlusion"]
+            self.assertEqual(stats["status"], "metric depth active (prototype)")
+            self.assertAlmostEqual(stats["depth_fit_a"], a0, places=3)
+            self.assertAlmostEqual(stats["depth_fit_b"], b0, places=3)
+
+    def test_depth_affine_fit_uses_current_geometric_anchors_and_stops_when_lost(self):
+        with tempfile.TemporaryDirectory() as directory:
+            pipe = Pipeline(self.config_with_map(directory), self.cam)
+            packet = self.packet(0, 0.)
+            result = pipe.process(packet, [], self.features())
+            # Bake a known affine relationship (raw = a0 + b0*true_Z) at each landmark's own
+            # pixel, so the fit the production code recovers can be checked exactly.
+            a0, b0 = 23.0, -5.0
+            z_true = depths(result.raw_pose.T_CW, self.X)
+            raw_at = {tuple(np.rint(p).astype(int)): a0+b0*z for p, z in zip(self.pixels(self.X), z_true)}
+
+            class FixedDepth:
+                def predict(self, image):
+                    raw = np.full(image.shape[:2], 1.0)
+                    for (x, y), v in raw_at.items():
+                        if 0 <= x < raw.shape[1] and 0 <= y < raw.shape[0]:
+                            raw[max(0, y-2):y+3, max(0, x-2):x+3] = v  # a flat patch, not a 1px spike: survives anchor_sample's edge rejection
+                    return raw, {"inference_ms": 1.}
+
             prototype = DepthPrototype(FixedDepth())
             prototype.render(packet, result, pipe.panel, pipe.map, pipe.last_features)
             stats = result.diagnostics["occlusion"]
             self.assertEqual(stats["status"], "metric depth active (prototype)")
             self.assertGreaterEqual(stats["scale_anchor_count"], 12)
-            self.assertAlmostEqual(stats["metric_scale"], float(np.median((self.X@self.T[:3, :3].T+self.T[:3, 3])[:, 2])))
+            self.assertAlmostEqual(stats["depth_fit_a"], a0, places=3)
+            self.assertAlmostEqual(stats["depth_fit_b"], b0, places=3)
             lost = pipe.process(self.packet(1, .03), [], [])
             self.assertIsNone(prototype.render(self.packet(1, .03), lost, pipe.panel, pipe.map, []))
-            self.assertFalse(prototype.scales)
+            self.assertFalse(prototype.fits)
 
     def test_prior_grace_keeps_seed_through_short_gaps_only_and_never_renders_it(self):
         for grace in (0.0, .05, .1):
@@ -680,6 +833,104 @@ class ExperimentTests(unittest.TestCase):
             pipe = Pipeline(cfg, self.cam)
             result = pipe.process(self.packet(0, 0.), [self.tag], self.features())
             self.assertEqual(result.diagnostics["ids_cleared_by_revalidation"], 0)
+
+    def test_step45_margin_fraction_default_and_scaling(self):
+        T, panel, oracle, valid = self._tilted_table()
+        scene = oracle-.15            # scene 15 cm nearer than the table panel
+        _, v0, z = panel_layer(T, panel, self.cam, scene, margin_m=.10)
+        _, v1, _ = panel_layer(T, panel, self.cam, scene, margin_m=.10, margin_fraction=0.)
+        self.assertTrue(np.array_equal(v0, v1))                # default unchanged
+        on = z > 0
+        self.assertFalse(v0[on].any())                         # 15 cm > 10 cm floor: hidden
+        _, v2, _ = panel_layer(T, panel, self.cam, scene, margin_m=.10, margin_fraction=.30)
+        self.assertTrue(v2[on & (z*.30 >= .15)].all())          # fractional margin covers it where 30% of Z >= 15 cm
+
+    def test_step45_config_default_off_and_partial_block(self):
+        self.assertFalse(load_config("config-logitech.json").occlusion.enabled)
+        with tempfile.TemporaryDirectory() as directory:
+            raw = json.loads(Path("config-logitech.json").read_text())
+            raw["occlusion"] = {"enabled": True, "line_reference": False}
+            path = Path(directory)/"c.json"
+            path.write_text(json.dumps(raw))
+            block = load_config(path).occlusion
+            self.assertTrue(block.enabled and not block.line_reference)
+            self.assertEqual(block.input_size, 252)
+
+    def test_step45_relative_line_occlusion_without_pose_draws_nothing(self):
+        class Model:
+            input_size = 252
+        occ = RelativeLineOcclusion(Model())
+        result = type("R", (), {"raw_pose": type("P", (), {"valid": False})(), "render_pose": None, "diagnostics": {}})()
+        self.assertIsNone(occ.render(None, result, None, None, []))
+        self.assertEqual(result.diagnostics["occlusion"]["alignment_source"], "unavailable")
+
+    def test_step46_side_by_side_shape_and_far_config(self):
+        T, panel, oracle, valid = self._tilted_table()
+        _, visible, z = panel_layer(T, panel, self.cam, oracle-.3, margin_m=.1)
+        view = {"scene": oracle-.3, "z": z, "visible": visible, "line_uv": np.array([[10, 10], [20, 20]])}
+        out = side_by_side(np.zeros((480, 640, 3), np.uint8), view)
+        self.assertEqual(out.shape, (360, 1440, 3))
+        cfg = load_config("config-logitech-far.json")
+        self.assertEqual((cfg.panel.width_m, cfg.panel.height_m, cfg.filter.enabled), (1.0, 0.5625, True))
+
+    def test_step48_plane_fit_recovers_synthetic_t_s(self):
+        T, panel, oracle, valid = self._tilted_table()
+        t, s = -3.0, 5.0
+        d = t+s/np.where(valid, oracle, 1.)
+        d[200:300, 250:400] = d.max()                              # a near "hand" that must not drag the fit
+        d += np.random.default_rng(1).normal(0, .01, d.shape)
+        class Model:
+            input_size = 252
+        occ = RelativeLineOcclusion(Model(), reference="plane", plane_extent_m=(-3., 3., -3., 3.), plane_min_span=.2)
+        zg, inside = __import__("ar_projection.occlusion", fromlist=["_plane_grid"])._plane_grid(T, self.cam, occ.extent)
+        result = type("R", (), {"raw_pose": type("P", (), {"landmark_inliers": 0})()})()
+        fit, source, info = occ._plane_reference(d, T, self.cam, result, None, [], zg, inside, None)
+        self.assertEqual(source, "plane_fresh")
+        self.assertAlmostEqual(fit[0], t, delta=.1)
+        self.assertAlmostEqual(fit[1], s, delta=.1)
+        self.assertGreaterEqual(info["plane_span"], .2)
+
+    def test_step48_plane_fit_rejects_a_flat_depth_range(self):
+        T, panel, oracle, valid = self._tilted_table()
+        class Model:
+            input_size = 252
+        occ = RelativeLineOcclusion(Model(), reference="plane", plane_extent_m=(-.02, .02, -.02, .02), plane_min_span=.3)
+        zg, inside = __import__("ar_projection.occlusion", fromlist=["_plane_grid"])._plane_grid(T, self.cam, occ.extent)
+        result = type("R", (), {"raw_pose": type("P", (), {"landmark_inliers": 0})()})()
+        fit, source, info = occ._plane_reference(-3+5/np.where(valid, oracle, 1.), T, self.cam, result, None, [], zg, inside, None)
+        self.assertIsNone(fit)
+        self.assertEqual(source, "unavailable")
+
+    def test_step48_background_prior_identity_warp_and_never_stores_a_near_blob(self):
+        prior = BackgroundPrior(PriorConfig(enabled=True))
+        T = np.eye(4)
+        h, w = 120, 160
+        Zs = np.full((h, w), 3.)
+        Zs[40:80, 60:100] = .5                                   # near blob, e.g. a hand
+        Pw, Cw = prior.warp(T, self.cam)
+        self.assertTrue(np.isnan(Pw).all())
+        prior.update(Zs, Pw, Cw, np.full((h, w), np.nan), np.zeros((h, w)), T)
+        self.assertTrue(np.isnan(prior.P[50:70, 70:90]).all())   # blob not stored
+        self.assertAlmostEqual(float(np.nanmedian(prior.P)), 3.)
+        Pw2, Cw2 = prior.warp(T, self.cam)
+        self.assertTrue(np.array_equal(np.isfinite(Pw2), np.isfinite(prior.P)))
+        self.assertTrue(np.allclose(Pw2[np.isfinite(Pw2)], prior.P[np.isfinite(prior.P)]))
+        # a static occluder nearer than the panel inside its footprint is not stored either
+        prior2 = BackgroundPrior(PriorConfig(enabled=True))
+        prior2.warp(T, self.cam)
+        Zs2 = np.full((h, w), 3.)
+        Zs2[40:80, 60:100] = 1.0
+        footprint = np.zeros((h, w)); footprint[20:100, 40:120] = 2.0
+        prior2.update(Zs2, np.full((h, w), np.nan), np.zeros((h, w)), np.full((h, w), np.nan), footprint, T)
+        self.assertTrue(np.isnan(prior2.P[45:75, 65:95]).all())
+
+    def test_step48_defaults_keep_line_reference_and_prior_off(self):
+        o = load_config("config-logitech-far.json").occlusion
+        self.assertEqual((o.reference, o.background_prior.enabled), ("line", False))
+        class Model:
+            input_size = 252
+        occ = RelativeLineOcclusion(Model())
+        self.assertEqual((occ.reference, occ.prior), ("line", None))
 
 
 if __name__ == "__main__":

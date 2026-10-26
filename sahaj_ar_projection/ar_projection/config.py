@@ -1,5 +1,5 @@
 """Single JSON source of defaults; strict typed validation before opening devices."""
-from dataclasses import MISSING, dataclass, fields
+from dataclasses import MISSING, asdict, dataclass, field, fields
 from pathlib import Path
 from typing import Optional, get_type_hints, get_origin, get_args, Union
 import json
@@ -174,6 +174,38 @@ class Logging:
 
 
 @dataclass(frozen=True)
+class BackgroundPrior:
+    """Step 48b stored static-background depth map (160 x 120) and foreground detection. Off by default."""
+    enabled: bool = False
+    agree_tol: float = 0.15       # relative |Z_new - Z_stored| that counts as agreement
+    near_ratio: float = 0.8       # foreground: Z < near_ratio * stored Z
+    fg_slack: float = 0.1         # foreground hides pixels with Z < Z_panel + fg_slack (m)
+    count_cap: int = 20
+    min_count: int = 3            # stored pixels with count >= min_count are trusted
+    open_px: int = 7              # opening kernel for the foreground mask
+
+
+@dataclass(frozen=True)
+class Occlusion:
+    """Step 45 live depth occlusion (relative model + base-line reference). Off by default; old configs are unaffected."""
+    enabled: bool = False
+    model: str = "relative"
+    repo: Optional[str] = None
+    checkpoint: Optional[str] = None
+    input_size: int = 252
+    margin_floor_m: float = 0.10
+    margin_fraction: float = 0.10
+    line_reference: bool = True
+    line_hold_frames: int = 30
+    require_tracking_acceptance: bool = True
+    reference: str = "line"       # "line" (Step 45 base-line fit) or "plane" (Step 48a table/floor-plane fit)
+    plane_extent_m: list = field(default_factory=lambda: [-1.0, 1.0, -0.6, 0.9])   # world x_min, x_max, y_min, y_max on Z=0
+    plane_min_span: float = 0.30  # inverse-depth span (p95-p5 over median) the inliers must cover
+    plane_min_px: int = 3000      # stored-map pixels join the fit when the plane gives fewer than this
+    background_prior: BackgroundPrior = field(default_factory=BackgroundPrior)
+
+
+@dataclass(frozen=True)
 class Calibration:
     columns: int
     rows: int
@@ -196,6 +228,7 @@ class Config:
     display: Display
     logging: Logging
     calibration: Calibration
+    occlusion: Occlusion = Occlusion()
 
 
 DEFAULT_PATH = Path(__file__).resolve().parents[1] / "config.json"
@@ -233,7 +266,7 @@ def validate(c: Config) -> None:
     enums = {"camera.source_type": ("camera", "video"), "camera.backend": ("auto", "dshow", "msmf", "v4l2", "avfoundation", "ffmpeg"),
              "tags.family": ("APRILTAG_36h11",), "features.backend": ("orb",), "mapping.mode": ("off", "build", "localize"),
              "pose.mode": ("tag_only", "landmark_only", "joint"), "pose.robust_loss": ("linear", "huber", "soft_l1", "cauchy", "arctan"), "filter.mode": ("ema",),
-             "logging.input_codec": ("FFV1", "HFYU"), "features.id_revalidation.mode": ("off", "loss_clear", "age_expire", "descriptor_check")}
+             "logging.input_codec": ("FFV1", "HFYU"), "features.id_revalidation.mode": ("off", "loss_clear", "age_expire", "descriptor_check"), "occlusion.model": ("relative", "metric"), "occlusion.reference": ("line", "plane")}
     for label, choices in enums.items():
         obj = c
         for part in label.split("."):
@@ -273,6 +306,11 @@ def validate(c: Config) -> None:
     for i, rect in enumerate(c.features.exclude_rectangles):
         if not isinstance(rect, list) or len(rect) != 4 or any(type(v) is not int for v in rect) or min(rect[2:]) <= 0:
             raise ValueError(f"features.exclude_rectangles[{i}]: expected [x,y,positive width,positive height] integers")
+    ex = c.occlusion.plane_extent_m
+    if len(ex) != 4 or any(type(v) not in (int, float) or not math.isfinite(v) for v in ex) or ex[0] >= ex[1] or ex[2] >= ex[3]:
+        raise ValueError("occlusion.plane_extent_m: expected [x_min, x_max, y_min, y_max] with min < max")
+    if c.occlusion.background_prior.near_ratio >= 1:
+        raise ValueError("occlusion.background_prior.near_ratio: must be below 1")
     if c.mapping.mode == "build" and (not c.tags.enabled or not c.features.enabled or c.camera.demo_approx):
         raise ValueError("mapping.mode=build requires tags, features and actual calibration")
     if c.pose.mode == "tag_only" and not c.tags.enabled:
@@ -308,6 +346,7 @@ def load_config(filename=DEFAULT_PATH, overrides=None) -> Config:
     data["mapping"].setdefault("multiview_descriptor_bank", 0)
     data["logging"].setdefault("input_codec", "FFV1")
     data["logging"].setdefault("association_dump", False)
+    data["occlusion"] = {**asdict(Occlusion()), **data.get("occlusion", {})}
     for label, value in (overrides or {}).items():
         section, name = label.split(".")
         if section not in data or name not in data[section]:

@@ -10,7 +10,7 @@ from .features import FeatureTracker
 from .geometry import project
 from .landmarks import MapBuilder, associate, load_map, map_metadata, revalidate_ids, save_map
 from .pose import PoseSolver
-from .rendering import PoseSmoother, annotate, panel_covariance, panel_geometry, visible_panel
+from .rendering import PoseSmoother, annotate, open_window, side_by_side, toggle_fullscreen, panel_covariance, panel_geometry, visible_panel
 from .tags import TagDetector
 from .types import FrameResult, PoseEstimate
 
@@ -147,7 +147,12 @@ class Pipeline:
         self.previous_time = packet.timestamp if np.isfinite(packet.timestamp) else None
         timings["rendering"] = (time.perf_counter()-before)*1000
         timings["total"] = (time.perf_counter()-start)*1000
-        diagnostics = {"tags": [{"id": t.id, "valid": t.valid, "ambiguous": t.ambiguous, "reason": t.reason, "candidate_rms_px": t.errors} for t in observations],
+        anchor_tag = next((t for t in observations if t.id == self.config.tags.anchor_id), None)
+        tag_log = {"candidates_detected": len(observations),
+                   "anchor_min_side_px": float(np.min(np.linalg.norm(anchor_tag.pixels-np.roll(anchor_tag.pixels, 1, axis=0), axis=1))) if anchor_tag is not None else None,
+                   "anchor_rms_px": anchor_tag.errors[0] if anchor_tag is not None and anchor_tag.errors else None,
+                   "anchor_status": "not detected" if anchor_tag is None else (anchor_tag.reason or "ok")}
+        diagnostics = {"tag_log": tag_log, "tags": [{"id": t.id, "valid": t.valid, "ambiguous": t.ambiguous, "reason": t.reason, "candidate_rms_px": t.errors} for t in observations],
                        "tracked_features": len(features), "mapped_observations": len(X), "map_size": len(self.map.ids) if self.map is not None else 0,
                        "stable_landmarks": self.builder.candidate_count if self.builder else (len(self.map.ids) if self.map is not None else 0),
                        "landmark_target": self.config.mapping.min_ready_landmarks,
@@ -184,6 +189,9 @@ class Pipeline:
         return FrameResult(self.state, pose, render_pose, raw_panel, render_panel, pixel_cov, diagnostics, timings, association_observations)
 
 
+WINDOW = "AprilTag floating panel"
+
+
 def run(config, save_when_ready=False, replace_map=False, max_frames=None, withhold_tag=False, withhold_tag_windows=None, occlusion=None):
     """withhold_tag_windows: optional [(start_s, end_s), ...]; the tag is withheld inside any
     window in addition to whenever withhold_tag is set. None (default) leaves behavior exactly
@@ -203,26 +211,34 @@ def run(config, save_when_ready=False, replace_map=False, max_frames=None, withh
         # Headless file replay remains sequential and reproducible. Live capture
         # and visible previews never run map construction/refinement inline.
         pipeline = Pipeline(config, packet.camera, background_mapping=config.camera.source_type == "camera" or display.enabled)
-        logger = RunLogger(config, packet.camera, capture.timestamp_basis, pipeline.map.metadata if pipeline.map else None, capture.fps)
+        logger = RunLogger(config, packet.camera, capture.timestamp_basis, pipeline.map.metadata if pipeline.map else None, capture.fps,
+                           {"occlusion": occlusion.run_metadata} if getattr(occlusion, "run_metadata", None) else None)
         logging.info("Tracking started; input recording %s", config.logging.input_codec if config.logging.save_input_video else "disabled")
+        side_view = False
+        if display.enabled:
+            open_window(WINDOW)
         while packet is not None:
             withhold_this_frame = withhold_tag or (withhold_tag_windows is not None
                                                     and any(start <= packet.timestamp <= end for start, end in withhold_tag_windows))
             result = pipeline.process(packet, withhold_tag=withhold_this_frame)
             layer = None
-            if occlusion is not None:
+            if occlusion is not None and not getattr(occlusion, "enabled", True):
+                result.diagnostics["occlusion"] = {"status": "off (key o)", "alignment_source": "off"}
+            if occlusion is not None and getattr(occlusion, "enabled", True):
                 before = time.perf_counter()
                 layer = occlusion.render(packet, result, pipeline.panel, pipeline.map, pipeline.last_features)
                 extra = (time.perf_counter()-before)*1000
                 result.timings["occlusion"] = extra
                 result.timings["total"] += extra
-            image = None
+            image = shown = None
             if display.enabled or config.logging.save_annotated_video:
                 before = time.perf_counter()
                 image = annotate(packet, result, pipeline.last_tags, pipeline.last_features, display, config.camera.demo_approx, layer)
                 extra = (time.perf_counter()-before)*1000
                 result.timings["rendering"] += extra
                 result.timings["total"] += extra
+                if side_view and getattr(occlusion, "view", None):
+                    shown = side_by_side(image, occlusion.view)
             before = time.perf_counter()
             if config.logging.save_input_video:
                 logger.video("input", packet.original)
@@ -236,7 +252,8 @@ def run(config, save_when_ready=False, replace_map=False, max_frames=None, withh
                 logging.info("Frozen map saved to %s", config.mapping.map_path)
             key = None
             if display.enabled:
-                cv2.imshow("AprilTag floating panel", image)
+                shown = image if shown is None else shown
+                cv2.imshow(WINDOW, shown)
                 key = cv2.waitKey(1) & 0xFF
             now = time.monotonic()
             result.timings["capture_read"] = packet.capture_read_ms
@@ -251,6 +268,16 @@ def run(config, save_when_ready=False, replace_map=False, max_frames=None, withh
                     break
                 if key == ord("d"):
                     display = replace(display, debug=not display.debug)
+                if key == ord("f"):
+                    toggle_fullscreen(WINDOW)
+                if key == ord("v") and hasattr(occlusion, "keep_view"):
+                    side_view = occlusion.keep_view = not occlusion.keep_view
+                if key == ord("p") and logger.path is not None and shown is not None:
+                    (logger.path/"sidebyside").mkdir(exist_ok=True)
+                    cv2.imwrite(str(logger.path/"sidebyside"/f"{packet.index:06d}.png"), shown)
+                if key == ord("o") and occlusion is not None and hasattr(occlusion, "enabled"):
+                    occlusion.enabled = not occlusion.enabled
+                    logging.info("Occlusion %s", "on" if occlusion.enabled else "off")
                 if key == ord("r"):
                     pipeline.reset()
                     saved = False

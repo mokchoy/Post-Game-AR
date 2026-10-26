@@ -69,7 +69,7 @@ def association_rows(features, landmark_map, pose, camera, threshold_px):
 
 
 class RunLogger:
-    def __init__(self, config, camera, timestamp_basis, map_metadata=None, source_fps=None):
+    def __init__(self, config, camera, timestamp_basis, map_metadata=None, source_fps=None, extra_metadata=None):
         self.config = config
         self.path = None
         self.file = None
@@ -95,7 +95,8 @@ class RunLogger:
                                                   "actual_dimensions": camera.size, "timestamp_basis": timestamp_basis, "source_fps": source_fps,
                                                   "map": map_metadata, "covariance": COVARIANCE_ASSUMPTIONS,
                                                   "reproducibility": "seeded sequential replay; not bitwise across versions/backends", "code_sha256": code_sha256(),
-                                                  "recording": f"{config.logging.input_codec} lossless input AVI; MJPG annotation; JSONL acquisition times authoritative"})
+                                                  "recording": f"{config.logging.input_codec} lossless input AVI; MJPG annotation; JSONL acquisition times authoritative",
+                                                  **(extra_metadata or {})})
             self.file = (self.path/"frames.jsonl").open("x", encoding="utf-8")
             if config.logging.association_dump:
                 self.assoc_file = (self.path/"assoc.jsonl").open("x", encoding="utf-8")

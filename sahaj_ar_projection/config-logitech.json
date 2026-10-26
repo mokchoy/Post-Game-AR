@@ -2,8 +2,8 @@
   "schema_version": 1,
   "seed": 7,
   "camera": {
-    "source_type": "camera", "index": 0, "video_path": null, "timestamps_path": null,
-    "backend": "msmf", "width": 640, "height": 480,
+    "source_type": "camera", "index": 4, "video_path": null, "timestamps_path": null,
+    "backend": "v4l2", "width": 640, "height": 480,
     "calibration_path": "logitech-camera-calibration.npz", "undistort": true, "demo_approx": false
   },
   "tags": {

@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 from .camera import backend
 from .config import DEFAULT_PATH, load_config
+from .rendering import open_window, toggle_fullscreen
 
 
 def main():
@@ -43,6 +44,7 @@ def main():
         template = np.zeros((c.rows*c.columns, 3), np.float32)
         template[:, :2] = np.mgrid[0:c.columns, 0:c.rows].T.reshape(-1, 2)*c.square_size_m
         print("Varied board positions/tilts: SPACE capture, Q/Esc finish. Raw images; runtime undistortion uses the resulting calibration.")
+        open_window("Camera calibration")
         while len(object_points) < c.views:
             ok, frame = cap.read()
             if not ok:
@@ -57,11 +59,13 @@ def main():
             if found:
                 corners = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_MAX_ITER, 30, .001))
                 cv2.drawChessboardCorners(view, pattern, corners, found)
-            cv2.putText(view, f"Views {len(object_points)}/{c.views} | SPACE capture | Q finish", (10, 28), cv2.FONT_HERSHEY_SIMPLEX, .6, (0, 255, 0), 2)
+            cv2.putText(view, f"Views {len(object_points)}/{c.views} | SPACE capture | F fullscreen | Q finish", (10, 28), cv2.FONT_HERSHEY_SIMPLEX, .6, (0, 255, 0), 2)
             cv2.imshow("Camera calibration", view)
             key = cv2.waitKey(1) & 0xFF
             if key in (ord("q"), 27):
                 break
+            if key == ord("f"):
+                toggle_fullscreen("Camera calibration")
             if key == ord(" ") and found:
                 object_points.append(template.copy())
                 image_points.append(corners.copy())

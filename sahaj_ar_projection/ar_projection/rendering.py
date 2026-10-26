@@ -118,5 +118,54 @@ def annotate(packet, result, tags, features, display, approximate=False, panel_l
     if approximate:
         cv2.putText(image, "DEMO: APPROXIMATE CALIBRATION", (12, 242), cv2.FONT_HERSHEY_SIMPLEX, .6, (0, 165, 255), 2)
     if "occlusion" in result.diagnostics:
-        cv2.putText(image, "Occlusion: "+result.diagnostics["occlusion"]["status"], (12, 268), cv2.FONT_HERSHEY_SIMPLEX, .43, (255, 255, 255), 1)
+        occ = result.diagnostics["occlusion"]
+        cv2.putText(image, "Occlusion: "+occ["status"], (12, 268), cv2.FONT_HERSHEY_SIMPLEX, .43, (255, 255, 255), 1)
+        if display.debug and "alignment_source" in occ:
+            lines = [f"pose {result.raw_pose.source} | align {occ['alignment_source']}" + (f" | line: {occ['line_reason']}" if occ.get("line_reason") else ""),
+                     f"panel Z {occ.get('panel_z_median_m', float('nan')):.2f} m | margin {occ.get('margin_m', float('nan')):.2f} m | hidden {occ.get('hidden_fraction', float('nan')):.2f}",
+                     f"depth {occ.get('inference_ms', float('nan')):.0f} ms | occlusion {result.timings.get('occlusion', float('nan')):.0f} ms | total so far {result.timings['total']:.0f} ms"]
+            for i, line in enumerate(lines):
+                cv2.putText(image, line, (12, 292+22*i), cv2.FONT_HERSHEY_SIMPLEX, .5, (0, 255, 255), 1)
     return image
+
+
+def side_by_side(left, view, z_range=(.3, 5.), diff_range=.5, pane=(480, 360)):
+    """Debug window: masked camera image | aligned depth Z_real (fixed colour scale, panel outline, base line) |
+    decision map Z_panel - Z_real inside the panel (red = scene nearer; white contour = where the mask flips)."""
+    scene, z, visible = view["scene"], view["z"], view["visible"]
+    on = z > 0
+    lo, hi = z_range
+    depth = cv2.applyColorMap((np.clip((np.where(np.isfinite(scene), scene, hi)-lo)/(hi-lo), 0, 1)*255).astype(np.uint8), cv2.COLORMAP_TURBO)
+    outline = cv2.findContours(on.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
+    cv2.drawContours(depth, outline, -1, (255, 255, 255), 1)
+    if view.get("line_uv") is not None:
+        for u, v in view["line_uv"][::4]:
+            cv2.circle(depth, (int(u), int(v)), 1, (0, 0, 0), -1)
+    for i, label in enumerate((f"Z_real {lo:g}-{hi:g} m (turbo, near=blue)", )):
+        cv2.putText(depth, label, (8, 20), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 255, 255), 1)
+    diff = np.where(on & np.isfinite(scene), z-scene, 0.)
+    decision = np.full(depth.shape, 90, np.uint8)
+    gray = cv2.applyColorMap((np.clip(diff/(2*diff_range)+.5, 0, 1)*255).astype(np.uint8), cv2.COLORMAP_COOL)
+    decision[on] = gray[on]
+    cv2.drawContours(decision, cv2.findContours((on & ~visible).astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0], -1, (255, 255, 255), 1)
+    cv2.putText(decision, f"Z_panel - Z_real, +-{diff_range:g} m; white = hidden edge", (8, 20), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 255, 255), 1)
+    panes = [cv2.resize(x, pane, interpolation=cv2.INTER_AREA) for x in (left, depth, decision)]
+    if view.get("fg") is not None:                       # Step 48b: foreground mask and stored background map
+        fg = cv2.cvtColor((view["fg"]*255).astype(np.uint8), cv2.COLOR_GRAY2BGR)
+        stored = cv2.applyColorMap((np.clip((np.where(view["prior"] > 0, view["prior"], hi)-lo)/(hi-lo), 0, 1)*255).astype(np.uint8), cv2.COLORMAP_TURBO)
+        stored[view["prior"] <= 0] = 60
+        cv2.putText(fg, "foreground (nearer than stored background)", (8, 20), cv2.FONT_HERSHEY_SIMPLEX, .5, (0, 255, 255), 1)
+        cv2.putText(stored, "stored background depth (grey = none)", (8, 20), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 255, 255), 1)
+        second = [cv2.resize(x, pane, interpolation=cv2.INTER_AREA) for x in (fg, stored)]+[np.zeros_like(panes[0])]
+        return np.vstack([np.hstack(panes), np.hstack(second)])
+    return np.hstack(panes)
+
+
+def open_window(name):
+    """Resizable window (the whole image, text included, scales with it); key f toggles full screen via toggle_fullscreen."""
+    cv2.namedWindow(name, cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
+
+
+def toggle_fullscreen(name):
+    full = cv2.getWindowProperty(name, cv2.WND_PROP_FULLSCREEN) == cv2.WINDOW_FULLSCREEN
+    cv2.setWindowProperty(name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_NORMAL if full else cv2.WINDOW_FULLSCREEN)

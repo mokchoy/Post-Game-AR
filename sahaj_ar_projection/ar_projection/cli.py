@@ -38,6 +38,9 @@ def main():
     parser.add_argument("--depth-weights", help="DA-V2 Small Hypersim metric checkpoint")
     parser.add_argument("--depth-input-size", type=int, default=252, choices=(252, 392, 518))
     parser.add_argument("--tracking-report", help="Passed experiments assess report for this camera/tag/map")
+    parser.add_argument("--occlusion", action="store_true", help="Depth occlusion from the config 'occlusion' block (Step 45; key o toggles it live)")
+    parser.add_argument("--depth-model", choices=("relative", "metric"), help="Override occlusion.model")
+    parser.add_argument("--allow-unaccepted-depth", action="store_true", help="Skip the tracking-acceptance report check (logged as bypassed)")
     parser.add_argument("--occlusion-output", help="New directory for frame-aligned visibility masks and virtual depth")
     arguments = {"camera": (int, "camera.index"), "calibration": (str, "camera.calibration_path"), "video": (str, "camera.video_path"),
                  "backend": (str, "camera.backend"), "tag-size": (float, "tags.size_m"), "width": (float, "panel.width_m"),
@@ -99,13 +102,31 @@ def main():
                  config.camera.source_type, config.camera.index, config.camera.backend,
                  config.camera.calibration_path, config.pose.mode, config.mapping.mode)
     occlusion = None
-    if args.depth_repo or args.depth_weights or args.occlusion_output:
-        if not (args.depth_repo and args.depth_weights and args.tracking_report):
-            parser.error("depth requires --depth-repo, --depth-weights and --tracking-report")
+    if args.occlusion or args.depth_repo or args.depth_weights or args.occlusion_output:
+        block = config.occlusion
+        model_name = args.depth_model or block.model
+        repo, weights = args.depth_repo or block.repo, args.depth_weights or block.checkpoint
+        if args.occlusion and not block.enabled:
+            logging.info("--occlusion given; config occlusion.enabled is false, using the block's settings anyway")
+        if not (repo and weights):
+            parser.error("depth requires a repo and checkpoint (--depth-repo/--depth-weights or the config occlusion block)")
+        if not (args.tracking_report or args.allow_unaccepted_depth):
+            parser.error("depth requires --tracking-report, or --allow-unaccepted-depth to bypass it (logged)")
         if config.mapping.mode != "localize" or not config.camera.undistort:
             parser.error("depth requires loaded-map localization and camera.undistort=true")
-        from .occlusion import DepthPrototype, MetricDepth, require_tracking_acceptance
-        require_tracking_acceptance(args.tracking_report, config)
-        occlusion = DepthPrototype(MetricDepth(args.depth_repo, args.depth_weights, args.depth_input_size), args.occlusion_output)
+        from .occlusion import DepthPrototype, MetricDepth, RelativeDepth, RelativeLineOcclusion, require_tracking_acceptance
+        if args.allow_unaccepted_depth and not args.tracking_report:
+            logging.warning("tracking acceptance BYPASSED (--allow-unaccepted-depth): depth masks are untested for this panel, tag limit and map")
+            acceptance = "bypassed"
+        else:
+            require_tracking_acceptance(args.tracking_report, config)
+            acceptance = "passed"
+        if model_name == "relative":
+            occlusion = RelativeLineOcclusion(RelativeDepth(repo, weights, block.input_size or args.depth_input_size), args.occlusion_output, block.margin_floor_m,
+                                              block.margin_fraction, block.line_reference, block.line_hold_frames, weights, acceptance,
+                                              block.reference, block.plane_extent_m, block.plane_min_span, block.plane_min_px, block.background_prior)
+            logging.info("Occlusion: relative model %s sha256 %s", occlusion.run_metadata["checkpoint"], occlusion.run_metadata["checkpoint_sha256"])
+        else:
+            occlusion = DepthPrototype(MetricDepth(repo, weights, args.depth_input_size), args.occlusion_output)
     run(config, args.save_map, args.replace_map, args.max_frames, withhold_tag=args.withhold_tag,
        withhold_tag_windows=withhold_tag_windows, occlusion=occlusion)
