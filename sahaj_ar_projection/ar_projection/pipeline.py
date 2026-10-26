@@ -10,6 +10,7 @@ from .features import FeatureTracker
 from .geometry import project
 from .landmarks import MapBuilder, associate, load_map, map_metadata, revalidate_ids, save_map
 from .pose import PoseSolver
+from .occlusion import advance_panel_video
 from .rendering import PoseSmoother, annotate, open_window, side_by_side, toggle_fullscreen, panel_covariance, panel_geometry, visible_panel
 from .tags import TagDetector
 from .types import FrameResult, PoseEstimate
@@ -225,6 +226,7 @@ def run(config, save_when_ready=False, replace_map=False, max_frames=None, withh
             if occlusion is not None and not getattr(occlusion, "enabled", True):
                 result.diagnostics["occlusion"] = {"status": "off (key o)", "alignment_source": "off"}
             if occlusion is not None and getattr(occlusion, "enabled", True):
+                advance_panel_video()
                 before = time.perf_counter()
                 layer = occlusion.render(packet, result, pipeline.panel, pipeline.map, pipeline.last_features)
                 extra = (time.perf_counter()-before)*1000

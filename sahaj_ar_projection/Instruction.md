@@ -21,7 +21,7 @@ Work in this order. Steps 37 and 38 are offline on existing clips and can run in
 5. **Step 41:** trimmed hand/object labelling (replaces the full Step 32) on the far clips.
 6. **Step 45 (next, set by Sahaj 25 Oct after Step 44):** make the Step 44 A+L variant (relative model, mode A, base-line reference, margin `max(0.10 m, 0.10 x Z)`) usable in the live tracker with the 0.60 x 0.33707 m panel, then Sahaj runs live tests at different distances and occluders. Do this before any further offline step. Later offline steps (per-frame miss breakdown with pixel-area scoring, more labels, 3-5 m capture, panel-crop depth) are written after the live results come in.
 7. **Steps 46-49 (set by Sahaj 25 Oct evening, after the Step 45 live runs):** first Step 46 (1.0 x 0.5625 m panel, side-by-side live depth view, per-frame tag logging, review of the live runs), then Step 47 (tracking stability: smoothing, source policy, map), then Step 48 (depth edge or segmentation guidance), Step 49 only if needed. See "Sahaj's live-run notes" just before Step 46.
-8. **Step 48 work order (set by Sahaj 26 Oct, NEXT):** see "Step 48 work order" just before Step 48c. First give Sahaj the map-build CLI for the new floor-tag scene (task 0). Then write and check the 48a and 48b code (tasks 1-2) while he builds the map. Then report (task 3).
+8. **Step 48 work order (set by Sahaj 26 Oct, NEXT):** see "Step 48 work order" just before Step 48c. Task 0 (floor map) is cancelled: write and check the 48a and 48b code (tasks 1-2) on the existing map and recordings with `--replay-run`, then report (task 3).
 
 Standing decisions from this session:
 - The occlusion method must generalise to any occluder (person, box, chair, thin objects), not only hands. Do not add hand-specific code unless Sahaj approves it after Step 40. If a segmentation aid is ever needed, prefer a class-agnostic one.
@@ -1103,7 +1103,9 @@ python april-tag-projection.py --config config-logitech-far.json --mapping-mode 
 ### Step 48 work order (set by Sahaj 26 Oct morning; do this now, in this order)
 Context: Sahaj is building a **new map in a new scene with the tag lying on the floor** while this code is written. The floor is the flat surface now (world Z = 0 is the floor). Use Linux paths and `.venv/bin/python` / `.venv-depth/bin/python`.
 
-**Task 0 (first, before any code): give Sahaj the CLI to build the new map.**
+**Update 26 Oct 11:12 (Sahaj): the new floor map is on hold; Task 0 is cancelled.** Do tasks 1-3 on the existing map `data/logitech-landmark-map-occ.npz` and existing recordings only, with `--replay-run`. Replay set: `runs/20261025T092056-7a6e0212` (hand, depth always on), `runs/20261025T084746-303f35ec`, `runs/20261025T093208-791a0da5`, the Step 45 runs (`081445`, `081546`, `081836`, `083944`), F-occ (`runs/20261025T000122-210c1bb8`) and F-empty (`runs/20261025T000913-e058a920`, false-hide gate). Compare line / plane / plane+prior on the same replays. The table is the flat surface (world Z = 0). Do not build or replace a map. In Task 3 give the live command for the existing map, not a floor map. Keep the floor-map text below for later.
+
+**Task 0 (CANCELLED 26 Oct 11:12, kept for later): give Sahaj the CLI to build the new map.**
 - Read `WORKFLOW.md`, `README.md`, `ar_projection/cli.py` and `config-logitech-far.json` to get the current build flags right.
 - Make a config copy `config-logitech-floor.json` from `config-logitech-far.json` (1.0 x 0.5625 m panel, far tag settings). Do not edit existing configs or maps.
 - New map path: `data/logitech-landmark-map-floor.npz`. Never overwrite an existing map; do not use `--replace-map`.

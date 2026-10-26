@@ -29,6 +29,32 @@ def camera_rays(size, intrinsics):
     return np.stack((x, y, np.ones_like(x)), axis=-1) @ np.linalg.inv(np.array(intrinsics).reshape(3, 3)).T
 
 
+_VIDEO = {"cap": None, "frame": None, "t0": 0., "n": 0}
+
+
+def set_panel_video(path):
+    cap = cv2.VideoCapture(str(path))
+    if not cap.isOpened():
+        raise ValueError(f"cannot open panel video {path}")
+    _VIDEO.update(cap=cap, frame=None, t0=time.monotonic(), n=0, fps=cap.get(cv2.CAP_PROP_FPS) or 25.)
+
+
+def advance_panel_video():
+    """Call once per frame: sets the panel texture to the video frame for wall-clock time (loops; skips frames when behind)."""
+    cap = _VIDEO["cap"]
+    if cap is None:
+        return
+    due = int((time.monotonic()-_VIDEO["t0"])*_VIDEO["fps"])
+    while _VIDEO["n"] <= due or _VIDEO["frame"] is None:
+        ok, frame = cap.read()
+        if not ok:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            _VIDEO["t0"], _VIDEO["n"] = time.monotonic(), 0
+            due = 0
+            continue
+        _VIDEO["frame"], _VIDEO["n"] = frame, _VIDEO["n"]+1
+
+
 def panel_layer(T, panel, camera, scene_depth=None, margin_m=.02, invalid_occludes=False, margin_fraction=0.):
     """Return BGR texture, visibility, and camera-Z metres (zero outside panel). margin_fraction > 0 makes the margin
     max(margin_m, margin_fraction * panel Z) per pixel."""
@@ -53,7 +79,10 @@ def panel_layer(T, panel, camera, scene_depth=None, margin_m=.02, invalid_occlud
     checks = ((x//16+y//16) % 2).astype(bool)
     texture = np.empty((96, 160, 3), np.uint8)
     texture[checks], texture[~checks] = (220, 180, 40), (245, 245, 245)
-    H = cv2.getPerspectiveTransform(np.array([[0, 0], [159, 0], [159, 95], [0, 95]], np.float32), pixels.astype(np.float32))
+    if _VIDEO["frame"] is not None:  # stretched to the panel; panel is 16:9, video is not necessarily
+        texture = cv2.flip(_VIDEO["frame"], 0)  # panel corner order puts the texture's top at the panel's bottom
+    th, tw = texture.shape[:2]
+    H = cv2.getPerspectiveTransform(np.array([[0, 0], [tw-1, 0], [tw-1, th-1], [0, th-1]], np.float32), pixels.astype(np.float32))
     color = cv2.warpPerspective(texture, H, (w, h))
     if scene_depth is not None:
         scene_depth = np.asarray(scene_depth)
