@@ -15,7 +15,7 @@
 *.ytdl
 
 # Model weights and binary data
-*.pt
+# *.pt
 *.pth
 *.ckpt
 *.onnx
