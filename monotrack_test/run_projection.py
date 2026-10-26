@@ -190,7 +190,7 @@ def draw_calibration_preview(
         cv2.drawMarker(image, pixel, color, cv2.MARKER_CROSS, 18, 3)
         cv2.putText(image, key.replace("_", " "), (pixel[0] + 9, pixel[1] - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.55, color, 2)
     status = f"frame {frame_index}/{frame_count - 1} | selected: {selection or 'none'} | preview scale {preview_scale:.4f}"
-    help_line = "1/2: post tips  3: net contact  4: floor contact  a/d: frame  A/D: 25 frames  u: unknown event  q: save/quit"
+    help_line = "1/2: post tips  3: net interruption  4: FIRST floor contact (fit endpoint)  a/d: frame  A/D: 25  u: unknown  q: save"
     cv2.rectangle(image, (0, 0), (image.shape[1], 64), (0, 0, 0), -1)
     cv2.putText(image, status, (15, 26), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
     cv2.putText(image, help_line, (15, 52), cv2.FONT_HERSHEY_SIMPLEX, 0.52, (255, 255, 255), 1)
@@ -328,11 +328,14 @@ def pick_calibration(video: Path, geometry: CourtGeometry, calibration_path: Pat
     return document
 
 
-def load_calibration(path: Path, geometry: CourtGeometry, metadata: dict) -> dict:
+def load_calibration(path: Path, geometry: CourtGeometry, metadata: dict, video: Path) -> dict:
     with path.open("r", encoding="utf-8") as stream:
         document = json.load(stream)
     if document.get("format_version") != 1:
         raise ValueError("Unsupported calibration file version")
+    source = document.get("source_video")
+    if not isinstance(source, str) or repo_path(source) != video.resolve():
+        raise ValueError("Calibration file belongs to a different input video")
     saved_geometry = document.get("geometry", {})
     if saved_geometry.get("homography_row_video") != geometry.row_video:
         raise ValueError("Calibration file belongs to a different homography row")
@@ -362,7 +365,8 @@ def load_calibration(path: Path, geometry: CourtGeometry, metadata: dict) -> dic
             frame = event.get("frame")
             if (pixel.shape != (2,) or not np.isfinite(pixel).all()
                     or not 0 <= pixel[0] < metadata["width"] or not 0 <= pixel[1] < metadata["height"]
-                    or not 0 <= int(frame) < metadata["frame_count"]):
+                    or not isinstance(frame, int) or isinstance(frame, bool)
+                    or not 0 <= frame < metadata["frame_count"]):
                 raise ValueError(f"Calibration file has an invalid {name} selection")
     return document
 
@@ -673,17 +677,67 @@ def fit_terminal_tail(
     last_path: np.ndarray | None,
     pixel_loss: str = "mse",
     huber_delta_px: float = 10.0,
+    players: list[dict] | None = None,
 ):
-    """Keep the shared interface while excluding manually annotated terminal contacts."""
+    """Fit a direct final shot to a manually identified first floor contact."""
     pixel_loss, huber_delta_px = validate_pixel_loss(pixel_loss, huber_delta_px)
-    return [], {
-        "extension": "terminal reconstruction disabled",
-        "status": "disabled",
-        "reason": "manual_contacts_evaluation_only",
+    diagnostics = {
+        "extension": "manual landing constrained final shot",
+        "status": "unavailable",
+        "manual_landing_used_for_fitting": False,
         "pixel_loss": pixel_loss,
         "huber_delta_px": huber_delta_px,
         "phases": [],
-    }, None
+    }
+    floor = calibration.get("terminal_events", {}).get("floor_contact", {})
+    if not hits or floor.get("status") != "manual":
+        return [], {**diagnostics, "reason": "manual_first_floor_contact_required"}, None
+    start_frame, end_frame = hits[-1]["clip_frame_num"], floor.get("frame")
+    if (not isinstance(end_frame, int) or isinstance(end_frame, bool)
+            or end_frame < start_frame + 2 or end_frame >= len(observations)):
+        return [], {**diagnostics, "reason": "invalid_floor_contact_frame"}, None
+    net = calibration.get("terminal_events", {}).get("net_contact", {})
+    if net.get("status") == "manual" and start_frame <= net["frame"] <= end_frame:
+        return [], {**diagnostics, "reason": "net_interruption_requires_piecewise_model"}, None
+    try:
+        pixel = np.asarray(floor.get("pixel_native"), dtype=np.float64)
+        if pixel.shape != (2,) or not np.isfinite(pixel).all():
+            raise ValueError("Invalid floor-contact pixel")
+        floor_world = np.append(geometry.native_floor_to_world(pixel), 0.0)
+        if floor_world.shape != (3,) or not np.isfinite(floor_world).all():
+            raise ValueError("Invalid floor-contact position")
+        fixed_start = None if last_path is None else np.asarray(last_path[-1], dtype=np.float64)
+        if fixed_start is not None:
+            if fixed_start.shape != (3,) or not np.isfinite(fixed_start).all() or fixed_start[2] < 0:
+                raise ValueError("Invalid carried final-hit position")
+            start_reference = fixed_start[:2]
+            source = "previous_fitted_endpoint"
+        else:
+            start_reference = np.asarray(players[-1][hits[-1]["player"]], dtype=np.float64)
+            source = f"current_row_{players[-1].get('source', 'player_location')}"
+            if start_reference.shape != (2,) or not np.isfinite(start_reference).all():
+                raise ValueError("Invalid final-hitter position")
+    except (TypeError, ValueError, KeyError, IndexError):
+        return [], {**diagnostics, "reason": "invalid_landing_or_final_hitter_position"}, None
+    path, detail = reconstruct_flight(
+        start_frame=start_frame, end_frame=end_frame, observations=observations,
+        projection=projection, start_reference_xy=start_reference,
+        receive_reference_xy=floor_world[:2], fps=fps,
+        start_fixed=fixed_start, end_fixed=floor_world, phase="final_hit_to_floor_contact",
+        pixel_loss=pixel_loss, huber_delta_px=huber_delta_px,
+    )
+    detail.update({"start_reference_source": source,
+                   "start_reference_xy_m": start_reference.tolist(),
+                   "receive_reference_source": "manual_first_floor_contact",
+                   "receive_reference_xy_m": floor_world[:2].tolist()})
+    diagnostics.update(status=detail["status"], manual_landing_used_for_fitting=True,
+                       floor_contact_frame=end_frame, floor_contact_world_m=floor_world.tolist(),
+                       phases=[detail])
+    if path is None:
+        diagnostics["reason"] = detail.get("reason", "final_shot_fit_failed")
+        return [], diagnostics, floor_world
+    return [{"start_frame": start_frame, "end_frame": end_frame,
+             "trajectory": path, "phase": detail["phase"]}], diagnostics, floor_world
 
 
 def assign_paths(
@@ -988,7 +1042,7 @@ def run_projection(args) -> None:
     player_tracks, player_provenance = load_player_positions(player_csv, video, metadata, hits, geometry)
     players = player_references(hits, geometry, player_tracks)
     calibration_path = inside_test(repo_path(args.calibration))
-    calibration = load_calibration(calibration_path, geometry, metadata)
+    calibration = load_calibration(calibration_path, geometry, metadata, video)
     output_dir = ensure_output_dir(args.output_dir)
     projection = np.asarray(calibration["camera_calibration"]["projection_matrix"], dtype=np.float64)
     stem = video.stem
@@ -1008,6 +1062,7 @@ def run_projection(args) -> None:
         tail_paths, tail_diagnostics, _ = fit_terminal_tail(
             calibration, geometry, hits, observations, projection, metadata["fps"], last_path,
             args.pixel_loss, args.huber_delta_px,
+            players=players,
         )
         assign_paths(coordinates, phases, segment_ids, tail_paths, tail=True)
         all_paths = paths + tail_paths
@@ -1036,7 +1091,7 @@ def run_projection(args) -> None:
             "hit_to_hit_segments": hit_diagnostics,
             "terminal_extension": tail_diagnostics,
             "output_video": output_meta,
-            "interpretation": "Current and next hitters' player positions are soft horizontal fit references. Shuttle hit/landing labels are display-only and manual terminal contacts do not enter reconstruction. A carried fitted 3D endpoint takes precedence at the next start. Estimates stop at the final hit; a plausible top-down path does not verify reconstructed height.",
+            "interpretation": "Current and next hitters' player positions are soft horizontal fit references. Shuttle CSV hit/landing labels are display-only. A manual first floor-contact frame/pixel constrains the final shot at z=0 unless a marked net contact interrupts it. A carried fitted 3D endpoint takes precedence at the next start. Final-shot estimates are manually assisted; plausible paths do not verify reconstructed height or physical accuracy.",
             "mono_track_source": {"repository": "https://github.com/jhwang7628/monotrack", "commit": SOURCE_COMMIT, "license": "Adobe Research License; noncommercial research only"},
         }
         with outputs[2].open("w", encoding="utf-8", newline="\n") as stream:

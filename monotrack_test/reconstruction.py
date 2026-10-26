@@ -307,6 +307,8 @@ def reconstruct_flight(
     receive_reference_xy = np.asarray(receive_reference_xy, dtype=np.float64)
     fixed_start = None if start_fixed is None else np.asarray(start_fixed, dtype=np.float64)
     fixed_end = None if end_fixed is None else np.asarray(end_fixed, dtype=np.float64)
+    manual_floor_endpoint = fixed_end is not None and fixed_end[2] == 0.0
+    landing_weight = 0.0 if manual_floor_endpoint else 0.15
     duration = duration_frames / float(fps)
     if fixed_start is None:
         y0 = float(np.clip(start_reference_xy[1], 0.0, COURT_LENGTH_M))
@@ -375,12 +377,15 @@ def reconstruct_flight(
         landing_distance_m = extrapolated_landing_distance(start, velocity, drag, fps)
         if landing_distance_m is None:
             return 1e12
-        cost += (0.15 * camera_scale * landing_distance_m) ** 2
+        # A measured landing may be out; the court prior must not fight that endpoint.
+        cost += (landing_weight * camera_scale * landing_distance_m) ** 2
         return cost if np.isfinite(cost) else 1e12
 
     constraints = []
     if fixed_end is not None:
         constraints.append({"type": "eq", "fun": lambda params: trajectory_for(params)[-1] - fixed_end})
+    if manual_floor_endpoint:
+        constraints.append({"type": "ineq", "fun": lambda params: trajectory_for(params)[:-1, 2]})
     try:
         result = minimize(
             objective,
@@ -407,6 +412,7 @@ def reconstruct_flight(
         and np.isfinite(reprojection_errors).all()
         and endpoint_error <= 0.01
         and landing_distance_m is not None
+        and (not manual_floor_endpoint or np.all(path[:-1, 2] >= -1e-6))
     )
     diagnostics = {
         **base,
@@ -417,7 +423,7 @@ def reconstruct_flight(
         "optimizer_message": str(result.message),
         "objective": float(result.fun),
         "landing_outside_distance_m": landing_distance_m,
-        "landing_penalty": None if landing_distance_m is None else (0.15 * camera_scale * landing_distance_m) ** 2,
+        "landing_penalty": None if landing_distance_m is None else (landing_weight * camera_scale * landing_distance_m) ** 2,
         "reprojection_rmse_px": float(np.sqrt(np.mean(np.square(reprojection_errors)))),
         "reprojection_median_px": float(np.median(reprojection_errors)),
         "reprojection_max_px": float(np.max(reprojection_errors)),

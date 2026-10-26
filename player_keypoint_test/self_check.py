@@ -233,6 +233,54 @@ def check_training_progress() -> None:
                     assert len(updates) < batches
 
 
+def check_explicit_review_selection() -> None:
+    manifest, clips = [], []
+    for match in ("heldout_a", "heldout_b"):
+        for rally in range(1, 6):
+            clip = runner.SOURCE / match / "set1" / f"rally_{rally:03d}.mp4"
+            clips.append(clip)
+            manifest.append({
+                "dataset": "set-1", "match": match, "game": "1", "original_rally_id": str(rally),
+                "clip_frame_num": "0", "clip_path": str(clip), "width": "1920", "height": "1080",
+                "fps": "25", "A_half": "far", "B_half": "near", "A_native_x": "600",
+                "A_native_y": "200", "B_native_x": "800", "B_native_y": "560",
+            })
+    held_out = {"heldout_a", "heldout_b"}
+    selected = runner.review_rallies(manifest, held_out, clips=list(reversed(clips)))
+    assert len(selected) == 10
+    assert [Path(row["clip_path"]) for row in selected] == list(reversed(clips))
+    assert len(runner.review_rallies(manifest, held_out)) == 2
+    split = {"held_out_matches": sorted(held_out), "development_matches": [], "dataset_identity": "synthetic"}
+    info = {**split, "test_used_for_training": False}
+    with patch.object(runner, "final_context", return_value=(info, {}, Path("synthetic.pt"))), \
+            patch.object(runner, "sha256_file", return_value="synthetic"), \
+            patch.object(runner, "load_frozen_split", return_value=(split, manifest)), \
+            patch.object(runner, "import_geometry"), patch.object(Path, "is_file", return_value=True):
+        context, blockers = runner.review_test_context("synthetic", clips=clips)
+    assert not blockers and len(context["selected"]) == 10, blockers
+    for requested, allowed in (([], held_out), ([clips[0], clips[0]], held_out),
+                               ([clips[0], clips[0].parent / "rally_999.mp4"], held_out),
+                               ([clips[0]], {"heldout_b"})):
+        try:
+            runner.review_rallies(manifest, allowed, clips=requested)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Accepted empty, duplicate, unknown, or development clips")
+    args = runner.parser().parse_args(["review-test", "--run-id", "synthetic", "--smooth",
+                                       "--check", "--clips", *map(str, clips)])
+    assert args.clips == clips and args.smooth and args.check
+    context = {"selected": selected, "checkpoint": Path("synthetic.pt"), "dataset_identity": "synthetic"}
+    with patch.object(runner, "review_test_context", return_value=(context, [])) as prepare, \
+            patch.object(pm, "load_checkpoint", return_value=(None, {"model_kind": pm.MODEL_KIND})), \
+            patch("builtins.print") as output:
+        assert runner.review_test_command("synthetic", check_only=True, clips=clips) == 0
+    prepare.assert_called_once_with("synthetic", clips=clips)
+    report = json.loads(output.call_args.args[0])
+    assert report["ready"] and report["selection_mode"] == "explicit_clips"
+    assert len(report["selected_rallies"]) == 10 and report["shortfall_from_three"] == 0
+
+
 def check_deterministic_review_and_render() -> None:
     preferred_match = "Kento_MOMOTA_CHOU_Tien_Chen_KOREA_OPEN_2019_Final"
     matches = [preferred_match, "heldout_b", "heldout_c", "heldout_d"]
@@ -460,6 +508,7 @@ def main() -> None:
     check_whole_rally_exclusion()
     config = check_splits_and_config()
     check_training_progress()
+    check_explicit_review_selection()
     check_deterministic_review_and_render()
     check_review_smoothing()
     model_summary = runner.run_model_checks(config)

@@ -1,0 +1,213 @@
+{
+  "format_version": 1,
+  "created_utc": "2026-10-26T03:45:57.050254+00:00",
+  "source_video": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\cleaned_rallies\\set-1\\CHEN_Long_CHOU_Tien_Chen_World_Tour_Finals_Group_Stage\\set1\\rally_017.mp4",
+  "video_metadata": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 25.0,
+    "frame_count": 354
+  },
+  "geometry": {
+    "homography_row_id": "2",
+    "homography_row_video": "CHEN_Long_CHOU_Tien_Chen_World_Tour_Finals_Group_Stage",
+    "homography_annotation_to_dataset": [
+      [
+        3.2257625231927,
+        1.8272734973122737,
+        -1875.3467940960556
+      ],
+      [
+        0.015628122818271688,
+        18.41136641581973,
+        -5886.457632662832
+      ],
+      [
+        0.00010418749255237047,
+        0.010394454526229408,
+        1.0
+      ]
+    ],
+    "dataset_to_metric": [
+      [
+        0.020333332927299306,
+        -1.762852366107197e-10,
+        -0.5083332967397053
+      ],
+      [
+        1.3664283380001927e-18,
+        0.020303027841604992,
+        -3.0454532468418916
+      ],
+      [
+        -1.1046995601082967e-19,
+        -2.889921894601068e-11,
+        1.0
+      ]
+    ],
+    "corners_annotation": [
+      [
+        415.4,
+        358.2
+      ],
+      [
+        863.4,
+        358.2
+      ],
+      [
+        262.8,
+        672.0
+      ],
+      [
+        1018.4,
+        677.2
+      ]
+    ],
+    "mapped_corners_dataset": [
+      [
+        24.999999450948838,
+        149.99995286912954
+      ],
+      [
+        324.9999958753688,
+        149.99995322708884
+      ],
+      [
+        25.000004908123163,
+        809.9999998206345
+      ],
+      [
+        324.99998759279197,
+        809.9999723605478
+      ]
+    ],
+    "mapped_bounds_dataset": [
+      24.999999450948838,
+      149.99995286912954,
+      324.9999958753688,
+      809.9999998206345
+    ]
+  },
+  "scaling": {
+    "annotation_to_native_video": 1.5,
+    "preview_size": [
+      1280,
+      720
+    ],
+    "native_size": [
+      1920,
+      1080
+    ],
+    "preview_to_native": [
+      1.5,
+      1.5
+    ]
+  },
+  "camera_calibration": {
+    "method": "MonoTrack six-point linear projective calibration adapted for native pixels",
+    "world_points_m": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        6.1,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        13.4,
+        0.0
+      ],
+      [
+        6.1,
+        13.4,
+        0.0
+      ],
+      [
+        0.0,
+        6.7,
+        1.55
+      ],
+      [
+        6.1,
+        6.7,
+        1.55
+      ]
+    ],
+    "corners_native": [
+      [
+        623.0999999999999,
+        537.3
+      ],
+      [
+        1295.1,
+        537.3
+      ],
+      [
+        394.20000000000005,
+        1008.0
+      ],
+      [
+        1527.6,
+        1015.8000000000001
+      ]
+    ],
+    "left_post_top": {
+      "frame": 0,
+      "pixel_native": [
+        544.5,
+        501.0
+      ]
+    },
+    "right_post_top": {
+      "frame": 0,
+      "pixel_native": [
+        1378.5,
+        502.5
+      ]
+    },
+    "projection_matrix": [
+      [
+        108.47097613946544,
+        -29.00995082085936,
+        6.729808300416769,
+        623.1008259967176
+      ],
+      [
+        -0.5760309704781653,
+        4.657280701277457,
+        -105.59937316756321,
+        536.9150390211873
+      ],
+      [
+        -0.0013069936438405705,
+        -0.030258209353782206,
+        0.0059865397859191205,
+        1.0
+      ]
+    ],
+    "calibration_reprojection_rmse_px": 0.34211060442427493
+  },
+  "terminal_events": {
+    "net_contact": {
+      "status": "unidentified",
+      "frame": null,
+      "pixel_native": null
+    },
+    "floor_contact": {
+      "status": "manual",
+      "frame": 284,
+      "pixel_native": [
+        844.5,
+        598.5
+      ]
+    }
+  },
+  "provenance": {
+    "repository": "https://github.com/jhwang7628/monotrack",
+    "commit": "39e9227bd44fa2a579731b1cc97c7f529f391cd6"
+  }
+}

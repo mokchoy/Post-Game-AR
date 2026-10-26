@@ -1741,7 +1741,8 @@ def render_review_rally(rally: dict, output_dir: Path, model, geometry,
     return result
 
 
-def review_rallies(rows: list[dict], held_out: set[str], seed: int = 42) -> list[dict]:
+def review_rallies(rows: list[dict], held_out: set[str], seed: int = 42,
+                   clips: list[Path] | None = None) -> list[dict]:
     if any(row.get("dataset") != "set-1" for row in rows):
         raise ValueError("Frozen manifest contains rows outside cleaned_rallies/set-1")
     groups = defaultdict(list)
@@ -1776,6 +1777,15 @@ def review_rallies(rows: list[dict], held_out: set[str], seed: int = 42) -> list
         if clip == preferred_path:
             preferred_key = key
         by_match[key[1]].append({"key": key, "clip_path": clip, "rows": rally_rows})
+    if clips is not None:
+        requested = [os.path.normcase(str(Path(clip).resolve())) for clip in clips]
+        if not requested or len(requested) != len(set(requested)):
+            raise ValueError("Explicit review clips must be non-empty and unique")
+        eligible = {rally["clip_path"]: rally for options in by_match.values() for rally in options}
+        missing = [clip for clip in requested if clip not in eligible]
+        if missing:
+            raise ValueError(f"Requested clips are not eligible frozen held-out rallies: {missing}")
+        return [eligible[clip] for clip in requested]
     matches = sorted(by_match)
     if not matches:
         return []
@@ -1796,7 +1806,7 @@ def review_rallies(rows: list[dict], held_out: set[str], seed: int = 42) -> list
     return selected
 
 
-def review_test_context(final_run_id: str) -> tuple[dict, list[str]]:
+def review_test_context(final_run_id: str, clips: list[Path] | None = None) -> tuple[dict, list[str]]:
     context, blockers = {"final_dir": ROOT / "runs" / final_run_id, "selected": []}, []
     try:
         info, config, checkpoint = final_context(final_run_id)
@@ -1810,8 +1820,8 @@ def review_test_context(final_run_id: str) -> tuple[dict, list[str]]:
             blockers.append("final run held-out assignments differ from the frozen split")
         if set(info.get("development_matches", [])) != set(split["development_matches"]):
             blockers.append("final run development assignments differ from the frozen split")
-        selected = review_rallies(rows, set(split["held_out_matches"]), seed=42)
-        if len({rally["key"][1] for rally in selected}) != len(selected):
+        selected = review_rallies(rows, set(split["held_out_matches"]), seed=42, clips=clips)
+        if clips is None and len({rally["key"][1] for rally in selected}) != len(selected):
             blockers.append("review selection contains multiple rallies from one match")
         if any(rally["key"][1] not in set(split["held_out_matches"]) for rally in selected):
             blockers.append("review selection contains a development match")
@@ -1827,9 +1837,10 @@ def review_test_context(final_run_id: str) -> tuple[dict, list[str]]:
     return context, blockers
 
 
-def review_test_command(final_run_id: str, check_only: bool = False, smooth: bool = False) -> int:
+def review_test_command(final_run_id: str, check_only: bool = False, smooth: bool = False,
+                        clips: list[Path] | None = None) -> int:
     smoothing = load_review_smoothing() if smooth else None
-    context, blockers = review_test_context(final_run_id)
+    context, blockers = review_test_context(final_run_id, clips=clips)
     if not blockers:
         try:
             _, checkpoint = pm.load_checkpoint(context["checkpoint"])
@@ -1843,7 +1854,8 @@ def review_test_command(final_run_id: str, check_only: bool = False, smooth: boo
         "dataset_identity": context.get("dataset_identity"),
         "selected_rallies": [{"key": list(item["key"]), "clip_path": item["clip_path"]} for item in selected],
         "selected_match_count": len({item["key"][1] for item in selected}),
-        "shortfall_from_three": max(0, 3 - len(selected)), "blockers": blockers,
+        "selection_mode": "explicit_clips" if clips is not None else "seeded_three_matches",
+        "shortfall_from_three": max(0, 3 - len(selected)) if clips is None else 0, "blockers": blockers,
     }
     if smoothing is not None:
         report["smoothing"] = smoothing
@@ -1869,7 +1881,8 @@ def review_test_command(final_run_id: str, check_only: bool = False, smooth: boo
         "held_out_matches": sorted(context["split"]["held_out_matches"]),
         "resolved_settings": settings,
         "selected_rallies": [{"key": list(item["key"]), "clip_path": item["clip_path"]} for item in selected],
-        "shortfall_from_three": max(0, 3 - len(selected)), "selection_saved_before_inference": True,
+        "selection_mode": report["selection_mode"],
+        "shortfall_from_three": report["shortfall_from_three"], "selection_saved_before_inference": True,
     })
     model, _ = pm.load_checkpoint(context["checkpoint"])
     device = resolve_device(context["config"])
@@ -1991,6 +2004,8 @@ def parser() -> argparse.ArgumentParser:
     test_review.add_argument("--run-id", required=True)
     test_review.add_argument("--check", action="store_true", help="Preflight only; does not run training smoke")
     test_review.add_argument("--smooth", action="store_true", help="Also render smoothing from review_config.yaml")
+    test_review.add_argument("--clips", nargs="+", type=Path,
+                             help="Explicit frozen held-out clips; defaults to three seeded rallies")
     return root
 
 
@@ -2006,7 +2021,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "overlay":
             return overlay_command(args.run_id, args.match, args.game, args.rally)
         if args.command == "review-test":
-            return review_test_command(args.run_id, args.check, args.smooth)
+            return review_test_command(args.run_id, args.check, args.smooth, args.clips)
         config = load_config(args.config, getattr(args, "folds", None))
         if args.command == "check":
             return check_command(config)

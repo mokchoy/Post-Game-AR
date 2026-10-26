@@ -1,0 +1,213 @@
+{
+  "format_version": 1,
+  "created_utc": "2026-10-26T03:47:38.257119+00:00",
+  "source_video": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\cleaned_rallies\\set-1\\Kento_MOMOTA_CHOU_Tien_Chen_Malaysia_Open_2018_QuarterFinals\\set1\\rally_016.mp4",
+  "video_metadata": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 25.0,
+    "frame_count": 282
+  },
+  "geometry": {
+    "homography_row_id": "7",
+    "homography_row_video": "Kento_MOMOTA_CHOU_Tien_Chen_Malaysia_Open_2018_QuarterFinals",
+    "homography_annotation_to_dataset": [
+      [
+        1.7642701851492364,
+        1.0455606745989166,
+        -963.216543027561
+      ],
+      [
+        -0.05505351441862821,
+        10.125022286691303,
+        -2815.2917916695087
+      ],
+      [
+        -3.777998080515185e-05,
+        0.005855800294804382,
+        1.0
+      ]
+    ],
+    "dataset_to_metric": [
+      [
+        0.02033333097640992,
+        5.876174255833481e-11,
+        -0.5083334383555161
+      ],
+      [
+        2.0653312346499526e-09,
+        0.02030303171410098,
+        -3.0454557381474787
+      ],
+      [
+        -4.6238743405096425e-10,
+        1.6376227241232783e-10,
+        1.0
+      ]
+    ],
+    "corners_annotation": [
+      [
+        395.4,
+        322.8
+      ],
+      [
+        882.2,
+        325.4
+      ],
+      [
+        216.2,
+        674.6
+      ],
+      [
+        1052.6,
+        678.4
+      ]
+    ],
+    "mapped_corners_dataset": [
+      [
+        25.000007189532635,
+        150.00004286851384
+      ],
+      [
+        324.9999947234941,
+        150.00002175036698
+      ],
+      [
+        25.000006254459826,
+        810.0000499832412
+      ],
+      [
+        325.00002210576713,
+        809.999949615509
+      ]
+    ],
+    "mapped_bounds_dataset": [
+      25.000006254459826,
+      150.00002175036698,
+      325.00002210576713,
+      810.0000499832412
+    ]
+  },
+  "scaling": {
+    "annotation_to_native_video": 1.5,
+    "preview_size": [
+      1280,
+      720
+    ],
+    "native_size": [
+      1920,
+      1080
+    ],
+    "preview_to_native": [
+      1.5,
+      1.5
+    ]
+  },
+  "camera_calibration": {
+    "method": "MonoTrack six-point linear projective calibration adapted for native pixels",
+    "world_points_m": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        6.1,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        13.4,
+        0.0
+      ],
+      [
+        6.1,
+        13.4,
+        0.0
+      ],
+      [
+        0.0,
+        6.7,
+        1.55
+      ],
+      [
+        6.1,
+        6.7,
+        1.55
+      ]
+    ],
+    "corners_native": [
+      [
+        593.0999999999999,
+        484.20000000000005
+      ],
+      [
+        1323.3000000000002,
+        488.09999999999997
+      ],
+      [
+        324.29999999999995,
+        1011.9000000000001
+      ],
+      [
+        1578.8999999999999,
+        1017.5999999999999
+      ]
+    ],
+    "left_post_top": {
+      "frame": 34,
+      "pixel_native": [
+        496.5,
+        450.0
+      ]
+    },
+    "right_post_top": {
+      "frame": 34,
+      "pixel_native": [
+        1414.5,
+        453.0
+      ]
+    },
+    "projection_matrix": [
+      [
+        119.60713709950639,
+        -30.173094507198552,
+        2.590743724257466,
+        593.0987057851993
+      ],
+      [
+        0.47638102466388077,
+        7.793205234748716,
+        -115.61256339447097,
+        484.5865575070937
+      ],
+      [
+        -7.421239781280065e-05,
+        -0.031185623889950165,
+        0.0028508963690045963,
+        1.0
+      ]
+    ],
+    "calibration_reprojection_rmse_px": 0.345820190424586
+  },
+  "terminal_events": {
+    "net_contact": {
+      "status": "unidentified",
+      "frame": null,
+      "pixel_native": null
+    },
+    "floor_contact": {
+      "status": "manual",
+      "frame": 237,
+      "pixel_native": [
+        769.5,
+        625.5
+      ]
+    }
+  },
+  "provenance": {
+    "repository": "https://github.com/jhwang7628/monotrack",
+    "commit": "39e9227bd44fa2a579731b1cc97c7f529f391cd6"
+  }
+}

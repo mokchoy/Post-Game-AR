@@ -1,0 +1,213 @@
+{
+  "format_version": 1,
+  "created_utc": "2026-10-26T03:41:07.594219+00:00",
+  "source_video": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\cleaned_rallies\\set-1\\Kento_MOMOTA_CHOU_Tien_Chen_KOREA_OPEN_2019_Final\\set1\\rally_010.mp4",
+  "video_metadata": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 25.0,
+    "frame_count": 350
+  },
+  "geometry": {
+    "homography_row_id": "3",
+    "homography_row_video": "Kento_MOMOTA_CHOU_Tien_Chen_KOREA_OPEN_2019_Final",
+    "homography_annotation_to_dataset": [
+      [
+        1.4590990108235753,
+        0.7034097098060653,
+        -761.6703438283957
+      ],
+      [
+        -0.012944124346272975,
+        6.991588273680825,
+        -1675.492902760459
+      ],
+      [
+        -8.455318067044705e-06,
+        0.003973652311934138,
+        1.0
+      ]
+    ],
+    "dataset_to_metric": [
+      [
+        0.020333328933459554,
+        -1.2078962683341125e-19,
+        -0.5083330682055002
+      ],
+      [
+        -3.0979961420139437e-09,
+        0.02030302804305308,
+        -3.0454531996092156
+      ],
+      [
+        -5.394520624408479e-10,
+        -1.378816450513789e-20,
+        1.0
+      ]
+    ],
+    "corners_annotation": [
+      [
+        420.6,
+        286.2
+      ],
+      [
+        858.8,
+        287.0
+      ],
+      [
+        266.2,
+        659.2
+      ],
+      [
+        1009.0,
+        660.4
+      ]
+    ],
+    "mapped_corners_dataset": [
+      [
+        24.999992711301488,
+        149.99996003776872
+      ],
+      [
+        325.0000083496444,
+        149.99999992592757
+      ],
+      [
+        24.999992700961993,
+        809.9999764123924
+      ],
+      [
+        325.00001242238557,
+        809.9999527907303
+      ]
+    ],
+    "mapped_bounds_dataset": [
+      24.999992700961993,
+      149.99996003776872,
+      325.00001242238557,
+      809.9999764123924
+    ]
+  },
+  "scaling": {
+    "annotation_to_native_video": 1.5,
+    "preview_size": [
+      1280,
+      720
+    ],
+    "native_size": [
+      1920,
+      1080
+    ],
+    "preview_to_native": [
+      1.5,
+      1.5
+    ]
+  },
+  "camera_calibration": {
+    "method": "MonoTrack six-point linear projective calibration adapted for native pixels",
+    "world_points_m": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        6.1,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        13.4,
+        0.0
+      ],
+      [
+        6.1,
+        13.4,
+        0.0
+      ],
+      [
+        0.0,
+        6.7,
+        1.55
+      ],
+      [
+        6.1,
+        6.7,
+        1.55
+      ]
+    ],
+    "corners_native": [
+      [
+        630.9000000000001,
+        429.29999999999995
+      ],
+      [
+        1288.1999999999998,
+        430.5
+      ],
+      [
+        399.29999999999995,
+        988.8000000000001
+      ],
+      [
+        1513.5,
+        990.5999999999999
+      ]
+    ],
+    "left_post_top": {
+      "frame": 0,
+      "pixel_native": [
+        547.5,
+        432.0
+      ]
+    },
+    "right_post_top": {
+      "frame": 0,
+      "pixel_native": [
+        1372.5,
+        435.0
+      ]
+    },
+    "projection_matrix": [
+      [
+        108.028858731822,
+        -29.511044811075347,
+        1.9059548888732907,
+        630.9010873910413
+      ],
+      [
+        0.38629575613470585,
+        11.496709935477861,
+        -104.26048302396056,
+        429.00221663512883
+      ],
+      [
+        0.00021356690948692858,
+        -0.03062204318540296,
+        0.0011332663684047173,
+        1.0
+      ]
+    ],
+    "calibration_reprojection_rmse_px": 0.2770121224522627
+  },
+  "terminal_events": {
+    "net_contact": {
+      "status": "unidentified",
+      "frame": null,
+      "pixel_native": null
+    },
+    "floor_contact": {
+      "status": "manual",
+      "frame": 331,
+      "pixel_native": [
+        607.5,
+        693.0
+      ]
+    }
+  },
+  "provenance": {
+    "repository": "https://github.com/jhwang7628/monotrack",
+    "commit": "39e9227bd44fa2a579731b1cc97c7f529f391cd6"
+  }
+}

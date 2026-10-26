@@ -58,6 +58,7 @@ from run_projection import (
     repo_path,
     video_metadata,
     load_annotations,
+    load_calibration,
     load_player_positions,
 )
 
@@ -142,7 +143,7 @@ def test_fit_references(hits: list[dict], geometry, projection: np.ndarray, fram
     assert all(call["pixel_loss"] == "mse" and call["huber_delta_px"] == 10.0 for call in calls)
     assert diagnostics[1]["start_fixed"] is True and diagnostics[1]["start_reference_source"] == "current_row_player_location"
 
-    # Optional shuttle labels and manual contacts cannot affect either loss's trajectories.
+    # Optional shuttle labels cannot affect hit-to-hit fits; marked net interruptions stay unavailable.
     original_hits = hits[:3]
     observations = [None] * frame_count
     baseline_calls = []
@@ -180,13 +181,110 @@ def test_fit_references(hits: list[dict], geometry, projection: np.ndarray, fram
             np.testing.assert_equal(changed[method]["coordinates"], baseline[method]["coordinates"])
             assert changed[method]["phases"] == baseline[method]["phases"]
             assert changed[method]["hit_diagnostics"] == baseline[method]["hit_diagnostics"]
-            assert changed[method]["terminal_diagnostics"] == baseline[method]["terminal_diagnostics"]
+            assert changed[method]["terminal_diagnostics"]["reason"] == "net_interruption_requires_piecewise_model"
+            assert not changed[method]["terminal_diagnostics"]["manual_landing_used_for_fitting"]
             final_frame = changed_hits[-1]["clip_frame_num"]
             assert np.array_equal(changed[method]["coordinates"][final_frame], fixed_point)
             assert changed[method]["phases"][final_frame] == "hit_2_to_hit_3"
             assert np.isnan(changed[method]["coordinates"][final_frame + 1:]).all()
     assert np.isnan(fit_hit_flights(hits[:1], players[:1], observations, projection, 25)[0]).all()
     assert np.isnan(fit_hit_flights(hits[:2], players[:2], observations, projection, 25)[0]).all()
+
+
+def test_manual_calibration_identity(geometry) -> None:
+    original = json.loads(repo_path("monotrack_test/calibration.json").read_text(encoding="utf-8"))
+    with tempfile.TemporaryDirectory(prefix="landing-calibration-check-", dir=repo_path("monotrack_test")) as temp:
+        path = Path(temp) / "calibration.json"
+        path.write_text(json.dumps(original), encoding="utf-8")
+        load_calibration(path, geometry, original["video_metadata"], DEFAULT_VIDEO)
+        for source, frame in ((str(DEFAULT_VIDEO.with_name("rally_999.mp4")), 3),
+                              (str(DEFAULT_VIDEO), 3.5), (str(DEFAULT_VIDEO), True)):
+            document = json.loads(json.dumps(original))
+            document["source_video"] = source
+            document["terminal_events"]["floor_contact"] = {
+                "status": "manual", "frame": frame, "pixel_native": [500, 500],
+            }
+            path.write_text(json.dumps(document), encoding="utf-8")
+            try:
+                load_calibration(path, geometry, document["video_metadata"], DEFAULT_VIDEO)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError("Accepted a wrong-clip calibration or non-integer contact frame")
+
+
+def test_manual_landing() -> None:
+    projection = synthetic_camera()
+    fps, duration = 25.0, 1.0
+    start = np.asarray([3.0, 11.0, 1.8])
+    velocity = np.asarray([0.5, 3.5, 4.9 * (duration + 1 / (fps * 30)) - start[2] / duration])
+    truth = simulate_trajectory(start, velocity, 0.0, 25, fps)
+    assert abs(truth[-1, 2]) < 1e-10 and np.all(truth[:-1, 2] > 0)
+    observations = [None] * 3 + [tuple(project_point(projection, point)) for point in truth] + [None]
+    geometry = SimpleNamespace(native_floor_to_world=lambda pixel: np.asarray(pixel) / 100)
+    terminal = {"terminal_events": {
+        "net_contact": {"status": "unidentified", "frame": None, "pixel_native": None},
+        "floor_contact": {"status": "manual", "frame": 28, "pixel_native": (truth[-1, :2] * 100).tolist()},
+    }}
+    hits, players = [{"clip_frame_num": 3, "player": "A"}], [{"A": start[:2], "source": "keypoint_smoothed"}]
+    for loss, previous in (("mse", np.asarray([start])), ("huber", np.asarray([start])), ("huber", None)):
+        paths, detail, floor = fit_terminal_tail(
+            terminal, geometry, hits, observations, projection, fps, previous, loss,
+            players=players,
+        )
+        assert len(paths) == 1 and detail["status"] == "available", detail
+        assert detail["manual_landing_used_for_fitting"] and floor[2] == 0
+        path = paths[0]["trajectory"]
+        assert np.allclose(path[0], start, atol=0.01) and np.allclose(path[-1], floor, atol=0.01)
+        assert np.all(path[:-1, 2] >= -1e-6)
+        assert detail["phases"][0]["landing_penalty"] == 0.0
+        assert floor[1] > COURT_LENGTH_M
+        coordinates, phases, segments = np.full((30, 3), np.nan), [""] * 30, [-1] * 30
+        assign_paths(coordinates, phases, segments, paths, tail=True)
+        assert np.isnan(coordinates[:3]).all() and np.isnan(coordinates[29:]).all()
+        assert np.allclose(coordinates[28], floor, atol=0.01) and segments[28] == -2
+    for floor_event, net, reason in (
+        ({"status": "unidentified"}, {}, "manual_first_floor_contact_required"),
+        ({"status": "manual", "frame": 3}, {}, "invalid_floor_contact_frame"),
+        ({"status": "manual", "frame": 30}, {}, "invalid_floor_contact_frame"),
+        ({"status": "manual", "frame": 28.5}, {}, "invalid_floor_contact_frame"),
+        (terminal["terminal_events"]["floor_contact"], {"status": "manual", "frame": 20},
+         "net_interruption_requires_piecewise_model"),
+        ({"status": "manual", "frame": 28, "pixel_native": [float("nan"), 0]}, {},
+         "invalid_landing_or_final_hitter_position"),
+    ):
+        with patch("run_projection.reconstruct_flight") as fitter:
+            paths, detail, _ = fit_terminal_tail(
+                {"terminal_events": {"floor_contact": floor_event, "net_contact": net}},
+                geometry, hits, observations, projection, fps, None, players=players,
+            )
+            fitter.assert_not_called()
+        assert not paths and detail["reason"] == reason and not detail["manual_landing_used_for_fitting"]
+    calls = []
+
+    def spy(**kwargs):
+        calls.append(kwargs)
+        return None, {"phase": kwargs["phase"], "status": "insufficient_data", "reason": "synthetic_missing_tracks"}
+
+    with patch("run_projection.reconstruct_flight", side_effect=spy):
+        paths, detail, _ = fit_terminal_tail(terminal, geometry, hits, observations, projection, fps,
+                                              None, players=players)
+    assert not paths and detail["reason"] == "synthetic_missing_tracks"
+    assert calls[0]["start_fixed"] is None and np.array_equal(calls[0]["start_reference_xy"], start[:2])
+    assert detail["phases"][0]["start_reference_source"] == "current_row_keypoint_smoothed"
+    calls.clear()
+    with patch("run_projection.reconstruct_flight", side_effect=spy):
+        fits = fit_loss_pair(hits, players, observations, projection, fps, terminal, geometry, 10)
+    assert [call["pixel_loss"] for call in calls] == ["mse", "huber"]
+    assert all(fit["terminal_diagnostics"]["manual_landing_used_for_fitting"] for fit in fits.values())
+    assert all(np.isnan(fit["coordinates"]).all() for fit in fits.values())
+    with patch("run_projection.reconstruct_flight", return_value=(truth, {
+        "phase": "final_hit_to_floor_contact", "status": "available",
+    })):
+        fits = fit_loss_pair(hits, players, observations, projection, fps, terminal, geometry, 10)
+    for fit in fits.values():
+        assert np.isnan(fit["coordinates"][3]).all() and fit["phases"][3] == ""
+        assert np.allclose(fit["coordinates"][4:29], truth[1:])
 
 
 def test_saved_player_tracks(geometry, projection: np.ndarray) -> None:
@@ -640,6 +738,8 @@ def run_checks(repo_root: Path, checkpoint: Path | None = None) -> None:
     fitted, camera_rmse = fit_camera_projection(image_points[:4], image_points[4:])
     assert camera_rmse < 1e-5
     test_fit_references(hits, geometry, fitted, frame_count)
+    test_manual_landing()
+    test_manual_calibration_identity(geometry)
     test_saved_player_tracks(geometry, fitted)
     test_pixel_losses()
     test_court_landing_penalty()
@@ -671,7 +771,7 @@ def run_checks(repo_root: Path, checkpoint: Path | None = None) -> None:
         )
         fitter.assert_not_called()
     assert not direct_paths and floor_world is None and not direct_detail["phases"]
-    assert direct_detail["status"] == "disabled" and direct_detail["reason"] == "manual_contacts_evaluation_only"
+    assert direct_detail["status"] == "unavailable" and direct_detail["reason"] == "invalid_floor_contact_frame"
     assert direct_detail["pixel_loss"] == "huber" and direct_detail["huber_delta_px"] == 8.0
 
     calibration_preview = draw_calibration_preview(

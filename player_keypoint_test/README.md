@@ -40,7 +40,21 @@ Every automatic source-quality failure excludes the complete rally and is writte
 
 `split` freezes the accepted point manifest and reserves 20% of matches as the seed-42 held-out set. CV fold assignments keep whole matches together. Fold count and training settings do not change held-out membership. Each fold independently loads the same pretrained backbone and selects its checkpoint by validation mean court-metre error; any invalid projection makes that epoch's selection score infinite. OOF exports include combined, player, match, and fold metrics; unavailable points count as failures in coverage and distance-success denominators.
 
-Final training uses all development matches for the rounded median selected epoch count and keeps the held-out matches out of training and checkpoint selection. `evaluate` runs the full held-out evaluation once. `review-test` selects up to three held-out rallies from different matches before inference, saves the selection, and writes fresh selected-rally diagnostics. It does not replace the full-test results. Its video shows the normal camera image beside a 600-pixel court panel, predicted A/B points, and reference crosses only at the annotated frames. It preserves source FPS and decoded frame count, exports two position rows per frame, records annotation-time errors, and verifies the encoded video by decoding it.
+Final training uses all development matches for the rounded median selected epoch count and keeps the held-out matches out of training and checkpoint selection. `evaluate` runs the full held-out evaluation once. `review-test` defaults to up to three held-out rallies from different matches before inference, saves the selection, and writes fresh selected-rally diagnostics. Pass `--clips PATH [PATH ...]` to select explicit clips instead, including multiple rallies from one match. Paths resolve from the current working directory and must identify unique eligible rallies in the frozen held-out manifest; development, unknown, and duplicate clips are rejected before inference. The default selection is unchanged. The saved selection records `selection_mode` and preserves the requested order.
+
+These selected-rally diagnostics do not replace the full-test results. The video shows the normal camera image beside a 600-pixel court panel, predicted A/B points, and reference crosses only at the annotated frames. It preserves source FPS and decoded frame count, exports two position rows per frame, records annotation-time errors, and verifies the encoded video by decoding it.
+
+For the ten MonoTrack clips, run from the repository root. The first command checks selection, checkpoint compatibility, and smoothing settings without inference. The second command runs player inference and renders new reviews; run it only when ready:
+
+```powershell
+$clips = Get-Content monotrack_test\projection_clips.txt
+python -B player_keypoint_test\runner.py review-test `
+  --run-id final_cv_5f_s42_1e4a7705f081 --smooth --check --clips @clips
+python -B player_keypoint_test\runner.py review-test `
+  --run-id final_cv_5f_s42_1e4a7705f081 --smooth --clips @clips
+```
+
+The printed `review_directory` contains `selection.json` and `render_summary.json`. Each summary entry identifies its rally key and output `directory`; use that directory's `player_positions_smoothed.csv` with MonoTrack. Keep the review metadata beside the CSV. Each run creates a fresh review directory.
 
 ## Configuration
 

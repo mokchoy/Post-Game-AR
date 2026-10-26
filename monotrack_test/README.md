@@ -21,7 +21,7 @@ py -3.14 -B monotrack_test\run_projection.py calibrate `
   --output-dir monotrack_test
 ```
 
-The preview is scaled to at most 1280×720. Select `1` and click the left post top tip; select `2` and click the right post top tip. Those are the only two extra camera-calibration points. Select `3` and click the net-contact frame/pixel, then `4` and click the first floor-contact frame/pixel. These terminal contacts are retained as reference metadata only and never constrain reconstruction; the paired comparison uses the floor-contact frame as an evaluation boundary. Press `u` for either terminal event when it cannot be identified; it will be recorded unavailable. Use `a`/`d` for one-frame stepping, `A`/`D` for 25-frame steps, and `q` to save. Clicks are converted back to native 1920×1080 pixels.
+The preview is scaled to at most 1280×720. Select `1` and click the left post top tip; select `2` and click the right post top tip. Those are the only two extra camera-calibration points. For the final shot, select its exact first floor-contact frame, press `4`, and click the shuttle's floor-contact pixel. This supplies the landing time and a fixed metric endpoint at `z=0`; do not click an airborne shuttle or a later bounce. Press `3` and click a known net interruption; a marked interruption between the final hit and landing leaves the final trajectory unavailable because a direct flight cannot model it. Press `u` for an unidentified event. Without an identified floor contact the final trajectory remains unavailable. Use `a`/`d` for one-frame stepping, `A`/`D` for 25-frame steps, and `q` to save. Clicks are converted back to native 1920×1080 pixels.
 
 After saving calibration, run the single rally:
 
@@ -48,7 +48,44 @@ The fit retains free height, existing soft-reference penalty weights, optimizer 
 
 Both pixel losses also include a MonoTrack-style hypothetical-landing penalty. Each candidate shot is simulated from launch as though the receiver never hits it, using the same gravity/drag integrator until its first ground crossing. Ground contact is interpolated between integration substeps. Let `d_out` be the horizontal distance of that landing from the nearest point in the full 6.1 x 13.4 m court rectangle (zero inside or on its boundary). The added cost is `(0.15 * camera_scale * d_out)^2`, matching the existing player-prior scaling; this weight has not been tuned on real rallies. Diagnostics record `landing_outside_distance_m` and the weighted `landing_penalty`. Extrapolation is capped at 60 seconds; nonfinite or missing ground contact rejects the candidate, and an optimized result without a valid landing is reported failed. This continuation is used only in the objective and never adds trajectory/video frames or uses annotated shuttle endpoints.
 
-Fitting defaults to pixel MSE. Select `--pixel-loss huber --huber-delta-px 10` on `run_projection.py run` to use the scaled Huber loss; the delta is in cleaned-video pixels. Terminal reconstruction is disabled in both runners: clicked net/floor contacts never become fixed endpoints or measured-floor trajectory holds. A successful final hit-to-hit flight includes its final hit sample; all later 3D samples remain unavailable because there is no next hitter to anchor the final shot. Existing calibration files and output interfaces are retained, with terminal diagnostics reporting `status: disabled` and `reason: manual_contacts_evaluation_only`.
+Fitting defaults to pixel MSE. Select `--pixel-loss huber --huber-delta-px 10` on `run_projection.py run` to use the scaled Huber loss; the delta is in cleaned-video pixels. Both runners fit the final shot to an identified manual first floor-contact frame/pixel. The final shot starts at the previous fitted endpoint when available; otherwise it uses the final hitter's soft horizontal reference. The endpoint is fixed at the floor position transformed through the homography, with nonnegative sampled height before contact. A measured out-of-court landing is allowed and does not receive the hypothetical in-court landing penalty. At least three visible TrackNet detections and three frames are still required, and failed fits remain unavailable. The landing sample is included; later samples remain unavailable, with no invented floor hold.
+
+Terminal diagnostics record `manual_landing_used_for_fitting`, the landing frame/world point, fit status, and failure reasons. These final-shot estimates are manually assisted. Existing calibration JSONs with manual floor contacts now supply fitting constraints; verify those clicks represent the first floor contact before reuse. Unknown contacts remain unavailable, and existing output files remain protected from overwrite.
+
+## Ten selected clips
+
+`projection_clips.txt` lists ten set-1 clips from held-out matches, with two rallies each from Korea 2019, Denmark 2019, Fuzhou 2019 semifinal, World Tour Finals, and Malaysia 2018. Export their smoothed player tracks using the explicit `--clips` commands in `player_keypoint_test/README.md`. This does not require retraining. Save a fresh calibration for each clip and use the corresponding smoothed player CSV in its original review directory.
+
+For example, after exporting the player reviews, replace `REVIEW_DIRECTORY` below with the printed review directory and run from the repository root:
+
+```powershell
+$review = 'REVIEW_DIRECTORY'
+$rally = 'cleaned_rallies\set-1\CHEN_Long_CHOU_Tien_Chen_Denmark_Open_2019_QuarterFinal\set1\rally_028'
+$players = Join-Path $review '777a2c3a75eabc9a\player_positions_smoothed.csv'
+$calibration = 'monotrack_test\denmark_028_landing_calibration_001.json'
+py -3.14 -B monotrack_test\run_projection.py calibrate `
+  --video "$rally.mp4" --rally-csv "$rally.csv" --calibration $calibration
+py -3.14 -B monotrack_test\run_projection.py run `
+  --video "$rally.mp4" --rally-csv "$rally.csv" --calibration $calibration `
+  --player-positions-csv $players --pixel-loss huber --huber-delta-px 10 `
+  --output-dir monotrack_test\denmark_028_with_landing_001
+```
+
+In calibration, mark both post tips and the first floor contact. Use a new calibration filename and output directory for each attempt. The result is `rally_028_projection.mp4` plus tracked pixels, metric trajectories, and diagnostics. Repeat with each clip and its matching review CSV; `render_summary.json` maps rally keys to review directories.
+
+### Rally video with current-shot-only top-down panel
+
+To render only the existing results in `ten_clips_001`, run from the repository root:
+
+```powershell
+py -3.14 -B monotrack_test\render_current_shot.py
+```
+
+The script reads saved trajectory CSVs, projection diagnostics, hit annotations, and the original smoothed player review files. It does not run tracking, smoothing, or trajectory fitting. Each 1440x720 H.264 MP4 preserves the original projection video's entire left panel, including the rally footage and its overlays, and replaces only the right court panel. The court shows moving A/B player markers, the current shuttle marker, and only the current shot's trail up to the displayed frame. The trail clears at each annotated hit, including the final hit; missing coordinates never join across a gap. Unavailable players or shuttle positions have no marker. These remain the existing reconstructed estimates.
+
+Videos retain the saved projection's audio when present and each clip's saved FPS/frame count. Outputs save beside each original projection as `ten_clips_001/<rally-key>/<rally-stem>_projection_current_shot.mp4`. Existing outputs are refused, and failed partial outputs are removed. The original projection videos and CSVs remain unchanged. `ffmpeg`, `ffprobe`, and the existing projection Python dependencies are required. Saved player CSV hashes must still match the diagnostics.
+
+Focused synthetic tests are in `test_render_current_shot.py`. They were added for later execution; only static checks were performed for this change.
 
 ## Saved smoothed keypoint tracks
 
@@ -110,9 +147,9 @@ py -3.14 -B monotrack_test\compare_losses.py `
   --output-dir monotrack_test\korea_loss_comparison_001
 ```
 
-The default Huber threshold is 10 cleaned-video pixels. To override it, use (for example) `--huber-delta-px 5` and choose a different new output directory such as `monotrack_test\korea_loss_comparison_delta_5`. Existing output directories are refused. The report includes per-loss available-frame metrics and primary paired metrics on the shared visible-GT/valid-trajectory intersection. It excludes pre-hit padding, frames at/after manually selected floor contact, and invisible GT; the floor-contact frame is an evaluation boundary, not a fitting constraint. Hit-to-hit baseline metrics include the final hit sample. The retained final-flight extension section reports coverage gaps and unavailable error metrics because no trajectory is reconstructed after that hit. Fitting residuals against TrackNet are reported separately from GT errors.
+The default Huber threshold is 10 cleaned-video pixels. To override it, use (for example) `--huber-delta-px 5` and choose a different new output directory such as `monotrack_test\korea_loss_comparison_delta_5`. Existing output directories are refused. The report includes per-loss available-frame metrics and paired metrics on the shared visible-GT/valid-trajectory intersection. It excludes pre-hit padding, frames at/after manually selected floor contact, and invisible GT. The manual floor contact also constrains final-shot fitting, so final-flight metrics and overall metrics containing that flight are manually assisted, not independent final-shot accuracy. Hit-to-hit baseline metrics include the final hit sample and remain separate. Fitting residuals against TrackNet are reported separately from GT errors.
 
-Dataset player floor positions are approximate contact priors, not exact racket/shuttle contact locations. Shuttle endpoint annotations remain available for visual comparison only; manual contact coordinates never constrain the fitted path. A plausible top-down path or successful SLSQP convergence does not verify reconstructed height or physical accuracy. The self-checks and synthetic tracker forward pass do not establish real-video tracking quality or physical trajectory accuracy. Reference-selection and label-independence checks use a fitter spy without real-rally fitting; run `python -B monotrack_test/self_check.py --repo-root .` without `--checkpoint` for checks without tracker inference.
+Dataset player floor positions are approximate contact priors, not exact racket/shuttle contact locations. Shuttle endpoint CSV annotations remain available for visual comparison only; the manually clicked first floor contact constrains only the final shot. A plausible top-down path or successful SLSQP convergence does not verify reconstructed height or physical accuracy. The self-checks and synthetic tracker forward pass do not establish real-video tracking quality or physical trajectory accuracy. Reference-selection and label-independence checks use a fitter spy without real-rally fitting; the manual-landing checks use synthetic observations and trajectories.
 
 ## Attribution and adaptation
 

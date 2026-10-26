@@ -99,9 +99,13 @@ def fit_chain(
         hits, players, observations, projection, fps, pixel_loss, huber_delta_px
     )
     tail_paths, terminal_diagnostics, _ = fit_terminal_tail(
-        calibration, geometry, hits, observations, projection, fps, last_path, pixel_loss, huber_delta_px
+        calibration, geometry, hits, observations, projection, fps, last_path, pixel_loss, huber_delta_px,
+        players=players,
     )
-    assign_paths(coordinates, phases, segment_ids, tail_paths, tail=True)
+    # Keep the final-hit baseline sample independent of the manually assisted tail.
+    scored_tail = [{**path, "start_frame": path["start_frame"] + 1,
+                   "trajectory": path["trajectory"][1:]} for path in tail_paths]
+    assign_paths(coordinates, phases, segment_ids, scored_tail, tail=True)
     return {
         "coordinates": coordinates,
         "phases": phases,
@@ -329,7 +333,7 @@ def run_comparison(args) -> dict:
     calibration_path = inside_test(repo_path(args.calibration))
     if not calibration_path.is_file():
         raise FileNotFoundError(f"Calibration JSON not found: {calibration_path}")
-    calibration = load_calibration(calibration_path, geometry, metadata)
+    calibration = load_calibration(calibration_path, geometry, metadata, video)
     floor_event = calibration["terminal_events"]["floor_contact"]
     if floor_event.get("status") != "manual":
         raise ValueError("The paired comparison requires a manually selected first floor-contact frame and pixel")
@@ -420,6 +424,11 @@ def run_comparison(args) -> dict:
                 "ground_truth_used_only_for_evaluation": True,
                 "ground_truth_used_for_fitting_or_initialization": False,
                 "manual_calibration_shared_by_both_losses": True,
+                "final_shot_interpretation": "Manually assisted by the selected landing frame/pixel; not independent final-shot accuracy.",
+                "manual_landing_used_for_fitting": {
+                    method: fit["terminal_diagnostics"]["manual_landing_used_for_fitting"]
+                    for method, fit in fits.items()
+                },
                 "prediction_csv": str(output_paths["predictions_csv"]),
                 "fit_loss_objective_is_not_an_accuracy_metric": True,
             },

@@ -1,0 +1,213 @@
+{
+  "format_version": 1,
+  "created_utc": "2026-10-26T03:45:04.022708+00:00",
+  "source_video": "C:\\Users\\ILLEGEAR\\Documents\\Post-Game-AR\\cleaned_rallies\\set-1\\CHOU_Tien_Chen_Anders_ANTONSEN_Fuzhou_Open_2019_Semi-finals\\set1\\rally_029.mp4",
+  "video_metadata": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 25.0,
+    "frame_count": 376
+  },
+  "geometry": {
+    "homography_row_id": "8",
+    "homography_row_video": "CHOU_Tien_Chen_Anders_ANTONSEN_Fuzhou_Open_2019_Semi-finals",
+    "homography_annotation_to_dataset": [
+      [
+        1.2040328339272803,
+        0.38913842098046203,
+        -591.9740173762436
+      ],
+      [
+        0.011345241565236579,
+        5.204825094114392,
+        -1424.930957789887
+      ],
+      [
+        8.58074420060726e-07,
+        0.002290539246896153,
+        1.0
+      ]
+    ],
+    "dataset_to_metric": [
+      [
+        0.020333333273993597,
+        9.563201627454644e-20,
+        -0.5083334094153509
+      ],
+      [
+        0.0,
+        0.02030302972504587,
+        -3.045454458756881
+      ],
+      [
+        2.209399070752926e-19,
+        1.3788164737023805e-20,
+        1.0
+      ]
+    ],
+    "corners_annotation": [
+      [
+        423.4,
+        323.0
+      ],
+      [
+        856.8,
+        322.0
+      ],
+      [
+        328.8,
+        666.2
+      ],
+      [
+        957.8,
+        664.2
+      ]
+    ],
+    "mapped_corners_dataset": [
+      [
+        25.00000422296385,
+        150.00000003979193
+      ],
+      [
+        325.0000084552497,
+        150.0000000796711
+      ],
+      [
+        25.0000039376481,
+        809.9999749046066
+      ],
+      [
+        325.0000039439574,
+        809.999974864396
+      ]
+    ],
+    "mapped_bounds_dataset": [
+      25.0000039376481,
+      150.00000003979193,
+      325.0000084552497,
+      809.9999749046066
+    ]
+  },
+  "scaling": {
+    "annotation_to_native_video": 1.5,
+    "preview_size": [
+      1280,
+      720
+    ],
+    "native_size": [
+      1920,
+      1080
+    ],
+    "preview_to_native": [
+      1.5,
+      1.5
+    ]
+  },
+  "camera_calibration": {
+    "method": "MonoTrack six-point linear projective calibration adapted for native pixels",
+    "world_points_m": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        6.1,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        13.4,
+        0.0
+      ],
+      [
+        6.1,
+        13.4,
+        0.0
+      ],
+      [
+        0.0,
+        6.7,
+        1.55
+      ],
+      [
+        6.1,
+        6.7,
+        1.55
+      ]
+    ],
+    "corners_native": [
+      [
+        635.0999999999999,
+        484.5
+      ],
+      [
+        1285.1999999999998,
+        483.0
+      ],
+      [
+        493.20000000000005,
+        999.3000000000001
+      ],
+      [
+        1436.6999999999998,
+        996.3000000000001
+      ]
+    ],
+    "left_post_top": {
+      "frame": 0,
+      "pixel_native": [
+        579.0,
+        507.0
+      ]
+    },
+    "right_post_top": {
+      "frame": 0,
+      "pixel_native": [
+        1342.5,
+        504.0
+      ]
+    },
+    "projection_matrix": [
+      [
+        106.60406299941177,
+        -22.036106483560896,
+        3.5700136791601644,
+        635.1010192588622
+      ],
+      [
+        -0.3187477474604405,
+        15.207184821435243,
+        -100.14518058685658,
+        484.75728622388124
+      ],
+      [
+        2.3830291635107415e-05,
+        -0.02320859856335389,
+        0.004486932909835595,
+        1.0
+      ]
+    ],
+    "calibration_reprojection_rmse_px": 0.23507273047090213
+  },
+  "terminal_events": {
+    "net_contact": {
+      "status": "unidentified",
+      "frame": null,
+      "pixel_native": null
+    },
+    "floor_contact": {
+      "status": "manual",
+      "frame": 331,
+      "pixel_native": [
+        507.0,
+        1002.0
+      ]
+    }
+  },
+  "provenance": {
+    "repository": "https://github.com/jhwang7628/monotrack",
+    "commit": "39e9227bd44fa2a579731b1cc97c7f529f391cd6"
+  }
+}
