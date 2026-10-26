@@ -1,0 +1,239 @@
+{"t": 13776.580065467, "loop_hz": 27.318669042319915}
+{"t": 13778.588297439, "loop_hz": 29.877026576881494}
+{"t": 13780.292189703, "prediction": "No gesture", "score": 0.40406689047813416, "confirmed": null}
+{"t": 13780.4922372, "prediction": "Doing other things", "score": 0.5552929639816284, "confirmed": null}
+{"t": 13780.596153184, "loop_hz": 29.88262485959086}
+{"t": 13780.696291589, "prediction": "Doing other things", "score": 0.5672393441200256, "confirmed": null}
+{"t": 13780.928243505, "prediction": "Doing other things", "score": 0.6810029149055481, "confirmed": null}
+{"t": 13781.128246119, "prediction": "Doing other things", "score": 0.7870006561279297, "confirmed": null}
+{"t": 13781.328301133, "prediction": "Doing other things", "score": 0.45769214630126953, "confirmed": null}
+{"t": 13781.532098677, "prediction": "Doing other things", "score": 0.5867319107055664, "confirmed": null}
+{"t": 13781.764040538, "prediction": "Doing other things", "score": 0.6512917876243591, "confirmed": null}
+{"t": 13781.96405813, "prediction": "Doing other things", "score": 0.6565606594085693, "confirmed": null}
+{"t": 13782.168256475, "prediction": "Swiping Left", "score": 0.8270713686943054, "confirmed": null}
+{"t": 13782.400044742, "prediction": "Swiping Left", "score": 0.9486172199249268, "confirmed": null}
+{"t": 13782.600147751, "prediction": "Swiping Left", "score": 0.9539878368377686, "confirmed": null}
+{"t": 13782.600147751, "loop_hz": 29.940200930700286}
+{"t": 13782.835919602, "prediction": "Swiping Left", "score": 0.891303300857544, "confirmed": "Swiping Left"}
+{"t": 13782.835919602, "event": "Swiping Left"}
+{"t": 13783.036168141, "prediction": "Swiping Left", "score": 0.9662659764289856, "confirmed": "Swiping Left"}
+{"t": 13783.268112238, "prediction": "Swiping Left", "score": 0.9289898872375488, "confirmed": "Swiping Left"}
+{"t": 13783.472027257, "prediction": "Swiping Left", "score": 0.9206398725509644, "confirmed": "Swiping Left"}
+{"t": 13783.704643172, "prediction": "Swiping Left", "score": 0.9384294748306274, "confirmed": "Swiping Left"}
+{"t": 13783.939995501, "prediction": "Swiping Left", "score": 0.849897027015686, "confirmed": "Swiping Left"}
+{"t": 13784.141918471, "prediction": "Swiping Left", "score": 0.8422538042068481, "confirmed": "Swiping Left"}
+{"t": 13784.372514602, "prediction": "Swiping Left", "score": 0.4331728219985962, "confirmed": "Swiping Left"}
+{"t": 13784.607997466, "prediction": "Doing other things", "score": 0.49951720237731934, "confirmed": "Swiping Left"}
+{"t": 13784.607997466, "loop_hz": 29.882714603457764}
+{"t": 13784.840843414, "prediction": "Doing other things", "score": 0.5349739193916321, "confirmed": null}
+{"t": 13785.044102161, "prediction": "Doing other things", "score": 0.7394658923149109, "confirmed": null}
+{"t": 13785.27643738, "prediction": "Doing other things", "score": 0.5190460085868835, "confirmed": null}
+{"t": 13785.5118675, "prediction": "Thumb Up", "score": 0.537299633026123, "confirmed": null}
+{"t": 13785.711975724, "prediction": "Thumb Up", "score": 0.7306046485900879, "confirmed": null}
+{"t": 13785.912126004, "prediction": "Thumb Up", "score": 0.874199628829956, "confirmed": null}
+{"t": 13786.144026761, "prediction": "Thumb Up", "score": 0.9612122774124146, "confirmed": null}
+{"t": 13786.347965788, "prediction": "Thumb Up", "score": 0.958836555480957, "confirmed": "Thumb Up"}
+{"t": 13786.347965788, "event": "Thumb Up"}
+{"t": 13786.579989065, "prediction": "Thumb Up", "score": 0.9768674373626709, "confirmed": "Thumb Up"}
+{"t": 13786.611834838, "loop_hz": 29.942549649185192}
+{"t": 13786.780069136, "prediction": "Thumb Up", "score": 0.9860681295394897, "confirmed": "Thumb Up"}
+{"t": 13786.980117593, "prediction": "Thumb Up", "score": 0.9933587908744812, "confirmed": "Thumb Up"}
+{"t": 13787.184008943, "prediction": "Thumb Up", "score": 0.9910470843315125, "confirmed": "Thumb Up"}
+{"t": 13787.415833261, "prediction": "Thumb Up", "score": 0.9949525594711304, "confirmed": "Thumb Up"}
+{"t": 13787.615845202, "prediction": "Thumb Up", "score": 0.9937143921852112, "confirmed": "Thumb Up"}
+{"t": 13787.81594409, "prediction": "Thumb Up", "score": 0.989176332950592, "confirmed": "Thumb Up"}
+{"t": 13788.020112415, "prediction": "Thumb Up", "score": 0.9765941500663757, "confirmed": "Thumb Up"}
+{"t": 13788.252115225, "prediction": "Thumb Up", "score": 0.8760623335838318, "confirmed": "Thumb Up"}
+{"t": 13788.488040863, "prediction": "Thumb Up", "score": 0.5345622897148132, "confirmed": "Thumb Up"}
+{"t": 13788.620030898, "loop_hz": 29.8775608592712}
+{"t": 13788.720078757, "prediction": "Thumb Down", "score": 0.8976409435272217, "confirmed": "Thumb Up"}
+{"t": 13788.955984685, "prediction": "Thumb Down", "score": 0.9447222352027893, "confirmed": null}
+{"t": 13789.188105851, "prediction": "Thumb Down", "score": 0.9813226461410522, "confirmed": null}
+{"t": 13789.388164422, "prediction": "Thumb Down", "score": 0.9863380789756775, "confirmed": "Thumb Down"}
+{"t": 13789.388164422, "event": "Thumb Down"}
+{"t": 13789.592025295, "prediction": "Thumb Down", "score": 0.9848120212554932, "confirmed": "Thumb Down"}
+{"t": 13789.792146173, "prediction": "Thumb Down", "score": 0.9689420461654663, "confirmed": "Thumb Down"}
+{"t": 13790.024157712, "prediction": "Thumb Down", "score": 0.9881751537322998, "confirmed": "Thumb Down"}
+{"t": 13790.259969849, "prediction": "Thumb Down", "score": 0.9872419834136963, "confirmed": "Thumb Down"}
+{"t": 13790.460162019, "prediction": "Thumb Down", "score": 0.9882137775421143, "confirmed": "Thumb Down"}
+{"t": 13790.627985734, "loop_hz": 29.88115017544576}
+{"t": 13790.6921745, "prediction": "Thumb Down", "score": 0.9964312314987183, "confirmed": "Thumb Down"}
+{"t": 13790.895742156, "prediction": "Thumb Down", "score": 0.9960177540779114, "confirmed": "Thumb Down"}
+{"t": 13791.095969346, "prediction": "Thumb Down", "score": 0.995073139667511, "confirmed": "Thumb Down"}
+{"t": 13791.29606963, "prediction": "Thumb Down", "score": 0.986483633518219, "confirmed": "Thumb Down"}
+{"t": 13791.531852424, "prediction": "Thumb Down", "score": 0.9869341850280762, "confirmed": "Thumb Down"}
+{"t": 13791.732151782, "prediction": "Thumb Down", "score": 0.989884614944458, "confirmed": "Thumb Down"}
+{"t": 13791.963828199, "prediction": "Thumb Down", "score": 0.9760871529579163, "confirmed": "Thumb Down"}
+{"t": 13792.163940537, "prediction": "Thumb Down", "score": 0.966443657875061, "confirmed": "Thumb Down"}
+{"t": 13792.369653147, "prediction": "Thumb Down", "score": 0.9567877650260925, "confirmed": null}
+{"t": 13792.632337219, "loop_hz": 29.93486943233857}
+{"t": 13792.732367811, "prediction": "Thumb Down", "score": 0.9003945589065552, "confirmed": null}
+{"t": 13792.936847063, "prediction": "Thumb Down", "score": 0.5091184973716736, "confirmed": null}
+{"t": 13793.168751998, "prediction": "Doing other things", "score": 0.45132067799568176, "confirmed": null}
+{"t": 13793.368789853, "prediction": "Doing other things", "score": 0.3422001600265503, "confirmed": null}
+{"t": 13793.572775253, "prediction": "Doing other things", "score": 0.49062010645866394, "confirmed": null}
+{"t": 13793.80418933, "prediction": "Doing other things", "score": 0.3983342945575714, "confirmed": null}
+{"t": 13794.004260769, "prediction": "Turning Hand Counterclockwise", "score": 0.35079437494277954, "confirmed": null}
+{"t": 13794.204463609, "prediction": "Turning Hand Counterclockwise", "score": 0.4018424153327942, "confirmed": null}
+{"t": 13794.407939729, "prediction": "Turning Hand Counterclockwise", "score": 0.6959234476089478, "confirmed": null}
+{"t": 13794.608372651, "prediction": "Turning Hand Counterclockwise", "score": 0.8803853988647461, "confirmed": null}
+{"t": 13794.640518998, "loop_hz": 29.877773330802984}
+{"t": 13794.839806373, "prediction": "Turning Hand Counterclockwise", "score": 0.8025815486907959, "confirmed": null}
+{"t": 13795.039846299, "prediction": "Turning Hand Counterclockwise", "score": 0.86285400390625, "confirmed": null}
+{"t": 13795.243874106, "prediction": "Turning Hand Counterclockwise", "score": 0.8554476499557495, "confirmed": "Turning Hand Counterclockwise"}
+{"t": 13795.243874106, "event": "Turning Hand Counterclockwise"}
+{"t": 13795.475873899, "prediction": "Turning Hand Counterclockwise", "score": 0.7937715649604797, "confirmed": "Turning Hand Counterclockwise"}
+{"t": 13795.675978316, "prediction": "Turning Hand Counterclockwise", "score": 0.8796992301940918, "confirmed": "Turning Hand Counterclockwise"}
+{"t": 13795.912298462, "prediction": "Turning Hand Counterclockwise", "score": 0.7227281332015991, "confirmed": "Turning Hand Counterclockwise"}
+{"t": 13796.143808251, "prediction": "Turning Hand Clockwise", "score": 0.7567033767700195, "confirmed": "Turning Hand Counterclockwise"}
+{"t": 13796.379852229, "prediction": "Turning Hand Clockwise", "score": 0.8375033736228943, "confirmed": "Turning Hand Counterclockwise"}
+{"t": 13796.61179989, "prediction": "Turning Hand Clockwise", "score": 0.8055911064147949, "confirmed": null}
+{"t": 13796.647858971, "loop_hz": 29.890302991527435}
+{"t": 13796.815921751, "prediction": "Turning Hand Clockwise", "score": 0.7312295436859131, "confirmed": "Turning Hand Clockwise"}
+{"t": 13796.815921751, "event": "Turning Hand Clockwise"}
+{"t": 13797.047846248, "prediction": "Turning Hand Clockwise", "score": 0.7216834425926208, "confirmed": "Turning Hand Clockwise"}
+{"t": 13797.283917464, "prediction": "Turning Hand Clockwise", "score": 0.7796940803527832, "confirmed": "Turning Hand Clockwise"}
+{"t": 13797.516077725, "prediction": "Turning Hand Clockwise", "score": 0.7193595170974731, "confirmed": "Turning Hand Clockwise"}
+{"t": 13797.716179453, "prediction": "Turning Hand Clockwise", "score": 0.7875202894210815, "confirmed": "Turning Hand Clockwise"}
+{"t": 13797.951560634, "prediction": "Doing other things", "score": 0.28508442640304565, "confirmed": "Turning Hand Clockwise"}
+{"t": 13798.15193365, "prediction": "Doing other things", "score": 0.27867916226387024, "confirmed": "Turning Hand Clockwise"}
+{"t": 13798.351947195, "prediction": "Zooming In With Full Hand", "score": 0.3552314341068268, "confirmed": null}
+{"t": 13798.587932849, "prediction": "Turning Hand Counterclockwise", "score": 0.4485708177089691, "confirmed": null}
+{"t": 13798.652048619, "loop_hz": 29.93728665342745}
+{"t": 13798.819949424, "prediction": "Turning Hand Counterclockwise", "score": 0.7670440077781677, "confirmed": null}
+{"t": 13799.055876846, "prediction": "Turning Hand Counterclockwise", "score": 0.8927692174911499, "confirmed": null}
+{"t": 13799.255899449, "prediction": "Turning Hand Counterclockwise", "score": 0.8589227199554443, "confirmed": null}
+{"t": 13799.455929007, "prediction": "Turning Hand Counterclockwise", "score": 0.8118413686752319, "confirmed": "Turning Hand Counterclockwise"}
+{"t": 13799.455929007, "event": "Turning Hand Counterclockwise"}
+{"t": 13799.691820452, "prediction": "Turning Hand Counterclockwise", "score": 0.821128785610199, "confirmed": "Turning Hand Counterclockwise"}
+{"t": 13799.89193038, "prediction": "Turning Hand Counterclockwise", "score": 0.8275323510169983, "confirmed": "Turning Hand Counterclockwise"}
+{"t": 13800.124093361, "prediction": "Turning Hand Counterclockwise", "score": 0.8122608661651611, "confirmed": "Turning Hand Counterclockwise"}
+{"t": 13800.359982658, "prediction": "Turning Hand Counterclockwise", "score": 0.47121483087539673, "confirmed": "Turning Hand Counterclockwise"}
+{"t": 13800.559993927, "prediction": "Doing other things", "score": 0.49883073568344116, "confirmed": "Turning Hand Counterclockwise"}
+{"t": 13800.659940048, "loop_hz": 29.882093789235515}
+{"t": 13800.760032285, "prediction": "Doing other things", "score": 0.42693623900413513, "confirmed": null}
+{"t": 13800.995793836, "prediction": "Doing other things", "score": 0.4355781674385071, "confirmed": null}
+{"t": 13801.22770007, "prediction": "Doing other things", "score": 0.3766339421272278, "confirmed": null}
+{"t": 13801.427768567, "prediction": "Turning Hand Clockwise", "score": 0.6296295523643494, "confirmed": null}
+{"t": 13801.663749426, "prediction": "Turning Hand Clockwise", "score": 0.8602046966552734, "confirmed": null}
+{"t": 13801.895825884, "prediction": "Turning Hand Clockwise", "score": 0.9108262062072754, "confirmed": null}
+{"t": 13802.0959782, "prediction": "Turning Hand Clockwise", "score": 0.8372018933296204, "confirmed": null}
+{"t": 13802.300607055, "prediction": "Turning Hand Clockwise", "score": 0.848543643951416, "confirmed": "Turning Hand Clockwise"}
+{"t": 13802.300607055, "event": "Turning Hand Clockwise"}
+{"t": 13802.5015703, "prediction": "Turning Hand Clockwise", "score": 0.895197331905365, "confirmed": "Turning Hand Clockwise"}
+{"t": 13802.66832657, "loop_hz": 29.874727470434326}
+{"t": 13802.733018942, "prediction": "Turning Hand Clockwise", "score": 0.9002980589866638, "confirmed": "Turning Hand Clockwise"}
+{"t": 13802.935680216, "prediction": "Turning Hand Clockwise", "score": 0.8103532791137695, "confirmed": "Turning Hand Clockwise"}
+{"t": 13803.136203734, "prediction": "Turning Hand Clockwise", "score": 0.793783962726593, "confirmed": "Turning Hand Clockwise"}
+{"t": 13803.368560139, "prediction": "Turning Hand Clockwise", "score": 0.70244300365448, "confirmed": "Turning Hand Clockwise"}
+{"t": 13803.603849008, "prediction": "Turning Hand Clockwise", "score": 0.4027368426322937, "confirmed": "Turning Hand Clockwise"}
+{"t": 13803.835790937, "prediction": "Doing other things", "score": 0.1818656474351883, "confirmed": "Turning Hand Clockwise"}
+{"t": 13804.071853467, "prediction": "No gesture", "score": 0.2593930661678314, "confirmed": null}
+{"t": 13804.303819019, "prediction": "No gesture", "score": 0.2882615923881531, "confirmed": null}
+{"t": 13804.539890704, "prediction": "Doing other things", "score": 0.19547003507614136, "confirmed": null}
+{"t": 13804.671687171, "loop_hz": 29.949675545204045}
+{"t": 13804.771646812, "prediction": "Turning Hand Counterclockwise", "score": 0.47633683681488037, "confirmed": null}
+{"t": 13804.975887084, "prediction": "Turning Hand Counterclockwise", "score": 0.6988120079040527, "confirmed": null}
+{"t": 13805.207648049, "prediction": "Turning Hand Counterclockwise", "score": 0.6295250654220581, "confirmed": null}
+{"t": 13805.407761053, "prediction": "Turning Hand Counterclockwise", "score": 0.6218668222427368, "confirmed": null}
+{"t": 13805.607884089, "prediction": "Turning Hand Counterclockwise", "score": 0.45988157391548157, "confirmed": null}
+{"t": 13805.811628535, "prediction": "Turning Hand Counterclockwise", "score": 0.5342521071434021, "confirmed": null}
+{"t": 13806.043637673, "prediction": "Turning Hand Counterclockwise", "score": 0.5365056395530701, "confirmed": null}
+{"t": 13806.243708536, "prediction": "Turning Hand Counterclockwise", "score": 0.5888015031814575, "confirmed": null}
+{"t": 13806.479752595, "prediction": "Doing other things", "score": 0.29252710938453674, "confirmed": null}
+{"t": 13806.679588014, "loop_hz": 29.881953687686526}
+{"t": 13806.711646595, "prediction": "No gesture", "score": 0.2926540672779083, "confirmed": null}
+{"t": 13806.911753978, "prediction": "No gesture", "score": 0.34651079773902893, "confirmed": null}
+{"t": 13807.115682147, "prediction": "No gesture", "score": 0.3045060336589813, "confirmed": null}
+{"t": 13807.347847097, "prediction": "Doing other things", "score": 0.29737961292266846, "confirmed": null}
+{"t": 13807.585014004, "prediction": "Doing other things", "score": 0.38134846091270447, "confirmed": null}
+{"t": 13807.815723875, "prediction": "Turning Hand Clockwise", "score": 0.4139634370803833, "confirmed": null}
+{"t": 13808.015809497, "prediction": "Turning Hand Clockwise", "score": 0.7264938354492188, "confirmed": null}
+{"t": 13808.219862858, "prediction": "Turning Hand Clockwise", "score": 0.7287217974662781, "confirmed": null}
+{"t": 13808.45174894, "prediction": "Turning Hand Clockwise", "score": 0.868003785610199, "confirmed": null}
+{"t": 13808.687636964, "prediction": "Turning Hand Clockwise", "score": 0.7583209276199341, "confirmed": "Turning Hand Clockwise"}
+{"t": 13808.687636964, "event": "Turning Hand Clockwise"}
+{"t": 13808.687636964, "loop_hz": 29.879749694354082}
+{"t": 13808.887702725, "prediction": "Turning Hand Clockwise", "score": 0.7908569574356079, "confirmed": "Turning Hand Clockwise"}
+{"t": 13809.119651001, "prediction": "Turning Hand Clockwise", "score": 0.8542975187301636, "confirmed": "Turning Hand Clockwise"}
+{"t": 13809.587648494, "prediction": "Turning Hand Clockwise", "score": 0.830472469329834, "confirmed": "Turning Hand Clockwise"}
+{"t": 13809.78765756, "prediction": "Turning Hand Clockwise", "score": 0.709205687046051, "confirmed": null}
+{"t": 13809.99161162, "prediction": "Turning Hand Clockwise", "score": 0.3742193579673767, "confirmed": null}
+{"t": 13810.191632722, "prediction": "Thumb Up", "score": 0.5394627451896667, "confirmed": null}
+{"t": 13810.423499756, "prediction": "Thumb Up", "score": 0.7500874400138855, "confirmed": null}
+{"t": 13810.623664544, "prediction": "Thumb Up", "score": 0.9239642024040222, "confirmed": null}
+{"t": 13810.69239285, "loop_hz": 29.92883094594543}
+{"t": 13810.827951712, "prediction": "Thumb Up", "score": 0.9336643218994141, "confirmed": null}
+{"t": 13811.059766859, "prediction": "Thumb Up", "score": 0.9389322996139526, "confirmed": "Thumb Up"}
+{"t": 13811.059766859, "event": "Thumb Up"}
+{"t": 13811.295669658, "prediction": "Thumb Up", "score": 0.9415604472160339, "confirmed": "Thumb Up"}
+{"t": 13811.496007463, "prediction": "Thumb Up", "score": 0.896872878074646, "confirmed": "Thumb Up"}
+{"t": 13811.727631597, "prediction": "Thumb Up", "score": 0.960576057434082, "confirmed": "Thumb Up"}
+{"t": 13811.931571155, "prediction": "Thumb Up", "score": 0.9721430540084839, "confirmed": "Thumb Up"}
+{"t": 13812.131784156, "prediction": "Thumb Up", "score": 0.9821130037307739, "confirmed": "Thumb Up"}
+{"t": 13812.363527391, "prediction": "Thumb Up", "score": 0.9378974437713623, "confirmed": null}
+{"t": 13812.563612189, "prediction": "Thumb Up", "score": 0.9249815940856934, "confirmed": null}
+{"t": 13812.699629809, "loop_hz": 29.891837000599228}
+{"t": 13812.76755267, "prediction": "Thumb Up", "score": 0.8885418176651001, "confirmed": "Thumb Up"}
+{"t": 13812.76755267, "event": "Thumb Up"}
+{"t": 13812.967614725, "prediction": "Thumb Up", "score": 0.6980093121528625, "confirmed": "Thumb Up"}
+{"t": 13813.199574207, "prediction": "Thumb Up", "score": 0.5506171584129333, "confirmed": "Thumb Up"}
+{"t": 13813.401293585, "prediction": "Thumb Up", "score": 0.6959654092788696, "confirmed": null}
+{"t": 13813.603635546, "prediction": "Thumb Up", "score": 0.6636056900024414, "confirmed": null}
+{"t": 13813.835610078, "prediction": "Thumb Up", "score": 0.33779218792915344, "confirmed": null}
+{"t": 13814.071552033, "prediction": "Swiping Left", "score": 0.42307934165000916, "confirmed": null}
+{"t": 13814.603514152, "prediction": "Swiping Left", "score": 0.8510962724685669, "confirmed": null}
+{"t": 13814.70350138, "loop_hz": 29.94203863577198}
+{"t": 13814.807518922, "prediction": "Swiping Left", "score": 0.7330518364906311, "confirmed": null}
+{"t": 13815.007588282, "prediction": "Doing other things", "score": 0.49996888637542725, "confirmed": null}
+{"t": 13815.207591685, "prediction": "Swiping Left", "score": 0.5910584926605225, "confirmed": null}
+{"t": 13815.407620905, "prediction": "Doing other things", "score": 0.6443461179733276, "confirmed": null}
+{"t": 13816.71153507, "loop_hz": 29.87997676471823}
+{"t": 13817.515629319, "prediction": "Swiping Left", "score": 0.9857226014137268, "confirmed": null}
+{"t": 13817.915731181, "prediction": "Swiping Left", "score": 0.7796818614006042, "confirmed": null}
+{"t": 13818.151515124, "prediction": "Swiping Left", "score": 0.6971160173416138, "confirmed": null}
+{"t": 13818.351691121, "prediction": "Doing other things", "score": 0.273044228553772, "confirmed": null}
+{"t": 13818.583552486, "prediction": "Swiping Right", "score": 0.3718174695968628, "confirmed": null}
+{"t": 13818.719499222, "loop_hz": 29.88101154110513}
+{"t": 13818.819652851, "prediction": "Swiping Right", "score": 0.48618996143341064, "confirmed": null}
+{"t": 13819.05167249, "prediction": "Swiping Right", "score": 0.3878750503063202, "confirmed": null}
+{"t": 13819.255495086, "prediction": "Swiping Right", "score": 0.4013477563858032, "confirmed": null}
+{"t": 13819.487482235, "prediction": "Swiping Right", "score": 0.4932752847671509, "confirmed": null}
+{"t": 13819.687558357, "prediction": "Doing other things", "score": 0.3319130837917328, "confirmed": null}
+{"t": 13819.887578936, "prediction": "Doing other things", "score": 0.4578479528427124, "confirmed": null}
+{"t": 13820.323558599, "prediction": "Doing other things", "score": 0.3897382616996765, "confirmed": null}
+{"t": 13820.523933653, "prediction": "Doing other things", "score": 0.4168839454650879, "confirmed": null}
+{"t": 13820.723530103, "loop_hz": 29.93965839990034}
+{"t": 13820.759415876, "prediction": "Swiping Left", "score": 0.5920474529266357, "confirmed": null}
+{"t": 13820.9595439, "prediction": "Swiping Left", "score": 0.8021098375320435, "confirmed": null}
+{"t": 13821.159961704, "prediction": "Swiping Left", "score": 0.7935348749160767, "confirmed": null}
+{"t": 13821.395637697, "prediction": "Swiping Left", "score": 0.7884594202041626, "confirmed": null}
+{"t": 13821.627410958, "prediction": "Swiping Left", "score": 0.9033894538879395, "confirmed": "Swiping Left"}
+{"t": 13821.627410958, "event": "Swiping Left"}
+{"t": 13821.827560671, "prediction": "Swiping Left", "score": 0.9285115599632263, "confirmed": "Swiping Left"}
+{"t": 13822.028259998, "prediction": "Swiping Left", "score": 0.5088105797767639, "confirmed": "Swiping Left"}
+{"t": 13822.231291145, "prediction": "Swiping Left", "score": 0.5906262993812561, "confirmed": "Swiping Left"}
+{"t": 13822.431607347, "prediction": "Swiping Left", "score": 0.6886817216873169, "confirmed": null}
+{"t": 13822.632901013, "prediction": "Doing other things", "score": 0.3928124010562897, "confirmed": null}
+{"t": 13822.731637967, "loop_hz": 29.87887308030162}
+{"t": 13822.833155886, "prediction": "Doing other things", "score": 0.5173456072807312, "confirmed": null}
+{"t": 13823.067455303, "prediction": "Doing other things", "score": 0.42922601103782654, "confirmed": null}
+{"t": 13823.435702777, "prediction": "Doing other things", "score": 0.35324162244796753, "confirmed": null}
+{"t": 13823.66792329, "prediction": "Doing other things", "score": 0.39644694328308105, "confirmed": null}
+{"t": 13823.903493487, "prediction": "Swiping Right", "score": 0.7145313620567322, "confirmed": null}
+{"t": 13824.103507333, "prediction": "Swiping Right", "score": 0.7063027024269104, "confirmed": null}
+{"t": 13824.303753795, "prediction": "Swiping Right", "score": 0.9924119114875793, "confirmed": null}
+{"t": 13824.539471792, "prediction": "Swiping Right", "score": 0.9932718873023987, "confirmed": "Swiping Right"}
+{"t": 13824.539471792, "event": "Swiping Right"}
+{"t": 13824.739527784, "prediction": "Swiping Right", "score": 0.9919242262840271, "confirmed": "Swiping Right"}
+{"t": 13824.739527784, "loop_hz": 29.882117779553393}
+{"t": 13824.939546738, "prediction": "Swiping Right", "score": 0.9863454699516296, "confirmed": "Swiping Right"}
+{"t": 13825.171350412, "prediction": "Swiping Right", "score": 0.9818552732467651, "confirmed": "Swiping Right"}
+{"t": 13825.376230039, "prediction": "Swiping Right", "score": 0.9872362017631531, "confirmed": "Swiping Right"}
+{"t": 13825.607360414, "prediction": "Swiping Right", "score": 0.9653109312057495, "confirmed": "Swiping Right"}
+{"t": 13825.807642051, "prediction": "Swiping Right", "score": 0.9540916085243225, "confirmed": "Swiping Right"}
+{"t": 13826.043465382, "prediction": "Doing other things", "score": 0.34253817796707153, "confirmed": "Swiping Right"}
+{"t": 13826.343544203, "prediction": "Doing other things", "score": 0.24972915649414062, "confirmed": "Swiping Right"}
+{"t": 13826.743566736, "loop_hz": 29.93953782191794}
+{"t": 13827.347748218, "prediction": "Swiping Left", "score": 0.5350876450538635, "confirmed": null}
+{"t": 13827.647391337, "prediction": "Swiping Left", "score": 0.3389279544353485, "confirmed": null}

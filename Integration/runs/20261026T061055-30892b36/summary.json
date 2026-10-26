@@ -1,0 +1,70 @@
+{
+  "frames": 1230,
+  "valid_pose_percent": 21.463414634146343,
+  "pose_source_counts": {
+    "none": 966,
+    "tag": 6,
+    "landmark": 258
+  },
+  "failure_durations_s": [
+    31.618573526000546,
+    0.05150699600017106,
+    0.1737931400002708,
+    0.12861149100172042,
+    0.056736460999673,
+    0.027838109999720473,
+    0.03464042899940978,
+    0.037951573000100325,
+    0.03799224500107812,
+    0.034157496000261744
+  ],
+  "median_processing_ms": 19.226718999561854,
+  "p95_processing_ms": 79.7014852510074,
+  "throughput_fps": 32.04211420845507,
+  "throughput_note": "processing including video encoding, not capture-to-display latency",
+  "map": {
+    "schema_version": 1,
+    "units": "metres",
+    "world_frame": "anchor: X right, Y up, Z printed front",
+    "transform": "T_CW",
+    "anchor_id": 0,
+    "tag_family": "APRILTAG_36h11",
+    "tag_size_m": 0.17,
+    "feature_backend": "orb",
+    "camera": {
+      "calibration_sha256": "e70a5bee9591f6196dbdfbb12c0366e9c9ab41b559ca692e38402f7cd005b751",
+      "approximate": false,
+      "size": [
+        640,
+        480
+      ],
+      "undistort": true,
+      "K": [
+        [
+          597.1328577780656,
+          0.0,
+          317.1013147461914
+        ],
+        [
+          0.0,
+          599.8120170977288,
+          226.35911097047054
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "distortion": [
+        0.0726527830816204,
+        -2.075960822235014,
+        0.0016299276915649104,
+        0.007319459433787838,
+        6.124735432252368
+      ]
+    }
+  },
+  "bootstrap_at_last_frame": null,
+  "exit_reason": "completed"
+}

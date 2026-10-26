@@ -1,0 +1,6 @@
+{
+  "cloud_root": "G:\\My Drive\\jester-data",
+  "local_cache_root": "cache",
+  "cache_limit_gb": 50,
+  "labels_dir": "jester_labels"
+}

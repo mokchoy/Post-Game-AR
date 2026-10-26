@@ -22,6 +22,7 @@ Work in this order. Steps 37 and 38 are offline on existing clips and can run in
 6. **Step 45 (next, set by Sahaj 25 Oct after Step 44):** make the Step 44 A+L variant (relative model, mode A, base-line reference, margin `max(0.10 m, 0.10 x Z)`) usable in the live tracker with the 0.60 x 0.33707 m panel, then Sahaj runs live tests at different distances and occluders. Do this before any further offline step. Later offline steps (per-frame miss breakdown with pixel-area scoring, more labels, 3-5 m capture, panel-crop depth) are written after the live results come in.
 7. **Steps 46-49 (set by Sahaj 25 Oct evening, after the Step 45 live runs):** first Step 46 (1.0 x 0.5625 m panel, side-by-side live depth view, per-frame tag logging, review of the live runs), then Step 47 (tracking stability: smoothing, source policy, map), then Step 48 (depth edge or segmentation guidance), Step 49 only if needed. See "Sahaj's live-run notes" just before Step 46.
 8. **Step 48 work order (set by Sahaj 26 Oct, NEXT):** see "Step 48 work order" just before Step 48c. Task 0 (floor map) is cancelled: write and check the 48a and 48b code (tasks 1-2) on the existing map and recordings with `--replay-run`, then report (task 3).
+9. **Step 50 (set by Sahaj 26 Oct afternoon; DO THIS NEXT, before the Step 48 work order in item 8: integration first, depth refinement after):** projection array of 4 panels with yaw/scale and gesture control from the laptop camera in a separate thread. See Step 50 after Step 49. Integration first; speed and occlusion refinement after Sahaj sees the performance.
 
 Standing decisions from this session:
 - The occlusion method must generalise to any occluder (person, box, chair, thin objects), not only hands. Do not add hand-specific code unless Sahaj approves it after Step 40. If a segmentation aid is ever needed, prefer a class-agnostic one.
@@ -1155,6 +1156,70 @@ Context: Sahaj is building a **new map in a new scene with the tag lying on the 
 
 ### Step 49 (only if needed): run depth asynchronously
 - [ ] If live speed stays under about 20 fps after Steps 46-48, move depth and alignment to a background thread: draw the panel at camera rate with the latest pose and the most recent mask (re-projected or held for a short, set time), and log mask age per frame. Ask Sahaj before starting.
+- Result: _(fill in)_
+
+### Step 50: projection array (4 panels) with gesture control from a second camera (code + live test; set by Sahaj 26 Oct afternoon)
+- [ ] Goal: replace the single panel with an array of 4 world-anchored panels that move together, and drive the array and the game with gestures from the laptop camera. Integration first; depth/occlusion refinement and speed work come after Sahaj has seen the performance.
+
+**Workspace rule (Sahaj, 26 Oct 16:14): all Step 50 work happens in `/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration`.**
+- Task 0 (first): copy the relevant files into `Integration/`. Treat `Post-Game-AR/sahaj_ar_projection` and `Post-Game-AR/dynamic-gesture-classification` as read-only sources: copy from them, never edit, run in, or write to them.
+  - From `sahaj_ar_projection`: `ar_projection/`, `april-tag-projection.py`, `calibrate-camera.py`, the configs (`config*.json`), `logitech-camera-calibration.npz`, `data/logitech-landmark-map-occ.npz`, `tests/`, `requirements*.txt`, `Instruction.md`, `CONTEXT.md`, `WORKFLOW.md`, `README.md`. Do not copy `runs/` (about 1 GB per run) or the venvs; read old runs in place, by path, read-only. New runs go to `Integration/runs/`.
+  - From `dynamic-gesture-classification`: all `*.py` (`webcam.py`, `webcam_stable.py`, `landmarks.py`, `classifiers.py`, `training_data.py`, `jester_pipeline.py` and anything they import), `config.json`, `requirements.txt`, `licenses/`, `tests/`, `DDNET_REFERENCE.md`, `README.md`, and the trained DD-Net experiment (see blocker below).
+  - Put the two sources in separate subfolders (for example `Integration/ar/` and `Integration/gestures/`) so imports stay clear. Write `Integration/README.md` with where each file came from, and its source SHA-256.
+  - Update paths inside the copies (map path, calibration path, configs) to the `Integration` copies. Paths to the depth model (`compvis/Depth-Anything-V2`) stay as they are, read-only.
+- Environment: create a new venv in `Integration/.venv` and install everything needed (Sahaj approved downloads): torch/torchvision, opencv-contrib-python, numpy, scipy, mediapipe, and the gesture requirements. Check that mediapipe has a wheel for the Python version; if not, make the venv with a Python version it supports (miniconda is at `/home/sahaj/miniconda3`). Record the exact versions in `Integration/README.md`.
+- Gesture model: **DD-Net** (`--model ddnet`). Checked by Claude 26 Oct 16:18: `dynamic-gesture-classification/ddnet_final/` now has `final.pt`, `last.pt`, `history.json` (all three SHA-256 match `training_complete.json`), plus `metrics.json`. `final.pt` loads into `classifiers.build_model("ddnet", 11)` with `strict=True`; output shape (1, 11) for a (1, 32, 43) input; about 34 ms per call on a slow 2-core cloud CPU. Class order (from `metrics.json`): Swiping Left, Swiping Right, Turning Hand Clockwise, Turning Hand Counterclockwise, Zooming In With Full Hand, Zooming Out With Full Hand, Thumb Up, Thumb Down, Stop Sign, No gesture, Doing other things. Sequence length 32 (`training_config.json`), extractor MediaPipe.
+  - **Sahaj confirmed 26 Oct 16:21: there is no `experiment.json`. Use the `load_job` route below; do not ask again.**
+  - Still missing: `experiment.json`. `webcam.load_model` needs `<experiment>/experiment.json` and `<experiment>/jobs/ddnet_final/`, and checks the experiment identity, which cannot be rebuilt (it is a hash). If Sahaj has `experiment.json`, use it with that layout. If not, write `load_job(job_dir, model_name)` in the Integration copy only: check the three SHA-256 values against `training_complete.json`, check the checkpoint `identity` equals the marker `identity`, read `class_order` from `metrics.json`, `sequence_length` from `training_config.json`, and require extractor `mediapipe`; then return the same dict as `load_model`. Log that the experiment-level check was skipped.
+  - Copy the `ddnet_final/` folder (and `training_config.json`) into `Integration/gestures/`. The MediaPipe model `hand_landmarker.task` is at `Post-Game-AR/demo_hand_gesture_recognition/hand_landmarker.task`: copy it to `Integration/gestures/models/`.
+  - Model quality to keep in mind (validation, `metrics.json`): macro F1 0.77; per-class F1 Swiping Left 0.72, Right 0.69, Clockwise 0.74, Counterclockwise 0.76, Zoom In 0.89, Zoom Out 0.89, Thumb Up 0.77, Thumb Down 0.84, Stop Sign 0.94. Background clips predicted as a gesture: 204 of 2001 (10%). Hand detection coverage 48% of frames. The vote (4 of 5 at confidence >= 0.70), edge trigger and cooldown are what keep false actions down; log every confirmed event so false triggers can be counted live.
+- After the copy, keep the Step 50 log (results, change-log rows) in `Integration/ar/Instruction.md`, not in this file.
+- Smoke test before Task 1: run the copied gesture code headless on the laptop camera with `--model ddnet` (or a short script calling `load_model` + `LiveSession` + `StableController`) and print confirmed labels.
+
+**Decisions from Sahaj (do not change without asking):**
+- Panels stand upright on the tag plane (the floor now; world Z = 0 is the tag plane, Z up). Array transforms are **yaw about the vertical (world Z) through the array pivot** and **uniform scale about the same pivot**. Pivot = bottom centre of the centre panel. The pivot never leaves the floor.
+- Limits in the JSON config, not hard-coded: yaw step 15 deg, yaw limit +-60 deg, scale limit 2.0x maximum. Scale step 1.1x per gesture and scale minimum 0.5x (confirmed by Sahaj).
+- Layout at scale 1, yaw 0 (all in the config, metres, 5 cm gaps, gap is a config value and may be raised if occlusion suffers):
+  - Centre panel (game): 0.50 wide x 0.28125 tall (16:9), base on the floor, centred on the pivot.
+  - Left panel (video, Sahaj calls it "2D projection"): 0.25 wide x 0.444 tall (9:16), base on the floor, inner edge 0.05 m left of the centre panel, already yawed 5 deg. Confirmed by Sahaj: the 5 deg is a yaw about its inner vertical edge, turning the panel towards the viewer (toe-in). Keep the angle and its sign as config values.
+  - Right top panel (score) and right bottom panel (player stats): each 0.25 wide x 0.1875 tall (4:3), inner edges 0.05 m right of the centre panel; bottom panel base on the floor, top panel 0.05 m above it.
+  - Keep the current `panel.offset_y_m` as the array's offset from the tag.
+- Content (hard-coded for now, rendered to a texture of the panel's aspect ratio at about 400 px on the long side):
+  - Centre: the current game. A config list of games (name, plus optional video path or placeholder). Placeholder: the game name in large text on the checkerboard.
+  - Left: the existing panel-video path (`set_panel_video`/`advance_panel_video`). Thumb up plays, stop sign stops.
+  - Score: "1:0" filling most of the panel.
+  - Stats: two columns. Column 1 title "Person 1", then the lines "Height: //", "Weight: //", "Rank: //". Column 2 is "Person 2" with the same lines (confirmed).
+- Gesture to action map (a config table, so a reversed direction is fixed in JSON, not code):
+  - Swiping Left: previous game. Swiping Right: next game.
+  - Turning Hand Clockwise: yaw the array one step (15 deg) so the **left** panel comes closer to the viewer (the camera side). Turning Hand Counterclockwise: one step so the **right** panel comes closer. Define the yaw sign by this effect and test it: after one clockwise step, the left panel's centre must be nearer the camera than the right panel's centre.
+  - Zooming In With Full Hand: scale up one step. Zooming Out With Full Hand: scale down one step. (Map the "Two Fingers" zoom classes the same way if the model has them.)
+  - Thumb Up: continue game and play the left video. Thumb Down: reset yaw and scale to the initial values. Stop Sign: stop game and stop the left video.
+- Gestures come from a **second, front-facing camera (the laptop camera)**, not the AR camera, in a **separate thread**.
+
+**Task 1 (after Task 0): array geometry (`ar_projection/rendering.py`, `geometry.py`, `config.py`).**
+- New config block `array` (panels list with name/role/size/position/yaw, gap, pivot, limits, steps, yaw sign) with `enabled` (default false: the single panel stays the default, old configs load unchanged).
+- `ArrayState` (yaw, scale, game index, playing) and a function that returns each panel's 4 world corners for the current state.
+- Near-plane clipping: clip each panel polygon to camera Z >= 0.05 m (Sutherland-Hodgman in camera coordinates) before projecting, then intersect with the image. `visible_panel` must no longer drop a whole panel when one corner is behind the camera. Tests: a panel partly behind the camera gives a clipped polygon; fully behind gives None.
+- Panels can overlap after yaw: build one per-pixel panel depth map (nearest panel wins) and one panel-id map, then composite each panel's texture with a perspective warp of its (clipped) corners.
+- Per-panel corner covariance and smoothing keep working (the existing pose filter applies once; corners come from the filtered pose).
+
+**Task 2: occlusion over the array (`occlusion.py`).**
+- `panel_layer` takes the array depth map instead of one panel. The hide test is per pixel against that depth map, unchanged otherwise.
+- Scale reference: if the Step 48a `"plane"` reference exists, use it (it does not depend on any panel). Otherwise keep the base line of the centre panel. Do not tune occlusion in this step; report how it behaves.
+
+**Task 3: gesture thread (`ar_projection/gestures.py`, new).**
+- Findings from the 26 Oct check (verify them): the gesture code is in `../dynamic-gesture-classification` (`webcam.py`: `load_model`, `LiveSession`; `webcam_stable.py`: `StableController`; `landmarks.py`: `MediaPipeHand`). It samples hands at 12 Hz, predicts every 0.2 s with a small GRU/LSTM/DD-Net on CPU over a 3 s window, and confirms with 4 of 5 votes (about 1 s). `run_camera` opens its own window, so do not call it; reuse the classes headless.
+- Blockers to resolve first (ASK SAHAJ): (a) no trained experiment directory was found on this machine (needed by `load_model`): ask for its path; (b) `mediapipe` is not installed in `.venv-depth` (Python 3.13); the gesture README targets Python 3.14 on Windows. Ask before installing anything. `models/hand_landmarker.task` is not in the gesture folder; a copy exists at `../demo_hand_gesture_recognition/hand_landmarker.task`.
+- Design: a daemon thread owns its own `cv2.VideoCapture(gesture.camera_index)` (laptop camera, config), runs hand landmarks, `LiveSession` and `StableController`, and puts **one event per new confirmation** (edge-triggered, plus a config cooldown, default 1.0 s) on a `queue.Queue`. The main loop drains the queue without blocking once per frame and applies events to `ArrayState`. No OpenCV windows or `waitKey` in the thread.
+- Failure handling: if the gesture camera or model fails, log it, disable gestures and keep the AR running.
+- GIL check: measure AR frame rate with the thread on and off. If it drops by more than about 10%, move the same worker into a `multiprocessing.Process` (spawn) with a `multiprocessing.Queue`; the event interface stays the same.
+- Keyboard fallback (also for replay tests): `,` / `.` game previous/next, `j` / `k` yaw left/right, `=` / `-` scale up/down, `t` thumb up, `b` thumb down (reset), `x` stop. Check these do not clash with the existing keys (`q d r s o v p f`).
+
+**Task 4: logging, tests, report.**
+- `frames.jsonl` per frame: array state (yaw, scale, game index, playing), gesture events with timestamps and labels, per-panel visibility, timings (array render, occlusion, gesture queue). A separate gesture log with per-prediction label/score and the thread's own rate.
+- Tests: corner geometry at known yaw/scale, limits clamp, reset, clipping, event mapping from the config table, edge-trigger and cooldown.
+- Offline check: replay `runs/20261025T092056-7a6e0212` with the array enabled and keyboard events scripted (or a fixed state) to show the array renders and occludes. Report time per frame for single panel versus array.
+- Report to Sahaj: files and config fields changed, test count, timings, the live command (AR camera + `--gesture-camera` or config index), and a short live test list: each gesture once, rotate to +-60 deg, scale to 2.0x close up (clipping), hand over each panel.
 - Result: _(fill in)_
 
 ## 6. Architecture change log

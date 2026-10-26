@@ -1,0 +1,16 @@
+{
+  "status": "complete",
+  "identity": "63d344c26278e18918aac557b433ab196ae5d8e612df4bdd82bbffe9b2702e72",
+  "sha256": {
+    "last.pt": "ef137820a3c6a66759cde1f9ea4115699352c73d20313c1be637dcbae6dda35e",
+    "history.json": "508bc4aa1ae1922a071cd91b5158227cfe906744df3ba6818c2e83c6b477a83a",
+    "final.pt": "64bacd47bdb60fab1ff52367ce3ebc2cda978fba54b8d2b739f3916d609eff4f"
+  },
+  "best_epoch": 31,
+  "best_macro_f1": null,
+  "completed_epochs": 31,
+  "reached_epoch_cap": false,
+  "parameter_count": 150699,
+  "weight_bytes": 641199,
+  "elapsed_seconds": 194.2233924000002
+}
