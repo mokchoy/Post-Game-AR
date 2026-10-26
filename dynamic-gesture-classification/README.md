@@ -261,3 +261,11 @@ py -3.14 .\webcam.py --experiment .\cache\training\experiments\jester-11class-10
 ```
 
 Use `--model gru|lstm|ddnet`, `--camera 0`, or `--window-seconds 3` to set startup options. Press `1`, `2`, or `3` to switch models; `Q` or Escape exits. The preview and inference use unmirrored frames. Displayed probabilities are uncalibrated, and rolling windows can include frames from adjacent gestures.
+
+For live temporal confirmation, launch the separate stabilized entrypoint:
+
+```powershell
+py -3.14 .\webcam_stable.py --experiment .\cache\training\experiments\jester-11class-1000-mediapipe-v1
+```
+
+It uses the same three-second model window, 12 Hz landmark sampling, and up-to-5 Hz prediction cadence. Defaults are a minimum uncalibrated softmax score of `0.70`, a five-prediction vote window, and four required votes. Set startup values with `--min-confidence`, `--vote-window` (1–25), and `--required-votes` (1 through the window size). Press `[` or `]` to lower or raise the score threshold by `0.05`; the two trackbars adjust the vote window and required votes. Changing any setting clears the current vote history and confirmation. Confirmations can be held for at most 0.6 seconds without fresh qualifying evidence; hand loss clears votes, while a successful model switch or prediction gap over one second clears both votes and confirmation. Background labels count as inactive votes. This is a temporal heuristic, not a calibration or accuracy guarantee; false triggers and transitions between adjacent gestures still need evaluation on representative webcam footage.

@@ -229,7 +229,15 @@ class LiveSession:
         return True
 
 
-def _draw(frame: np.ndarray, session: LiveSession, fps: float, timestamp: float) -> None:
+def _draw(
+    frame: np.ndarray,
+    session: LiveSession,
+    fps: float,
+    timestamp: float,
+    *,
+    prediction_prefix: str = "Prediction",
+    extra_lines: tuple[str, ...] = (),
+) -> None:
     height, width = frame.shape[:2]
     if session.current_valid:
         points = [
@@ -246,20 +254,21 @@ def _draw(frame: np.ndarray, session: LiveSession, fps: float, timestamp: float)
         lines.append("Warming up")
     elif session.current_valid:
         if session.prediction is None:
-            lines.append("Prediction: --")
+            lines.append(f"{prediction_prefix}: --")
         else:
             label, probability = session.prediction
-            lines.append(f"Prediction: {label} ({probability:.3f})")
+            lines.append(f"{prediction_prefix}: {label} ({probability:.3f})")
     if not session.current_valid:
         lines.append("No hand detected")
     if session.switch_error:
         lines.append(f"Model switch failed: {session.switch_error[:90]}")
+    lines.extend(extra_lines)
     for index, line in enumerate(lines):
         color = (0, 0, 255) if line.startswith("Model switch failed") else (255, 255, 255)
         cv2.putText(frame, line, (16, 30 + index * 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
 
 
-def run_camera(args, initial_model: dict) -> None:
+def run_camera(args, initial_model: dict, controller=None) -> None:
     capture = detector = None
     try:
         if not args.hand_model.is_file():
@@ -273,6 +282,8 @@ def run_camera(args, initial_model: dict) -> None:
             raise RuntimeError(f"could not initialize MediaPipe hand model: {exc}") from exc
 
         session = LiveSession(args.experiment, initial_model, args.window_seconds)
+        if controller is not None:
+            controller.start(cv2, "Dynamic gesture recognition")
         video_started = time.monotonic()
         last_sample_at: float | None = None
         last_video_timestamp_ms = -1
@@ -288,15 +299,33 @@ def run_camera(args, initial_model: dict) -> None:
                 session.add_sample(now, result["xy"])
                 last_sample_at = now
                 last_video_timestamp_ms = video_timestamp_ms
-            session.predict_if_due(now)
+            if controller is not None:
+                controller.poll_controls(cv2)
+            fresh_prediction = session.predict_if_due(now)
             fps = 1.0 / max(time.monotonic() - loop_started, 1e-9)
-            _draw(frame, session, fps, now)
+            if controller is None:
+                _draw(frame, session, fps, now)
+            else:
+                controller.update(session, now, fresh_prediction)
+                _draw(
+                    frame,
+                    session,
+                    fps,
+                    now,
+                    prediction_prefix="Raw prediction (uncalibrated softmax score)",
+                    extra_lines=controller.display_lines(),
+                )
             cv2.imshow("Dynamic gesture recognition", frame)
             key = cv2.waitKey(1) & 0xFF
             if key in (ord("q"), 27):
                 break
             if chr(key) in MODELS:
-                session.switch_model(MODELS[chr(key)])
+                previous_model = session.model_name
+                if session.switch_model(MODELS[chr(key)]) and session.model_name != previous_model:
+                    if controller is not None:
+                        controller.model_switched(session)
+            if controller is not None:
+                controller.handle_key(key)
     finally:
         try:
             if capture is not None:
