@@ -1,0 +1,9 @@
+{
+  "status": "complete",
+  "identity": "662f72b4c12f2220694221e04f587f7e96564178407b7f6ad2d3d7c92e731fe8",
+  "sha256": {
+    "metrics.json": "bc1cf1c6aa19b4c498a900109458efa43b6efa4405ec346c6a27e0a7d43a9432",
+    "predictions.csv": "bdea5889664cbb74d4fe051634ee6de761ff739ce537387c37add6bd1bee97f7"
+  },
+  "clip_ids_sha256": "59f5ce7f650579433681632b1170b9e5f09f0fd576a816ac48e1bf9ab95e2bd5"
+}
