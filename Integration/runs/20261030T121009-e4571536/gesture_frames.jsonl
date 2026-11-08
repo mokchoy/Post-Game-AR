@@ -1,0 +1,1921 @@
+{"i": 0, "t": 26110.115647163, "confirmed": null}
+{"i": 1, "t": 26110.147268433, "confirmed": null}
+{"i": 2, "t": 26110.179213522, "confirmed": null}
+{"i": 3, "t": 26110.215283995, "confirmed": null}
+{"i": 4, "t": 26110.246962389, "confirmed": null}
+{"i": 5, "t": 26110.282793879, "confirmed": null}
+{"i": 6, "t": 26110.314944373, "confirmed": null}
+{"i": 7, "t": 26110.34693379, "confirmed": null}
+{"i": 8, "t": 26110.383027723, "confirmed": null}
+{"i": 9, "t": 26110.414933169, "confirmed": null}
+{"i": 10, "t": 26110.446860839, "confirmed": null}
+{"i": 11, "t": 26110.569271454, "confirmed": null}
+{"i": 12, "t": 26110.602530668, "confirmed": null}
+{"i": 13, "t": 26110.607423089, "confirmed": null}
+{"i": 14, "t": 26110.612403971, "confirmed": null}
+{"i": 15, "t": 26110.616104456, "confirmed": null}
+{"i": 16, "t": 26110.650725285, "confirmed": null}
+{"i": 17, "t": 26110.68284654, "confirmed": null}
+{"i": 18, "t": 26110.715366222, "confirmed": null}
+{"i": 19, "t": 26110.750635942, "confirmed": null}
+{"i": 20, "t": 26110.782711428, "confirmed": null}
+{"i": 21, "t": 26110.814653871, "confirmed": null}
+{"i": 22, "t": 26110.850991798, "confirmed": null}
+{"i": 23, "t": 26110.882895236, "confirmed": null}
+{"i": 24, "t": 26110.914796138, "confirmed": null}
+{"i": 25, "t": 26110.950837171, "confirmed": null}
+{"i": 26, "t": 26110.983047098, "confirmed": null}
+{"i": 27, "t": 26111.018927749, "confirmed": null}
+{"i": 28, "t": 26111.050677748, "confirmed": null}
+{"i": 29, "t": 26111.082692469, "confirmed": null}
+{"i": 30, "t": 26111.118830207, "confirmed": null}
+{"i": 31, "t": 26111.15072779, "confirmed": null}
+{"i": 32, "t": 26111.18275743, "confirmed": null}
+{"i": 33, "t": 26111.218663794, "confirmed": null}
+{"i": 34, "t": 26111.251421063, "confirmed": null}
+{"i": 35, "t": 26111.28348577, "confirmed": null}
+{"i": 36, "t": 26111.318599396, "confirmed": null}
+{"i": 37, "t": 26111.350833284, "confirmed": null}
+{"i": 38, "t": 26111.382757852, "confirmed": null}
+{"i": 39, "t": 26111.41864651, "confirmed": null}
+{"i": 40, "t": 26111.450745234, "confirmed": null}
+{"i": 41, "t": 26111.486675896, "confirmed": null}
+{"i": 42, "t": 26111.51875748, "confirmed": null}
+{"i": 43, "t": 26111.550785, "confirmed": null}
+{"i": 44, "t": 26111.586707034, "confirmed": null}
+{"i": 45, "t": 26111.61875659, "confirmed": null}
+{"i": 46, "t": 26111.650670044, "confirmed": null}
+{"i": 47, "t": 26111.686731645, "confirmed": null}
+{"i": 48, "t": 26111.718749247, "confirmed": null}
+{"i": 49, "t": 26111.750706797, "confirmed": null}
+{"i": 50, "t": 26111.78688957, "confirmed": null}
+{"i": 51, "t": 26111.818697735, "confirmed": null}
+{"i": 52, "t": 26111.85481385, "confirmed": null}
+{"i": 53, "t": 26111.886602418, "confirmed": null}
+{"i": 54, "t": 26111.918634715, "confirmed": null}
+{"i": 55, "t": 26111.954926682, "confirmed": null}
+{"i": 56, "t": 26111.98680539, "confirmed": null}
+{"i": 57, "t": 26112.018673937, "confirmed": null}
+{"i": 58, "t": 26112.054915651, "confirmed": null}
+{"i": 59, "t": 26112.086744778, "confirmed": null}
+{"i": 60, "t": 26112.11857526, "confirmed": null}
+{"i": 61, "t": 26112.154828643, "confirmed": null}
+{"i": 62, "t": 26112.18675605, "confirmed": null}
+{"i": 63, "t": 26112.222843128, "confirmed": null}
+{"i": 64, "t": 26112.254751048, "confirmed": null}
+{"i": 65, "t": 26112.286759474, "confirmed": null}
+{"i": 66, "t": 26112.322816892, "confirmed": null}
+{"i": 67, "t": 26112.354586811, "confirmed": null}
+{"i": 68, "t": 26112.386790147, "confirmed": null}
+{"i": 69, "t": 26112.422693375, "confirmed": null}
+{"i": 70, "t": 26112.454758533, "confirmed": null}
+{"i": 71, "t": 26112.487312338, "confirmed": null}
+{"i": 72, "t": 26112.522782035, "confirmed": null}
+{"i": 73, "t": 26112.554851531, "confirmed": null}
+{"i": 74, "t": 26112.58671223, "confirmed": null}
+{"i": 75, "t": 26112.622861444, "confirmed": null}
+{"i": 76, "t": 26112.654638, "confirmed": null}
+{"i": 77, "t": 26112.690735473, "confirmed": null}
+{"i": 78, "t": 26112.722775783, "confirmed": null}
+{"i": 79, "t": 26112.754804348, "confirmed": null}
+{"i": 80, "t": 26112.790700916, "confirmed": null}
+{"i": 81, "t": 26112.822860478, "confirmed": null}
+{"i": 82, "t": 26112.854749188, "confirmed": null}
+{"i": 83, "t": 26112.890579585, "confirmed": null}
+{"i": 84, "t": 26112.92275821, "confirmed": null}
+{"i": 85, "t": 26112.95462433, "confirmed": null}
+{"i": 86, "t": 26112.990728742, "confirmed": null}
+{"i": 87, "t": 26113.022600295, "confirmed": null}
+{"i": 88, "t": 26113.058695608, "confirmed": null}
+{"i": 89, "t": 26113.090800573, "confirmed": null}
+{"i": 90, "t": 26113.122675699, "confirmed": null}
+{"i": 91, "t": 26113.158670035, "confirmed": null}
+{"i": 92, "t": 26113.190516789, "confirmed": null}
+{"i": 93, "t": 26113.222711966, "confirmed": null}
+{"i": 94, "t": 26113.258669179, "confirmed": null}
+{"i": 95, "t": 26113.290754483, "confirmed": null}
+{"i": 96, "t": 26113.322799299, "confirmed": null}
+{"i": 97, "t": 26113.358736124, "confirmed": null}
+{"i": 98, "t": 26113.390837858, "confirmed": null}
+{"i": 99, "t": 26113.422550112, "confirmed": null}
+{"i": 100, "t": 26113.458842483, "confirmed": null}
+{"i": 101, "t": 26113.490703633, "confirmed": null}
+{"i": 102, "t": 26113.527297612, "confirmed": null}
+{"i": 103, "t": 26113.558774037, "confirmed": null}
+{"i": 104, "t": 26113.590561842, "confirmed": null}
+{"i": 105, "t": 26113.626885742, "confirmed": null}
+{"i": 106, "t": 26113.658749739, "confirmed": null}
+{"i": 107, "t": 26113.690756695, "confirmed": null}
+{"i": 108, "t": 26113.726825508, "confirmed": null}
+{"i": 109, "t": 26113.759174115, "confirmed": null}
+{"i": 110, "t": 26113.79069696, "confirmed": null}
+{"i": 111, "t": 26113.827023533, "confirmed": null}
+{"i": 112, "t": 26113.858794347, "confirmed": null}
+{"i": 113, "t": 26113.894894001, "confirmed": null}
+{"i": 114, "t": 26113.926622805, "confirmed": null}
+{"i": 115, "t": 26113.95854077, "confirmed": null}
+{"i": 116, "t": 26113.994578508, "confirmed": null}
+{"i": 117, "t": 26114.026572133, "confirmed": null}
+{"i": 118, "t": 26114.058683193, "confirmed": null}
+{"i": 119, "t": 26114.094621445, "confirmed": null}
+{"i": 120, "t": 26114.126462094, "confirmed": null}
+{"i": 121, "t": 26114.158586213, "confirmed": null}
+{"i": 122, "t": 26114.194943613, "confirmed": null}
+{"i": 123, "t": 26114.22663481, "confirmed": null}
+{"i": 124, "t": 26114.266679606, "confirmed": null}
+{"i": 125, "t": 26114.2948276, "confirmed": null}
+{"i": 126, "t": 26114.326624389, "confirmed": null}
+{"i": 127, "t": 26114.362426214, "confirmed": null}
+{"i": 128, "t": 26114.395053612, "confirmed": null}
+{"i": 129, "t": 26114.42683007, "confirmed": null}
+{"i": 130, "t": 26114.463877605, "confirmed": null}
+{"i": 131, "t": 26114.495072788, "confirmed": null}
+{"i": 132, "t": 26114.526574726, "confirmed": null}
+{"i": 133, "t": 26114.564137997, "confirmed": null}
+{"i": 134, "t": 26114.594794313, "confirmed": null}
+{"i": 135, "t": 26114.626530405, "confirmed": null}
+{"i": 136, "t": 26114.664083139, "confirmed": null}
+{"i": 137, "t": 26114.694525392, "confirmed": null}
+{"i": 138, "t": 26114.730324512, "confirmed": null}
+{"i": 139, "t": 26114.762320437, "confirmed": null}
+{"i": 140, "t": 26114.794487224, "confirmed": null}
+{"i": 141, "t": 26114.830636141, "confirmed": null}
+{"i": 142, "t": 26114.862762517, "confirmed": null}
+{"i": 143, "t": 26114.89454935, "confirmed": null}
+{"i": 144, "t": 26114.930590073, "confirmed": null}
+{"i": 145, "t": 26114.964161164, "confirmed": null}
+{"i": 146, "t": 26114.994763962, "confirmed": null}
+{"i": 147, "t": 26115.030533183, "confirmed": null}
+{"i": 148, "t": 26115.062604772, "confirmed": null}
+{"i": 149, "t": 26115.098533948, "confirmed": null}
+{"i": 150, "t": 26115.130444397, "confirmed": null}
+{"i": 151, "t": 26115.162564942, "confirmed": null}
+{"i": 152, "t": 26115.198942013, "confirmed": null}
+{"i": 153, "t": 26115.230512489, "confirmed": null}
+{"i": 154, "t": 26115.262495206, "confirmed": null}
+{"i": 155, "t": 26115.299164924, "confirmed": null}
+{"i": 156, "t": 26115.330397251, "confirmed": null}
+{"i": 157, "t": 26115.362662509, "confirmed": null}
+{"i": 158, "t": 26115.398403602, "confirmed": null}
+{"i": 159, "t": 26115.430466144, "confirmed": null}
+{"i": 160, "t": 26115.46305424, "confirmed": null}
+{"i": 161, "t": 26115.498471347, "confirmed": null}
+{"i": 162, "t": 26115.530325184, "confirmed": null}
+{"i": 163, "t": 26115.566571294, "confirmed": null}
+{"i": 164, "t": 26115.598849296, "confirmed": null}
+{"i": 165, "t": 26115.631297022, "confirmed": null}
+{"i": 166, "t": 26115.66692019, "confirmed": null}
+{"i": 167, "t": 26115.69853407, "confirmed": null}
+{"i": 168, "t": 26115.730546091, "confirmed": null}
+{"i": 169, "t": 26115.766549995, "confirmed": null}
+{"i": 170, "t": 26115.798667194, "confirmed": null}
+{"i": 171, "t": 26115.830443664, "confirmed": null}
+{"i": 172, "t": 26115.866616691, "confirmed": null}
+{"i": 173, "t": 26115.898938759, "confirmed": null}
+{"i": 174, "t": 26115.934635869, "confirmed": null}
+{"i": 175, "t": 26115.966663723, "confirmed": null}
+{"i": 176, "t": 26115.998516942, "confirmed": null}
+{"i": 177, "t": 26116.034760602, "confirmed": null}
+{"i": 178, "t": 26116.06651095, "confirmed": null}
+{"i": 179, "t": 26116.098533477, "confirmed": null}
+{"i": 180, "t": 26116.13471254, "confirmed": null}
+{"i": 181, "t": 26116.166402048, "confirmed": null}
+{"i": 182, "t": 26116.198782444, "confirmed": null}
+{"i": 183, "t": 26116.234458927, "confirmed": null}
+{"i": 184, "t": 26116.267524705, "confirmed": null}
+{"i": 185, "t": 26116.302434313, "confirmed": null}
+{"i": 186, "t": 26116.334532773, "confirmed": null}
+{"i": 187, "t": 26116.3676966, "confirmed": null}
+{"i": 188, "t": 26116.403073038, "confirmed": null}
+{"i": 189, "t": 26116.434534712, "confirmed": null}
+{"i": 190, "t": 26116.466479735, "confirmed": null}
+{"i": 191, "t": 26116.502417926, "confirmed": null}
+{"i": 192, "t": 26116.534380807, "confirmed": null}
+{"i": 193, "t": 26116.566707482, "confirmed": null}
+{"i": 194, "t": 26116.602767892, "confirmed": null}
+{"i": 195, "t": 26116.634503114, "confirmed": null}
+{"i": 196, "t": 26116.666599393, "confirmed": null}
+{"i": 197, "t": 26116.702570743, "confirmed": null}
+{"i": 198, "t": 26116.734876262, "confirmed": null}
+{"i": 199, "t": 26116.77046276, "confirmed": null}
+{"i": 200, "t": 26116.802625155, "confirmed": null}
+{"i": 201, "t": 26116.834812866, "confirmed": null}
+{"i": 202, "t": 26116.87066284, "confirmed": null}
+{"i": 203, "t": 26116.902443673, "confirmed": null}
+{"i": 204, "t": 26116.935468116, "confirmed": null}
+{"i": 205, "t": 26116.971107845, "confirmed": null}
+{"i": 206, "t": 26117.002392181, "confirmed": null}
+{"i": 207, "t": 26117.03439694, "confirmed": null}
+{"i": 208, "t": 26117.070459856, "confirmed": null}
+{"i": 209, "t": 26117.102340071, "confirmed": null}
+{"i": 210, "t": 26117.138969066, "confirmed": null}
+{"i": 211, "t": 26117.17041634, "confirmed": null}
+{"i": 212, "t": 26117.202381708, "confirmed": null}
+{"i": 213, "t": 26117.238539068, "confirmed": null}
+{"i": 214, "t": 26117.270478895, "confirmed": null}
+{"i": 215, "t": 26117.30241056, "confirmed": null}
+{"i": 216, "t": 26117.338316036, "confirmed": null}
+{"i": 217, "t": 26117.370510484, "confirmed": null}
+{"i": 218, "t": 26117.402290638, "confirmed": null}
+{"i": 219, "t": 26117.438390291, "confirmed": null}
+{"i": 220, "t": 26117.470583288, "confirmed": null}
+{"i": 221, "t": 26117.50656723, "confirmed": null}
+{"i": 222, "t": 26117.539252935, "confirmed": null}
+{"i": 223, "t": 26117.570382647, "confirmed": null}
+{"i": 224, "t": 26117.606316588, "confirmed": null}
+{"i": 225, "t": 26117.638393282, "confirmed": null}
+{"i": 226, "t": 26117.670239114, "confirmed": null}
+{"i": 227, "t": 26117.706445325, "confirmed": null}
+{"i": 228, "t": 26117.738383082, "confirmed": null}
+{"i": 229, "t": 26117.770529011, "confirmed": null}
+{"i": 230, "t": 26117.806371882, "confirmed": null}
+{"i": 231, "t": 26117.838357707, "confirmed": null}
+{"i": 232, "t": 26117.87068701, "confirmed": null}
+{"i": 233, "t": 26117.907676509, "confirmed": null}
+{"i": 234, "t": 26117.938379754, "confirmed": null}
+{"i": 235, "t": 26117.974386079, "confirmed": null}
+{"i": 236, "t": 26118.006184343, "confirmed": null}
+{"i": 237, "t": 26118.038529663, "confirmed": null}
+{"i": 238, "t": 26118.075549805, "confirmed": null}
+{"i": 239, "t": 26118.106293043, "confirmed": null}
+{"i": 240, "t": 26118.138331749, "confirmed": null}
+{"i": 241, "t": 26118.174446321, "confirmed": null}
+{"i": 242, "t": 26118.206341279, "confirmed": null}
+{"i": 243, "t": 26118.238301244, "confirmed": null}
+{"i": 244, "t": 26118.274285684, "confirmed": null}
+{"i": 245, "t": 26118.306783986, "confirmed": null}
+{"i": 246, "t": 26118.342246373, "confirmed": null}
+{"i": 247, "t": 26118.374279348, "confirmed": null}
+{"i": 248, "t": 26118.406360474, "confirmed": null}
+{"i": 249, "t": 26118.44259057, "confirmed": null}
+{"i": 250, "t": 26118.474295258, "confirmed": null}
+{"i": 251, "t": 26118.50631888, "confirmed": null}
+{"i": 252, "t": 26118.54258564, "confirmed": null}
+{"i": 253, "t": 26118.574439469, "confirmed": null}
+{"i": 254, "t": 26118.606304142, "confirmed": null}
+{"i": 255, "t": 26118.642193299, "confirmed": null}
+{"i": 256, "t": 26118.674831182, "confirmed": null}
+{"i": 257, "t": 26118.706336065, "confirmed": null}
+{"i": 258, "t": 26118.742319649, "confirmed": null}
+{"i": 259, "t": 26118.7743287, "confirmed": null}
+{"i": 260, "t": 26118.811756459, "confirmed": null}
+{"i": 261, "t": 26118.842267101, "confirmed": null}
+{"i": 262, "t": 26118.874383691, "confirmed": null}
+{"i": 263, "t": 26118.910411874, "confirmed": null}
+{"i": 264, "t": 26118.94228717, "confirmed": null}
+{"i": 265, "t": 26118.974562787, "confirmed": null}
+{"i": 266, "t": 26119.010270625, "confirmed": null}
+{"i": 267, "t": 26119.042594809, "confirmed": null}
+{"i": 268, "t": 26119.074674458, "confirmed": null}
+{"i": 269, "t": 26119.110319634, "confirmed": null}
+{"i": 270, "t": 26119.14223603, "confirmed": null}
+{"i": 271, "t": 26119.178645269, "confirmed": null}
+{"i": 272, "t": 26119.210443605, "confirmed": null}
+{"i": 273, "t": 26119.242242392, "confirmed": null}
+{"i": 274, "t": 26119.278234034, "confirmed": null}
+{"i": 275, "t": 26119.310478196, "confirmed": null}
+{"i": 276, "t": 26119.342254142, "confirmed": null}
+{"i": 277, "t": 26119.378351434, "confirmed": null}
+{"i": 278, "t": 26119.410286027, "confirmed": null}
+{"i": 279, "t": 26119.442484358, "confirmed": null}
+{"i": 280, "t": 26119.478332252, "confirmed": null}
+{"i": 281, "t": 26119.510250596, "confirmed": null}
+{"i": 282, "t": 26119.546659199, "confirmed": null}
+{"i": 283, "t": 26119.578336441, "confirmed": null}
+{"i": 284, "t": 26119.61061065, "confirmed": null}
+{"i": 285, "t": 26119.646294561, "confirmed": null}
+{"i": 286, "t": 26119.678093457, "confirmed": null}
+{"i": 287, "t": 26119.710706652, "confirmed": null}
+{"i": 288, "t": 26119.746373462, "confirmed": null}
+{"i": 289, "t": 26119.778475137, "confirmed": null}
+{"i": 290, "t": 26119.810543956, "confirmed": null}
+{"i": 291, "t": 26119.84639107, "confirmed": null}
+{"i": 292, "t": 26119.878224534, "confirmed": null}
+{"i": 293, "t": 26119.910575235, "confirmed": null}
+{"i": 294, "t": 26119.946301507, "confirmed": null}
+{"i": 295, "t": 26119.978332494, "confirmed": null}
+{"i": 296, "t": 26120.01424054, "confirmed": null}
+{"i": 297, "t": 26120.046303885, "confirmed": null}
+{"i": 298, "t": 26120.07882507, "confirmed": null}
+{"i": 299, "t": 26120.11418874, "confirmed": null}
+{"i": 300, "t": 26120.146319893, "confirmed": null}
+{"i": 301, "t": 26120.178177396, "confirmed": null}
+{"i": 302, "t": 26120.214550105, "confirmed": null}
+{"i": 303, "t": 26120.246323043, "confirmed": null}
+{"i": 304, "t": 26120.278304656, "confirmed": null}
+{"i": 305, "t": 26120.31452371, "confirmed": null}
+{"i": 306, "t": 26120.346100262, "confirmed": null}
+{"i": 307, "t": 26120.382148231, "confirmed": null}
+{"i": 308, "t": 26120.414276748, "confirmed": null}
+{"i": 309, "t": 26120.44620007, "confirmed": null}
+{"i": 310, "t": 26120.48243101, "confirmed": null}
+{"i": 311, "t": 26120.515859634, "confirmed": null}
+{"i": 312, "t": 26120.546273305, "confirmed": null}
+{"i": 313, "t": 26120.582452095, "confirmed": null}
+{"i": 314, "t": 26120.614101456, "confirmed": null}
+{"i": 315, "t": 26120.646396598, "confirmed": null}
+{"i": 316, "t": 26120.682376575, "confirmed": null}
+{"i": 317, "t": 26120.714162206, "confirmed": null}
+{"i": 318, "t": 26120.746171276, "confirmed": null}
+{"i": 319, "t": 26120.78227559, "confirmed": null}
+{"i": 320, "t": 26120.814132843, "confirmed": null}
+{"i": 321, "t": 26120.850210629, "confirmed": null}
+{"i": 322, "t": 26120.88283494, "confirmed": null}
+{"i": 323, "t": 26120.914198882, "confirmed": null}
+{"i": 324, "t": 26120.950398796, "confirmed": null}
+{"i": 325, "t": 26120.98207715, "confirmed": null}
+{"i": 326, "t": 26121.014320535, "confirmed": null}
+{"i": 327, "t": 26121.050327002, "confirmed": null}
+{"i": 328, "t": 26121.082392762, "confirmed": null}
+{"i": 329, "t": 26121.114489952, "confirmed": null}
+{"i": 330, "t": 26121.150127701, "confirmed": null}
+{"i": 331, "t": 26121.182263053, "confirmed": null}
+{"i": 332, "t": 26121.218793992, "confirmed": null}
+{"i": 333, "t": 26121.254088695, "confirmed": null}
+{"i": 334, "t": 26121.282195675, "confirmed": null}
+{"i": 335, "t": 26121.318270047, "confirmed": null}
+{"i": 336, "t": 26121.350312792, "confirmed": null}
+{"i": 337, "t": 26121.382274861, "confirmed": null}
+{"i": 338, "t": 26121.418129447, "confirmed": null}
+{"i": 339, "t": 26121.450244312, "confirmed": null}
+{"i": 340, "t": 26121.482505176, "confirmed": null}
+{"i": 341, "t": 26121.518131978, "confirmed": null}
+{"i": 342, "t": 26121.550197253, "confirmed": null}
+{"i": 343, "t": 26121.586152175, "confirmed": null}
+{"i": 344, "t": 26121.618112778, "confirmed": null}
+{"i": 345, "t": 26121.650011016, "confirmed": null}
+{"i": 346, "t": 26121.68619509, "confirmed": null}
+{"i": 347, "t": 26121.719139481, "confirmed": null}
+{"i": 348, "t": 26121.750436935, "confirmed": null}
+{"i": 349, "t": 26121.786320529, "confirmed": null}
+{"i": 350, "t": 26121.818148009, "confirmed": null}
+{"i": 351, "t": 26121.850692898, "confirmed": null}
+{"i": 352, "t": 26121.886302695, "confirmed": null}
+{"i": 353, "t": 26121.918246789, "confirmed": null}
+{"i": 354, "t": 26121.950232458, "confirmed": null}
+{"i": 355, "t": 26121.986509608, "confirmed": null}
+{"i": 356, "t": 26122.018500984, "confirmed": null}
+{"i": 357, "t": 26122.054323596, "confirmed": null}
+{"i": 358, "t": 26122.086167357, "confirmed": null}
+{"i": 359, "t": 26122.118190395, "confirmed": null}
+{"i": 360, "t": 26122.158336987, "confirmed": null}
+{"i": 361, "t": 26122.186241986, "confirmed": null}
+{"i": 362, "t": 26122.217998323, "confirmed": null}
+{"i": 363, "t": 26122.254055473, "confirmed": null}
+{"i": 364, "t": 26122.286162771, "confirmed": null}
+{"i": 365, "t": 26122.31814059, "confirmed": null}
+{"i": 366, "t": 26122.354109821, "confirmed": null}
+{"i": 367, "t": 26122.386106659, "confirmed": null}
+{"i": 368, "t": 26122.422256304, "confirmed": null}
+{"i": 369, "t": 26122.453986855, "confirmed": null}
+{"i": 370, "t": 26122.486199937, "confirmed": null}
+{"i": 371, "t": 26122.521972146, "confirmed": null}
+{"i": 372, "t": 26122.554036607, "confirmed": null}
+{"i": 373, "t": 26122.586072199, "confirmed": null}
+{"i": 374, "t": 26122.622033743, "confirmed": null}
+{"i": 375, "t": 26122.654027746, "confirmed": null}
+{"i": 376, "t": 26122.686200791, "confirmed": null}
+{"i": 377, "t": 26122.722059534, "confirmed": null}
+{"i": 378, "t": 26122.754051049, "confirmed": null}
+{"i": 379, "t": 26122.78614959, "confirmed": null}
+{"i": 380, "t": 26122.822193148, "confirmed": null}
+{"i": 381, "t": 26122.854217022, "confirmed": null}
+{"i": 382, "t": 26122.890016593, "confirmed": null}
+{"i": 383, "t": 26122.922294131, "confirmed": null}
+{"i": 384, "t": 26122.954033395, "confirmed": null}
+{"i": 385, "t": 26122.990040506, "confirmed": null}
+{"i": 386, "t": 26123.022210492, "confirmed": null}
+{"i": 387, "t": 26123.054149794, "confirmed": null}
+{"i": 388, "t": 26123.090192534, "confirmed": null}
+{"i": 389, "t": 26123.121875048, "confirmed": null}
+{"i": 390, "t": 26123.154710322, "confirmed": null}
+{"i": 391, "t": 26123.190095847, "confirmed": null}
+{"i": 392, "t": 26123.222133417, "confirmed": null}
+{"i": 393, "t": 26123.258562072, "confirmed": null}
+{"i": 394, "t": 26123.290089672, "confirmed": null}
+{"i": 395, "t": 26123.322063986, "confirmed": null}
+{"i": 396, "t": 26123.358129106, "confirmed": null}
+{"i": 397, "t": 26123.390137021, "confirmed": "Zooming In With Full Hand"}
+{"i": 398, "t": 26123.422059977, "confirmed": "Zooming In With Full Hand"}
+{"i": 399, "t": 26123.4579199, "confirmed": "Zooming In With Full Hand"}
+{"i": 400, "t": 26123.491639037, "confirmed": "Zooming In With Full Hand"}
+{"i": 401, "t": 26123.522190823, "confirmed": "Zooming In With Full Hand"}
+{"i": 402, "t": 26123.558150041, "confirmed": "Zooming In With Full Hand"}
+{"i": 403, "t": 26123.590207183, "confirmed": "Zooming In With Full Hand"}
+{"i": 404, "t": 26123.62633619, "confirmed": "Zooming In With Full Hand"}
+{"i": 405, "t": 26123.658014824, "confirmed": "Zooming In With Full Hand"}
+{"i": 406, "t": 26123.690364817, "confirmed": "Zooming In With Full Hand"}
+{"i": 407, "t": 26123.726221297, "confirmed": "Zooming In With Full Hand"}
+{"i": 408, "t": 26123.758293386, "confirmed": "Zooming In With Full Hand"}
+{"i": 409, "t": 26123.79003393, "confirmed": "Zooming In With Full Hand"}
+{"i": 410, "t": 26123.826100614, "confirmed": "Zooming In With Full Hand"}
+{"i": 411, "t": 26123.858102131, "confirmed": "Zooming In With Full Hand"}
+{"i": 412, "t": 26123.89039745, "confirmed": "Zooming In With Full Hand"}
+{"i": 413, "t": 26123.926147096, "confirmed": "Zooming In With Full Hand"}
+{"i": 414, "t": 26123.958112031, "confirmed": "Zooming In With Full Hand"}
+{"i": 415, "t": 26123.989922068, "confirmed": "Zooming In With Full Hand"}
+{"i": 416, "t": 26124.026603501, "confirmed": "Zooming In With Full Hand"}
+{"i": 417, "t": 26124.089819783, "confirmed": "Zooming In With Full Hand"}
+{"i": 418, "t": 26124.093922258, "confirmed": "Zooming In With Full Hand"}
+{"i": 419, "t": 26124.12605972, "confirmed": "Zooming In With Full Hand"}
+{"i": 420, "t": 26124.157983737, "confirmed": "Zooming In With Full Hand"}
+{"i": 421, "t": 26124.19405521, "confirmed": "Zooming In With Full Hand"}
+{"i": 422, "t": 26124.226012097, "confirmed": "Zooming In With Full Hand"}
+{"i": 423, "t": 26124.258417737, "confirmed": "Zooming In With Full Hand"}
+{"i": 424, "t": 26124.2941362, "confirmed": "Zooming In With Full Hand"}
+{"i": 425, "t": 26124.326210395, "confirmed": "Zooming In With Full Hand"}
+{"i": 426, "t": 26124.35807681, "confirmed": "Zooming In With Full Hand"}
+{"i": 427, "t": 26124.393928727, "confirmed": "Zooming In With Full Hand"}
+{"i": 428, "t": 26124.426222107, "confirmed": "Zooming In With Full Hand"}
+{"i": 429, "t": 26124.462187176, "confirmed": "Zooming In With Full Hand"}
+{"i": 430, "t": 26124.493971969, "confirmed": "Zooming In With Full Hand"}
+{"i": 431, "t": 26124.526084804, "confirmed": "Zooming In With Full Hand"}
+{"i": 432, "t": 26124.562100103, "confirmed": "Zooming In With Full Hand"}
+{"i": 433, "t": 26124.594063823, "confirmed": "Zooming In With Full Hand"}
+{"i": 434, "t": 26124.62605282, "confirmed": "Zooming In With Full Hand"}
+{"i": 435, "t": 26124.662740382, "confirmed": "Zooming In With Full Hand"}
+{"i": 436, "t": 26124.694392895, "confirmed": "Zooming In With Full Hand"}
+{"i": 437, "t": 26124.72617809, "confirmed": "Zooming In With Full Hand"}
+{"i": 438, "t": 26124.761988126, "confirmed": "Zooming In With Full Hand"}
+{"i": 439, "t": 26124.794049413, "confirmed": "Zooming In With Full Hand"}
+{"i": 440, "t": 26124.830147027, "confirmed": "Zooming In With Full Hand"}
+{"i": 441, "t": 26124.862168081, "confirmed": "Zooming In With Full Hand"}
+{"i": 442, "t": 26124.894048029, "confirmed": "Zooming In With Full Hand"}
+{"i": 443, "t": 26124.930049485, "confirmed": "Zooming In With Full Hand"}
+{"i": 444, "t": 26124.961958478, "confirmed": "Zooming In With Full Hand"}
+{"i": 445, "t": 26124.994588216, "confirmed": "Zooming In With Full Hand"}
+{"i": 446, "t": 26125.029983023, "confirmed": "Zooming In With Full Hand"}
+{"i": 447, "t": 26125.062150517, "confirmed": "Zooming In With Full Hand"}
+{"i": 448, "t": 26125.09398562, "confirmed": "Zooming In With Full Hand"}
+{"i": 449, "t": 26125.131246848, "confirmed": "Zooming In With Full Hand"}
+{"i": 450, "t": 26125.1618102, "confirmed": "Zooming In With Full Hand"}
+{"i": 451, "t": 26125.19397292, "confirmed": "Zooming In With Full Hand"}
+{"i": 452, "t": 26125.229962814, "confirmed": "Zooming In With Full Hand"}
+{"i": 453, "t": 26125.262075499, "confirmed": "Zooming In With Full Hand"}
+{"i": 454, "t": 26125.297946221, "confirmed": "Zooming In With Full Hand"}
+{"i": 455, "t": 26125.329807803, "confirmed": "Zooming In With Full Hand"}
+{"i": 456, "t": 26125.364178527, "confirmed": "Zooming In With Full Hand"}
+{"i": 457, "t": 26125.397975941, "confirmed": "Zooming In With Full Hand"}
+{"i": 458, "t": 26125.430641371, "confirmed": "Zooming In With Full Hand"}
+{"i": 459, "t": 26125.462075499, "confirmed": "Zooming In With Full Hand"}
+{"i": 460, "t": 26125.497972104, "confirmed": null}
+{"i": 461, "t": 26125.529903223, "confirmed": null}
+{"i": 462, "t": 26125.562447301, "confirmed": null}
+{"i": 463, "t": 26125.597990777, "confirmed": null}
+{"i": 464, "t": 26125.630007263, "confirmed": null}
+{"i": 465, "t": 26125.666128253, "confirmed": null}
+{"i": 466, "t": 26125.697893143, "confirmed": null}
+{"i": 467, "t": 26125.730832093, "confirmed": null}
+{"i": 468, "t": 26125.765999578, "confirmed": null}
+{"i": 469, "t": 26125.798210957, "confirmed": null}
+{"i": 470, "t": 26125.82989114, "confirmed": null}
+{"i": 471, "t": 26125.866052127, "confirmed": null}
+{"i": 472, "t": 26125.897922376, "confirmed": null}
+{"i": 473, "t": 26125.929994433, "confirmed": null}
+{"i": 474, "t": 26125.965978878, "confirmed": null}
+{"i": 475, "t": 26125.997894655, "confirmed": null}
+{"i": 476, "t": 26126.029994386, "confirmed": null}
+{"i": 477, "t": 26126.065708763, "confirmed": null}
+{"i": 478, "t": 26126.098006028, "confirmed": null}
+{"i": 479, "t": 26126.134037959, "confirmed": null}
+{"i": 480, "t": 26126.16587438, "confirmed": null}
+{"i": 481, "t": 26126.197908425, "confirmed": null}
+{"i": 482, "t": 26126.233891217, "confirmed": null}
+{"i": 483, "t": 26126.270452458, "confirmed": null}
+{"i": 484, "t": 26126.297888303, "confirmed": null}
+{"i": 485, "t": 26126.333945926, "confirmed": null}
+{"i": 486, "t": 26126.365842601, "confirmed": null}
+{"i": 487, "t": 26126.397885226, "confirmed": null}
+{"i": 488, "t": 26126.433854999, "confirmed": null}
+{"i": 489, "t": 26126.466452123, "confirmed": null}
+{"i": 490, "t": 26126.501855294, "confirmed": null}
+{"i": 491, "t": 26126.533882042, "confirmed": null}
+{"i": 492, "t": 26126.566092389, "confirmed": null}
+{"i": 493, "t": 26126.601952134, "confirmed": null}
+{"i": 494, "t": 26126.633950911, "confirmed": null}
+{"i": 495, "t": 26126.665783081, "confirmed": null}
+{"i": 496, "t": 26126.701947769, "confirmed": null}
+{"i": 497, "t": 26126.73439507, "confirmed": null}
+{"i": 498, "t": 26126.76643433, "confirmed": null}
+{"i": 499, "t": 26126.801955089, "confirmed": null}
+{"i": 500, "t": 26126.833969889, "confirmed": null}
+{"i": 501, "t": 26126.86991168, "confirmed": null}
+{"i": 502, "t": 26126.902086938, "confirmed": null}
+{"i": 503, "t": 26126.934277986, "confirmed": null}
+{"i": 504, "t": 26126.969985919, "confirmed": null}
+{"i": 505, "t": 26127.00224462, "confirmed": null}
+{"i": 506, "t": 26127.033813244, "confirmed": null}
+{"i": 507, "t": 26127.069698302, "confirmed": null}
+{"i": 508, "t": 26127.101795239, "confirmed": null}
+{"i": 509, "t": 26127.133971243, "confirmed": null}
+{"i": 510, "t": 26127.173229997, "confirmed": null}
+{"i": 511, "t": 26127.201967198, "confirmed": null}
+{"i": 512, "t": 26127.234156824, "confirmed": null}
+{"i": 513, "t": 26127.269788884, "confirmed": null}
+{"i": 514, "t": 26127.301832565, "confirmed": null}
+{"i": 515, "t": 26127.337970932, "confirmed": null}
+{"i": 516, "t": 26127.385616289, "confirmed": null}
+{"i": 517, "t": 26127.401843821, "confirmed": null}
+{"i": 518, "t": 26127.437951693, "confirmed": null}
+{"i": 519, "t": 26127.46982138, "confirmed": null}
+{"i": 520, "t": 26127.501942541, "confirmed": null}
+{"i": 521, "t": 26127.537803747, "confirmed": null}
+{"i": 522, "t": 26127.574117584, "confirmed": null}
+{"i": 523, "t": 26127.601899954, "confirmed": null}
+{"i": 524, "t": 26127.637912091, "confirmed": null}
+{"i": 525, "t": 26127.669809278, "confirmed": null}
+{"i": 526, "t": 26127.705996401, "confirmed": null}
+{"i": 527, "t": 26127.737807558, "confirmed": null}
+{"i": 528, "t": 26127.76987213, "confirmed": null}
+{"i": 529, "t": 26127.805788456, "confirmed": null}
+{"i": 530, "t": 26127.837856292, "confirmed": null}
+{"i": 531, "t": 26127.869908407, "confirmed": null}
+{"i": 532, "t": 26127.905923887, "confirmed": null}
+{"i": 533, "t": 26127.938035624, "confirmed": null}
+{"i": 534, "t": 26127.97026678, "confirmed": null}
+{"i": 535, "t": 26128.006510028, "confirmed": null}
+{"i": 536, "t": 26128.040085742, "confirmed": null}
+{"i": 537, "t": 26128.069870089, "confirmed": null}
+{"i": 538, "t": 26128.105760926, "confirmed": null}
+{"i": 539, "t": 26128.137710653, "confirmed": null}
+{"i": 540, "t": 26128.173876999, "confirmed": null}
+{"i": 541, "t": 26128.20590844, "confirmed": null}
+{"i": 542, "t": 26128.237889562, "confirmed": "Zooming Out With Full Hand"}
+{"i": 543, "t": 26128.27363199, "confirmed": "Zooming Out With Full Hand"}
+{"i": 544, "t": 26128.305928053, "confirmed": "Zooming Out With Full Hand"}
+{"i": 545, "t": 26128.337948198, "confirmed": "Zooming Out With Full Hand"}
+{"i": 546, "t": 26128.37393563, "confirmed": "Zooming Out With Full Hand"}
+{"i": 547, "t": 26128.409326546, "confirmed": "Zooming Out With Full Hand"}
+{"i": 548, "t": 26128.437869179, "confirmed": "Zooming Out With Full Hand"}
+{"i": 549, "t": 26128.473756524, "confirmed": "Zooming Out With Full Hand"}
+{"i": 550, "t": 26128.505797138, "confirmed": "Zooming Out With Full Hand"}
+{"i": 551, "t": 26128.54175251, "confirmed": "Zooming Out With Full Hand"}
+{"i": 552, "t": 26128.574357654, "confirmed": "Zooming Out With Full Hand"}
+{"i": 553, "t": 26128.605727697, "confirmed": "Zooming Out With Full Hand"}
+{"i": 554, "t": 26128.641851455, "confirmed": "Zooming Out With Full Hand"}
+{"i": 555, "t": 26128.675083958, "confirmed": "Zooming Out With Full Hand"}
+{"i": 556, "t": 26128.705940388, "confirmed": "Zooming Out With Full Hand"}
+{"i": 557, "t": 26128.741842203, "confirmed": "Zooming Out With Full Hand"}
+{"i": 558, "t": 26128.773723245, "confirmed": "Zooming Out With Full Hand"}
+{"i": 559, "t": 26128.805873357, "confirmed": "Zooming Out With Full Hand"}
+{"i": 560, "t": 26128.841674406, "confirmed": null}
+{"i": 561, "t": 26128.875019595, "confirmed": null}
+{"i": 562, "t": 26128.909826594, "confirmed": null}
+{"i": 563, "t": 26128.9418304, "confirmed": null}
+{"i": 564, "t": 26128.974145618, "confirmed": null}
+{"i": 565, "t": 26129.009929479, "confirmed": null}
+{"i": 566, "t": 26129.042056246, "confirmed": null}
+{"i": 567, "t": 26129.075631237, "confirmed": null}
+{"i": 568, "t": 26129.110164729, "confirmed": null}
+{"i": 569, "t": 26129.160462435, "confirmed": null}
+{"i": 570, "t": 26129.18761304, "confirmed": null}
+{"i": 571, "t": 26129.209853227, "confirmed": null}
+{"i": 572, "t": 26129.241895111, "confirmed": null}
+{"i": 573, "t": 26129.273877791, "confirmed": null}
+{"i": 574, "t": 26129.309705617, "confirmed": null}
+{"i": 575, "t": 26129.341725524, "confirmed": null}
+{"i": 576, "t": 26129.379732501, "confirmed": null}
+{"i": 577, "t": 26129.410219596, "confirmed": null}
+{"i": 578, "t": 26129.442064185, "confirmed": null}
+{"i": 579, "t": 26129.477742537, "confirmed": null}
+{"i": 580, "t": 26129.509621111, "confirmed": null}
+{"i": 581, "t": 26129.541805192, "confirmed": null}
+{"i": 582, "t": 26129.577992336, "confirmed": null}
+{"i": 583, "t": 26129.609850236, "confirmed": null}
+{"i": 584, "t": 26129.641767539, "confirmed": null}
+{"i": 585, "t": 26129.67780849, "confirmed": null}
+{"i": 586, "t": 26129.70971419, "confirmed": null}
+{"i": 587, "t": 26129.745875419, "confirmed": null}
+{"i": 588, "t": 26129.778112406, "confirmed": null}
+{"i": 589, "t": 26129.811253346, "confirmed": null}
+{"i": 590, "t": 26129.845917817, "confirmed": null}
+{"i": 591, "t": 26129.878066808, "confirmed": null}
+{"i": 592, "t": 26129.909825645, "confirmed": null}
+{"i": 593, "t": 26129.945789274, "confirmed": null}
+{"i": 594, "t": 26129.977680603, "confirmed": null}
+{"i": 595, "t": 26130.010546416, "confirmed": null}
+{"i": 596, "t": 26130.045690318, "confirmed": null}
+{"i": 597, "t": 26130.077671439, "confirmed": null}
+{"i": 598, "t": 26130.109870761, "confirmed": null}
+{"i": 599, "t": 26130.145795387, "confirmed": null}
+{"i": 600, "t": 26130.177860775, "confirmed": null}
+{"i": 601, "t": 26130.213876317, "confirmed": null}
+{"i": 602, "t": 26130.245582023, "confirmed": null}
+{"i": 603, "t": 26130.27832039, "confirmed": null}
+{"i": 604, "t": 26130.313793573, "confirmed": null}
+{"i": 605, "t": 26130.34615134, "confirmed": null}
+{"i": 606, "t": 26130.377786621, "confirmed": null}
+{"i": 607, "t": 26130.413588143, "confirmed": null}
+{"i": 608, "t": 26130.445644298, "confirmed": null}
+{"i": 609, "t": 26130.477600024, "confirmed": null}
+{"i": 610, "t": 26130.51364633, "confirmed": null}
+{"i": 611, "t": 26130.546132545, "confirmed": null}
+{"i": 612, "t": 26130.582762653, "confirmed": null}
+{"i": 613, "t": 26130.615305647, "confirmed": null}
+{"i": 614, "t": 26130.64603581, "confirmed": null}
+{"i": 615, "t": 26130.681710832, "confirmed": null}
+{"i": 616, "t": 26130.715974881, "confirmed": null}
+{"i": 617, "t": 26130.745636264, "confirmed": null}
+{"i": 618, "t": 26130.781718383, "confirmed": null}
+{"i": 619, "t": 26130.813683765, "confirmed": null}
+{"i": 620, "t": 26130.846176525, "confirmed": null}
+{"i": 621, "t": 26130.881629575, "confirmed": null}
+{"i": 622, "t": 26130.914098938, "confirmed": null}
+{"i": 623, "t": 26130.949744397, "confirmed": null}
+{"i": 624, "t": 26130.981706968, "confirmed": null}
+{"i": 625, "t": 26131.013677797, "confirmed": null}
+{"i": 626, "t": 26131.050171691, "confirmed": null}
+{"i": 627, "t": 26131.081770778, "confirmed": null}
+{"i": 628, "t": 26131.113775185, "confirmed": null}
+{"i": 629, "t": 26131.149718753, "confirmed": null}
+{"i": 630, "t": 26131.181660906, "confirmed": null}
+{"i": 631, "t": 26131.213569983, "confirmed": null}
+{"i": 632, "t": 26131.250072701, "confirmed": null}
+{"i": 633, "t": 26131.281549869, "confirmed": null}
+{"i": 634, "t": 26131.31970421, "confirmed": null}
+{"i": 635, "t": 26131.349582918, "confirmed": null}
+{"i": 636, "t": 26131.381680556, "confirmed": null}
+{"i": 637, "t": 26131.417571848, "confirmed": null}
+{"i": 638, "t": 26131.449707452, "confirmed": null}
+{"i": 639, "t": 26131.481624096, "confirmed": null}
+{"i": 640, "t": 26131.517519975, "confirmed": null}
+{"i": 641, "t": 26131.54970738, "confirmed": null}
+{"i": 642, "t": 26131.581688085, "confirmed": null}
+{"i": 643, "t": 26131.617752763, "confirmed": null}
+{"i": 644, "t": 26131.649603476, "confirmed": null}
+{"i": 645, "t": 26131.681675131, "confirmed": null}
+{"i": 646, "t": 26131.718457061, "confirmed": null}
+{"i": 647, "t": 26131.749566246, "confirmed": null}
+{"i": 648, "t": 26131.785725488, "confirmed": null}
+{"i": 649, "t": 26131.820594519, "confirmed": null}
+{"i": 650, "t": 26131.849492109, "confirmed": null}
+{"i": 651, "t": 26131.885570288, "confirmed": null}
+{"i": 652, "t": 26131.920711022, "confirmed": null}
+{"i": 653, "t": 26131.949590085, "confirmed": null}
+{"i": 654, "t": 26131.985711298, "confirmed": null}
+{"i": 655, "t": 26132.02143332, "confirmed": null}
+{"i": 656, "t": 26132.049494078, "confirmed": null}
+{"i": 657, "t": 26132.085707362, "confirmed": null}
+{"i": 658, "t": 26132.124784497, "confirmed": null}
+{"i": 659, "t": 26132.153540564, "confirmed": null}
+{"i": 660, "t": 26132.185694104, "confirmed": null}
+{"i": 661, "t": 26132.217829013, "confirmed": null}
+{"i": 662, "t": 26132.253664816, "confirmed": null}
+{"i": 663, "t": 26132.285591117, "confirmed": null}
+{"i": 664, "t": 26132.317820492, "confirmed": null}
+{"i": 665, "t": 26132.353535981, "confirmed": null}
+{"i": 666, "t": 26132.385643376, "confirmed": null}
+{"i": 667, "t": 26132.417389959, "confirmed": null}
+{"i": 668, "t": 26132.453657121, "confirmed": null}
+{"i": 669, "t": 26132.485414499, "confirmed": null}
+{"i": 670, "t": 26132.517743329, "confirmed": null}
+{"i": 671, "t": 26132.553721692, "confirmed": "Zooming Out With Full Hand"}
+{"i": 672, "t": 26132.58608024, "confirmed": "Zooming Out With Full Hand"}
+{"i": 673, "t": 26132.622729749, "confirmed": "Zooming Out With Full Hand"}
+{"i": 674, "t": 26132.653760219, "confirmed": "Zooming Out With Full Hand"}
+{"i": 675, "t": 26132.687683911, "confirmed": "Zooming Out With Full Hand"}
+{"i": 676, "t": 26132.721735377, "confirmed": "Zooming Out With Full Hand"}
+{"i": 677, "t": 26132.75370036, "confirmed": "Zooming Out With Full Hand"}
+{"i": 678, "t": 26132.785499825, "confirmed": "Zooming Out With Full Hand"}
+{"i": 679, "t": 26132.82139568, "confirmed": "Zooming Out With Full Hand"}
+{"i": 680, "t": 26132.853895286, "confirmed": "Zooming Out With Full Hand"}
+{"i": 681, "t": 26132.885486317, "confirmed": "Zooming Out With Full Hand"}
+{"i": 682, "t": 26132.921590174, "confirmed": "Zooming Out With Full Hand"}
+{"i": 683, "t": 26132.953858801, "confirmed": "Zooming Out With Full Hand"}
+{"i": 684, "t": 26132.99021043, "confirmed": "Zooming Out With Full Hand"}
+{"i": 685, "t": 26133.024445643, "confirmed": "Zooming Out With Full Hand"}
+{"i": 686, "t": 26133.053664744, "confirmed": "Zooming Out With Full Hand"}
+{"i": 687, "t": 26133.089530649, "confirmed": "Zooming Out With Full Hand"}
+{"i": 688, "t": 26133.121469382, "confirmed": "Zooming Out With Full Hand"}
+{"i": 689, "t": 26133.153497145, "confirmed": "Zooming Out With Full Hand"}
+{"i": 690, "t": 26133.18973318, "confirmed": null}
+{"i": 691, "t": 26133.221793792, "confirmed": null}
+{"i": 692, "t": 26133.254238066, "confirmed": null}
+{"i": 693, "t": 26133.2895402, "confirmed": null}
+{"i": 694, "t": 26133.321561625, "confirmed": null}
+{"i": 695, "t": 26133.354009786, "confirmed": null}
+{"i": 696, "t": 26133.390420631, "confirmed": null}
+{"i": 697, "t": 26133.421755907, "confirmed": null}
+{"i": 698, "t": 26133.457833747, "confirmed": null}
+{"i": 699, "t": 26133.490089905, "confirmed": null}
+{"i": 700, "t": 26133.521518016, "confirmed": null}
+{"i": 701, "t": 26133.557917024, "confirmed": null}
+{"i": 702, "t": 26133.589784651, "confirmed": null}
+{"i": 703, "t": 26133.621765252, "confirmed": null}
+{"i": 704, "t": 26133.657912368, "confirmed": null}
+{"i": 705, "t": 26133.689571659, "confirmed": null}
+{"i": 706, "t": 26133.723392257, "confirmed": null}
+{"i": 707, "t": 26133.757464009, "confirmed": null}
+{"i": 708, "t": 26133.789482835, "confirmed": null}
+{"i": 709, "t": 26133.825951861, "confirmed": null}
+{"i": 710, "t": 26133.857637552, "confirmed": null}
+{"i": 711, "t": 26133.890678029, "confirmed": null}
+{"i": 712, "t": 26133.92543243, "confirmed": null}
+{"i": 713, "t": 26133.957492073, "confirmed": null}
+{"i": 714, "t": 26133.991204216, "confirmed": null}
+{"i": 715, "t": 26134.025529048, "confirmed": null}
+{"i": 716, "t": 26134.057383709, "confirmed": null}
+{"i": 717, "t": 26134.089422948, "confirmed": null}
+{"i": 718, "t": 26134.125958638, "confirmed": null}
+{"i": 719, "t": 26134.157557499, "confirmed": null}
+{"i": 720, "t": 26134.193647157, "confirmed": null}
+{"i": 721, "t": 26134.227102604, "confirmed": null}
+{"i": 722, "t": 26134.258147374, "confirmed": null}
+{"i": 723, "t": 26134.293556332, "confirmed": null}
+{"i": 724, "t": 26134.325390044, "confirmed": null}
+{"i": 725, "t": 26134.357381844, "confirmed": null}
+{"i": 726, "t": 26134.393358002, "confirmed": null}
+{"i": 727, "t": 26134.425365845, "confirmed": null}
+{"i": 728, "t": 26134.457813748, "confirmed": null}
+{"i": 729, "t": 26134.493572053, "confirmed": null}
+{"i": 730, "t": 26134.525345696, "confirmed": null}
+{"i": 731, "t": 26134.557697166, "confirmed": null}
+{"i": 732, "t": 26134.593606193, "confirmed": null}
+{"i": 733, "t": 26134.625569753, "confirmed": null}
+{"i": 734, "t": 26134.673855091, "confirmed": null}
+{"i": 735, "t": 26134.69367867, "confirmed": null}
+{"i": 736, "t": 26134.725366944, "confirmed": null}
+{"i": 737, "t": 26134.761378602, "confirmed": null}
+{"i": 738, "t": 26134.794060917, "confirmed": null}
+{"i": 739, "t": 26134.827199972, "confirmed": null}
+{"i": 740, "t": 26134.861492888, "confirmed": null}
+{"i": 741, "t": 26134.893548137, "confirmed": null}
+{"i": 742, "t": 26134.925923988, "confirmed": null}
+{"i": 743, "t": 26134.96158905, "confirmed": null}
+{"i": 744, "t": 26134.993465029, "confirmed": null}
+{"i": 745, "t": 26135.030270106, "confirmed": null}
+{"i": 746, "t": 26135.061553387, "confirmed": null}
+{"i": 747, "t": 26135.09369423, "confirmed": null}
+{"i": 748, "t": 26135.129515343, "confirmed": null}
+{"i": 749, "t": 26135.161533879, "confirmed": null}
+{"i": 750, "t": 26135.193756514, "confirmed": null}
+{"i": 751, "t": 26135.229303365, "confirmed": null}
+{"i": 752, "t": 26135.261826866, "confirmed": null}
+{"i": 753, "t": 26135.293649535, "confirmed": null}
+{"i": 754, "t": 26135.32944819, "confirmed": null}
+{"i": 755, "t": 26135.361892122, "confirmed": null}
+{"i": 756, "t": 26135.393478268, "confirmed": null}
+{"i": 757, "t": 26135.429465383, "confirmed": null}
+{"i": 758, "t": 26135.461552697, "confirmed": null}
+{"i": 759, "t": 26135.497426198, "confirmed": null}
+{"i": 760, "t": 26135.541317394, "confirmed": null}
+{"i": 761, "t": 26135.561254485, "confirmed": null}
+{"i": 762, "t": 26135.597484083, "confirmed": null}
+{"i": 763, "t": 26135.629312427, "confirmed": null}
+{"i": 764, "t": 26135.661436335, "confirmed": null}
+{"i": 765, "t": 26135.697376585, "confirmed": null}
+{"i": 766, "t": 26135.729477275, "confirmed": null}
+{"i": 767, "t": 26135.761325891, "confirmed": null}
+{"i": 768, "t": 26135.797272207, "confirmed": null}
+{"i": 769, "t": 26135.829465299, "confirmed": null}
+{"i": 770, "t": 26135.865602938, "confirmed": null}
+{"i": 771, "t": 26135.897279823, "confirmed": null}
+{"i": 772, "t": 26135.929394728, "confirmed": null}
+{"i": 773, "t": 26135.967550711, "confirmed": null}
+{"i": 774, "t": 26135.997557113, "confirmed": null}
+{"i": 775, "t": 26136.02996845, "confirmed": null}
+{"i": 776, "t": 26136.065454414, "confirmed": null}
+{"i": 777, "t": 26136.097581132, "confirmed": null}
+{"i": 778, "t": 26136.131510819, "confirmed": null}
+{"i": 779, "t": 26136.165739324, "confirmed": null}
+{"i": 780, "t": 26136.198295649, "confirmed": "Zooming In With Full Hand"}
+{"i": 781, "t": 26136.234982474, "confirmed": "Zooming In With Full Hand"}
+{"i": 782, "t": 26136.265330857, "confirmed": "Zooming In With Full Hand"}
+{"i": 783, "t": 26136.297777158, "confirmed": "Zooming In With Full Hand"}
+{"i": 784, "t": 26136.333515061, "confirmed": "Zooming In With Full Hand"}
+{"i": 785, "t": 26136.365445925, "confirmed": "Zooming In With Full Hand"}
+{"i": 786, "t": 26136.397501144, "confirmed": "Zooming In With Full Hand"}
+{"i": 787, "t": 26136.433495415, "confirmed": "Zooming In With Full Hand"}
+{"i": 788, "t": 26136.465778811, "confirmed": "Zooming In With Full Hand"}
+{"i": 789, "t": 26136.497515703, "confirmed": "Zooming In With Full Hand"}
+{"i": 790, "t": 26136.53345201, "confirmed": "Zooming In With Full Hand"}
+{"i": 791, "t": 26136.565336267, "confirmed": "Zooming In With Full Hand"}
+{"i": 792, "t": 26136.597717865, "confirmed": "Zooming In With Full Hand"}
+{"i": 793, "t": 26136.633201046, "confirmed": "Zooming In With Full Hand"}
+{"i": 794, "t": 26136.665364622, "confirmed": "Zooming In With Full Hand"}
+{"i": 795, "t": 26136.701316826, "confirmed": "Zooming In With Full Hand"}
+{"i": 796, "t": 26136.733489374, "confirmed": "Zooming In With Full Hand"}
+{"i": 797, "t": 26136.765483315, "confirmed": "Zooming In With Full Hand"}
+{"i": 798, "t": 26136.801125718, "confirmed": "Zooming In With Full Hand"}
+{"i": 799, "t": 26136.833303637, "confirmed": "Zooming In With Full Hand"}
+{"i": 800, "t": 26136.865439596, "confirmed": "Zooming In With Full Hand"}
+{"i": 801, "t": 26136.901481941, "confirmed": "Zooming In With Full Hand"}
+{"i": 802, "t": 26136.933666225, "confirmed": "Zooming In With Full Hand"}
+{"i": 803, "t": 26136.96536779, "confirmed": "Zooming In With Full Hand"}
+{"i": 804, "t": 26137.001704688, "confirmed": "Zooming In With Full Hand"}
+{"i": 805, "t": 26137.033132277, "confirmed": "Zooming In With Full Hand"}
+{"i": 806, "t": 26137.06940255, "confirmed": "Zooming In With Full Hand"}
+{"i": 807, "t": 26137.101569707, "confirmed": "Zooming In With Full Hand"}
+{"i": 808, "t": 26137.133546399, "confirmed": "Zooming In With Full Hand"}
+{"i": 809, "t": 26137.169592225, "confirmed": "Zooming In With Full Hand"}
+{"i": 810, "t": 26137.201963761, "confirmed": "Zooming In With Full Hand"}
+{"i": 811, "t": 26137.233480723, "confirmed": "Zooming In With Full Hand"}
+{"i": 812, "t": 26137.269521501, "confirmed": "Zooming In With Full Hand"}
+{"i": 813, "t": 26137.301557473, "confirmed": "Zooming In With Full Hand"}
+{"i": 814, "t": 26137.334101346, "confirmed": "Zooming In With Full Hand"}
+{"i": 815, "t": 26137.369570387, "confirmed": "Zooming In With Full Hand"}
+{"i": 816, "t": 26137.40170321, "confirmed": "Zooming In With Full Hand"}
+{"i": 817, "t": 26137.433275667, "confirmed": "Zooming In With Full Hand"}
+{"i": 818, "t": 26137.469763419, "confirmed": "Zooming In With Full Hand"}
+{"i": 819, "t": 26137.51113277, "confirmed": "Zooming In With Full Hand"}
+{"i": 820, "t": 26137.554246096, "confirmed": "Zooming In With Full Hand"}
+{"i": 821, "t": 26137.569412462, "confirmed": "Zooming In With Full Hand"}
+{"i": 822, "t": 26137.601621474, "confirmed": "Zooming In With Full Hand"}
+{"i": 823, "t": 26137.642433734, "confirmed": "Zooming In With Full Hand"}
+{"i": 824, "t": 26137.669293231, "confirmed": "Zooming In With Full Hand"}
+{"i": 825, "t": 26137.701295614, "confirmed": "Zooming In With Full Hand"}
+{"i": 826, "t": 26137.737074246, "confirmed": "Zooming In With Full Hand"}
+{"i": 827, "t": 26137.769205082, "confirmed": "Zooming In With Full Hand"}
+{"i": 828, "t": 26137.801271621, "confirmed": "Zooming In With Full Hand"}
+{"i": 829, "t": 26137.837611878, "confirmed": "Zooming In With Full Hand"}
+{"i": 830, "t": 26137.869611378, "confirmed": "Zooming In With Full Hand"}
+{"i": 831, "t": 26137.905337298, "confirmed": "Zooming In With Full Hand"}
+{"i": 832, "t": 26137.937040228, "confirmed": "Zooming In With Full Hand"}
+{"i": 833, "t": 26137.96921373, "confirmed": "Zooming In With Full Hand"}
+{"i": 834, "t": 26138.005394676, "confirmed": "Zooming In With Full Hand"}
+{"i": 835, "t": 26138.037411186, "confirmed": "Zooming In With Full Hand"}
+{"i": 836, "t": 26138.069379685, "confirmed": "Zooming In With Full Hand"}
+{"i": 837, "t": 26138.105250536, "confirmed": "Zooming In With Full Hand"}
+{"i": 838, "t": 26138.137755895, "confirmed": "Zooming In With Full Hand"}
+{"i": 839, "t": 26138.169227665, "confirmed": "Zooming In With Full Hand"}
+{"i": 840, "t": 26138.20532996, "confirmed": "Zooming In With Full Hand"}
+{"i": 841, "t": 26138.237446707, "confirmed": "Zooming In With Full Hand"}
+{"i": 842, "t": 26138.273290643, "confirmed": "Zooming In With Full Hand"}
+{"i": 843, "t": 26138.305368678, "confirmed": null}
+{"i": 844, "t": 26138.337476825, "confirmed": null}
+{"i": 845, "t": 26138.373314297, "confirmed": null}
+{"i": 846, "t": 26138.405713917, "confirmed": null}
+{"i": 847, "t": 26138.437291076, "confirmed": null}
+{"i": 848, "t": 26138.473956213, "confirmed": null}
+{"i": 849, "t": 26138.505173595, "confirmed": null}
+{"i": 850, "t": 26138.537331758, "confirmed": null}
+{"i": 851, "t": 26138.573432136, "confirmed": null}
+{"i": 852, "t": 26138.605320747, "confirmed": null}
+{"i": 853, "t": 26138.637237329, "confirmed": null}
+{"i": 854, "t": 26138.673255266, "confirmed": null}
+{"i": 855, "t": 26138.705322161, "confirmed": null}
+{"i": 856, "t": 26138.741421194, "confirmed": null}
+{"i": 857, "t": 26138.773386404, "confirmed": null}
+{"i": 858, "t": 26138.8053305, "confirmed": null}
+{"i": 859, "t": 26138.841245632, "confirmed": null}
+{"i": 860, "t": 26138.873394172, "confirmed": null}
+{"i": 861, "t": 26138.905214117, "confirmed": null}
+{"i": 862, "t": 26138.941219011, "confirmed": null}
+{"i": 863, "t": 26138.973858181, "confirmed": null}
+{"i": 864, "t": 26139.005184926, "confirmed": null}
+{"i": 865, "t": 26139.041389198, "confirmed": null}
+{"i": 866, "t": 26139.073821508, "confirmed": null}
+{"i": 867, "t": 26139.109498524, "confirmed": null}
+{"i": 868, "t": 26139.143745259, "confirmed": null}
+{"i": 869, "t": 26139.173461311, "confirmed": null}
+{"i": 870, "t": 26139.209305638, "confirmed": null}
+{"i": 871, "t": 26139.241594256, "confirmed": "Zooming Out With Full Hand"}
+{"i": 872, "t": 26139.273686459, "confirmed": "Zooming Out With Full Hand"}
+{"i": 873, "t": 26139.309341538, "confirmed": "Zooming Out With Full Hand"}
+{"i": 874, "t": 26139.34127922, "confirmed": "Zooming Out With Full Hand"}
+{"i": 875, "t": 26139.37327052, "confirmed": "Zooming Out With Full Hand"}
+{"i": 876, "t": 26139.409275117, "confirmed": "Zooming Out With Full Hand"}
+{"i": 877, "t": 26139.44175009, "confirmed": "Zooming Out With Full Hand"}
+{"i": 878, "t": 26139.473154471, "confirmed": "Zooming Out With Full Hand"}
+{"i": 879, "t": 26139.509566057, "confirmed": "Zooming Out With Full Hand"}
+{"i": 880, "t": 26139.541437573, "confirmed": "Zooming Out With Full Hand"}
+{"i": 881, "t": 26139.577427795, "confirmed": "Zooming Out With Full Hand"}
+{"i": 882, "t": 26139.609443922, "confirmed": "Zooming Out With Full Hand"}
+{"i": 883, "t": 26139.641274489, "confirmed": "Zooming Out With Full Hand"}
+{"i": 884, "t": 26139.677277011, "confirmed": "Zooming Out With Full Hand"}
+{"i": 885, "t": 26139.709538407, "confirmed": "Zooming Out With Full Hand"}
+{"i": 886, "t": 26139.741350457, "confirmed": "Zooming Out With Full Hand"}
+{"i": 887, "t": 26139.777182069, "confirmed": "Zooming Out With Full Hand"}
+{"i": 888, "t": 26139.809363021, "confirmed": "Zooming Out With Full Hand"}
+{"i": 889, "t": 26139.841243182, "confirmed": "Zooming Out With Full Hand"}
+{"i": 890, "t": 26139.877322841, "confirmed": "Zooming Out With Full Hand"}
+{"i": 891, "t": 26139.909387181, "confirmed": "Zooming Out With Full Hand"}
+{"i": 892, "t": 26139.945205519, "confirmed": "Zooming Out With Full Hand"}
+{"i": 893, "t": 26139.977214933, "confirmed": "Zooming Out With Full Hand"}
+{"i": 894, "t": 26140.00919497, "confirmed": "Zooming Out With Full Hand"}
+{"i": 895, "t": 26140.04516138, "confirmed": "Zooming Out With Full Hand"}
+{"i": 896, "t": 26140.077470211, "confirmed": "Zooming Out With Full Hand"}
+{"i": 897, "t": 26140.109060323, "confirmed": "Zooming Out With Full Hand"}
+{"i": 898, "t": 26140.145234332, "confirmed": "Zooming Out With Full Hand"}
+{"i": 899, "t": 26140.177346177, "confirmed": "Zooming Out With Full Hand"}
+{"i": 900, "t": 26140.209207971, "confirmed": "Zooming Out With Full Hand"}
+{"i": 901, "t": 26140.244939953, "confirmed": "Zooming Out With Full Hand"}
+{"i": 902, "t": 26140.277486984, "confirmed": "Zooming Out With Full Hand"}
+{"i": 903, "t": 26140.313190143, "confirmed": "Zooming Out With Full Hand"}
+{"i": 904, "t": 26140.345338137, "confirmed": "Zooming Out With Full Hand"}
+{"i": 905, "t": 26140.377277165, "confirmed": "Zooming Out With Full Hand"}
+{"i": 906, "t": 26140.413169949, "confirmed": "Zooming Out With Full Hand"}
+{"i": 907, "t": 26140.446778263, "confirmed": "Zooming Out With Full Hand"}
+{"i": 908, "t": 26140.47741324, "confirmed": null}
+{"i": 909, "t": 26140.513569566, "confirmed": null}
+{"i": 910, "t": 26140.559680865, "confirmed": null}
+{"i": 911, "t": 26140.577537546, "confirmed": null}
+{"i": 912, "t": 26140.61313524, "confirmed": null}
+{"i": 913, "t": 26140.64526214, "confirmed": null}
+{"i": 914, "t": 26140.677119686, "confirmed": null}
+{"i": 915, "t": 26140.713371257, "confirmed": null}
+{"i": 916, "t": 26140.745978809, "confirmed": null}
+{"i": 917, "t": 26140.781170833, "confirmed": null}
+{"i": 918, "t": 26140.813188227, "confirmed": null}
+{"i": 919, "t": 26140.845213747, "confirmed": null}
+{"i": 920, "t": 26140.881087668, "confirmed": null}
+{"i": 921, "t": 26140.913123684, "confirmed": null}
+{"i": 922, "t": 26140.945496667, "confirmed": null}
+{"i": 923, "t": 26140.981375143, "confirmed": "Zooming In With Full Hand"}
+{"i": 924, "t": 26141.01331097, "confirmed": "Zooming In With Full Hand"}
+{"i": 925, "t": 26141.045013924, "confirmed": "Zooming In With Full Hand"}
+{"i": 926, "t": 26141.081512621, "confirmed": "Zooming In With Full Hand"}
+{"i": 927, "t": 26141.113084747, "confirmed": "Zooming In With Full Hand"}
+{"i": 928, "t": 26141.14935306, "confirmed": "Zooming In With Full Hand"}
+{"i": 929, "t": 26141.181134665, "confirmed": "Zooming In With Full Hand"}
+{"i": 930, "t": 26141.213277411, "confirmed": "Zooming In With Full Hand"}
+{"i": 931, "t": 26141.248880707, "confirmed": "Zooming In With Full Hand"}
+{"i": 932, "t": 26141.281135445, "confirmed": "Zooming In With Full Hand"}
+{"i": 933, "t": 26141.313508213, "confirmed": "Zooming In With Full Hand"}
+{"i": 934, "t": 26141.349173524, "confirmed": "Zooming In With Full Hand"}
+{"i": 935, "t": 26141.381158382, "confirmed": "Zooming In With Full Hand"}
+{"i": 936, "t": 26141.413198261, "confirmed": "Zooming In With Full Hand"}
+{"i": 937, "t": 26141.449163786, "confirmed": "Zooming In With Full Hand"}
+{"i": 938, "t": 26141.481268577, "confirmed": "Zooming In With Full Hand"}
+{"i": 939, "t": 26141.517253049, "confirmed": "Zooming In With Full Hand"}
+{"i": 940, "t": 26141.549105229, "confirmed": "Zooming In With Full Hand"}
+{"i": 941, "t": 26141.581331142, "confirmed": "Zooming In With Full Hand"}
+{"i": 942, "t": 26141.617063454, "confirmed": "Zooming In With Full Hand"}
+{"i": 943, "t": 26141.649464421, "confirmed": "Zooming In With Full Hand"}
+{"i": 944, "t": 26141.681075893, "confirmed": "Zooming In With Full Hand"}
+{"i": 945, "t": 26141.71697128, "confirmed": "Zooming In With Full Hand"}
+{"i": 946, "t": 26141.749124611, "confirmed": "Zooming In With Full Hand"}
+{"i": 947, "t": 26141.781076071, "confirmed": "Zooming In With Full Hand"}
+{"i": 948, "t": 26141.817087025, "confirmed": "Zooming In With Full Hand"}
+{"i": 949, "t": 26141.848922638, "confirmed": "Zooming In With Full Hand"}
+{"i": 950, "t": 26141.881168861, "confirmed": "Zooming In With Full Hand"}
+{"i": 951, "t": 26141.917529811, "confirmed": "Zooming In With Full Hand"}
+{"i": 952, "t": 26141.950596316, "confirmed": "Zooming In With Full Hand"}
+{"i": 953, "t": 26141.985540948, "confirmed": "Zooming In With Full Hand"}
+{"i": 954, "t": 26142.017312383, "confirmed": "Zooming In With Full Hand"}
+{"i": 955, "t": 26142.049375984, "confirmed": "Zooming In With Full Hand"}
+{"i": 956, "t": 26142.085221542, "confirmed": "Zooming In With Full Hand"}
+{"i": 957, "t": 26142.117107245, "confirmed": "Zooming In With Full Hand"}
+{"i": 958, "t": 26142.148963152, "confirmed": "Zooming In With Full Hand"}
+{"i": 959, "t": 26142.185161094, "confirmed": "Zooming In With Full Hand"}
+{"i": 960, "t": 26142.218567969, "confirmed": "Zooming In With Full Hand"}
+{"i": 961, "t": 26142.249236165, "confirmed": "Zooming In With Full Hand"}
+{"i": 962, "t": 26142.285223699, "confirmed": "Zooming In With Full Hand"}
+{"i": 963, "t": 26142.317006622, "confirmed": "Zooming In With Full Hand"}
+{"i": 964, "t": 26142.353440714, "confirmed": "Zooming In With Full Hand"}
+{"i": 965, "t": 26142.385245942, "confirmed": "Zooming In With Full Hand"}
+{"i": 966, "t": 26142.417278515, "confirmed": "Zooming In With Full Hand"}
+{"i": 967, "t": 26142.453250874, "confirmed": "Zooming In With Full Hand"}
+{"i": 968, "t": 26142.485145913, "confirmed": "Zooming In With Full Hand"}
+{"i": 969, "t": 26142.517256208, "confirmed": "Zooming In With Full Hand"}
+{"i": 970, "t": 26142.552944153, "confirmed": "Zooming In With Full Hand"}
+{"i": 971, "t": 26142.586101818, "confirmed": "Zooming In With Full Hand"}
+{"i": 972, "t": 26142.617210931, "confirmed": "Zooming In With Full Hand"}
+{"i": 973, "t": 26142.653148452, "confirmed": "Zooming In With Full Hand"}
+{"i": 974, "t": 26142.685155939, "confirmed": "Zooming In With Full Hand"}
+{"i": 975, "t": 26142.717310905, "confirmed": null}
+{"i": 976, "t": 26142.75482723, "confirmed": null}
+{"i": 977, "t": 26142.78523401, "confirmed": null}
+{"i": 978, "t": 26142.821161103, "confirmed": null}
+{"i": 979, "t": 26142.853160117, "confirmed": null}
+{"i": 980, "t": 26142.885059746, "confirmed": null}
+{"i": 981, "t": 26142.921019427, "confirmed": null}
+{"i": 982, "t": 26142.953096639, "confirmed": null}
+{"i": 983, "t": 26142.984875266, "confirmed": null}
+{"i": 984, "t": 26143.021118179, "confirmed": null}
+{"i": 985, "t": 26143.053160566, "confirmed": null}
+{"i": 986, "t": 26143.085130464, "confirmed": null}
+{"i": 987, "t": 26143.121092148, "confirmed": null}
+{"i": 988, "t": 26143.153339484, "confirmed": null}
+{"i": 989, "t": 26143.189100656, "confirmed": null}
+{"i": 990, "t": 26143.221064618, "confirmed": null}
+{"i": 991, "t": 26143.25304935, "confirmed": null}
+{"i": 992, "t": 26143.289559912, "confirmed": null}
+{"i": 993, "t": 26143.321073162, "confirmed": null}
+{"i": 994, "t": 26143.352987049, "confirmed": null}
+{"i": 995, "t": 26143.38910341, "confirmed": null}
+{"i": 996, "t": 26143.421407416, "confirmed": null}
+{"i": 997, "t": 26143.453510855, "confirmed": null}
+{"i": 998, "t": 26143.488986539, "confirmed": null}
+{"i": 999, "t": 26143.521052136, "confirmed": null}
+{"i": 1000, "t": 26143.557511893, "confirmed": "Zooming In With Full Hand"}
+{"i": 1001, "t": 26143.589429432, "confirmed": "Zooming In With Full Hand"}
+{"i": 1002, "t": 26143.621151206, "confirmed": "Zooming In With Full Hand"}
+{"i": 1003, "t": 26143.656943974, "confirmed": "Zooming In With Full Hand"}
+{"i": 1004, "t": 26143.689017602, "confirmed": "Zooming In With Full Hand"}
+{"i": 1005, "t": 26143.720952855, "confirmed": "Zooming In With Full Hand"}
+{"i": 1006, "t": 26143.757134022, "confirmed": "Zooming In With Full Hand"}
+{"i": 1007, "t": 26143.789115067, "confirmed": "Zooming In With Full Hand"}
+{"i": 1008, "t": 26143.822471774, "confirmed": "Zooming In With Full Hand"}
+{"i": 1009, "t": 26143.857009115, "confirmed": "Zooming In With Full Hand"}
+{"i": 1010, "t": 26143.888733418, "confirmed": "Zooming In With Full Hand"}
+{"i": 1011, "t": 26143.921060466, "confirmed": "Zooming In With Full Hand"}
+{"i": 1012, "t": 26143.957118242, "confirmed": "Zooming In With Full Hand"}
+{"i": 1013, "t": 26143.989046004, "confirmed": "Zooming In With Full Hand"}
+{"i": 1014, "t": 26144.025053768, "confirmed": "Zooming In With Full Hand"}
+{"i": 1015, "t": 26144.059992259, "confirmed": "Zooming In With Full Hand"}
+{"i": 1016, "t": 26144.089062729, "confirmed": "Zooming In With Full Hand"}
+{"i": 1017, "t": 26144.125092196, "confirmed": "Zooming In With Full Hand"}
+{"i": 1018, "t": 26144.156755683, "confirmed": "Zooming In With Full Hand"}
+{"i": 1019, "t": 26144.189044218, "confirmed": "Zooming In With Full Hand"}
+{"i": 1020, "t": 26144.225009159, "confirmed": "Zooming In With Full Hand"}
+{"i": 1021, "t": 26144.257077627, "confirmed": "Zooming In With Full Hand"}
+{"i": 1022, "t": 26144.288883998, "confirmed": "Zooming In With Full Hand"}
+{"i": 1023, "t": 26144.325197503, "confirmed": "Zooming In With Full Hand"}
+{"i": 1024, "t": 26144.357188043, "confirmed": "Zooming In With Full Hand"}
+{"i": 1025, "t": 26144.393435231, "confirmed": "Zooming In With Full Hand"}
+{"i": 1026, "t": 26144.424917981, "confirmed": "Zooming In With Full Hand"}
+{"i": 1027, "t": 26144.45691548, "confirmed": "Zooming In With Full Hand"}
+{"i": 1028, "t": 26144.492847414, "confirmed": "Zooming In With Full Hand"}
+{"i": 1029, "t": 26144.525072018, "confirmed": "Zooming In With Full Hand"}
+{"i": 1030, "t": 26144.556877326, "confirmed": "Zooming In With Full Hand"}
+{"i": 1031, "t": 26144.593104464, "confirmed": "Zooming In With Full Hand"}
+{"i": 1032, "t": 26144.624881527, "confirmed": "Zooming In With Full Hand"}
+{"i": 1033, "t": 26144.657043579, "confirmed": "Zooming In With Full Hand"}
+{"i": 1034, "t": 26144.692862761, "confirmed": "Zooming In With Full Hand"}
+{"i": 1035, "t": 26144.725215265, "confirmed": "Zooming In With Full Hand"}
+{"i": 1036, "t": 26144.756932505, "confirmed": "Zooming In With Full Hand"}
+{"i": 1037, "t": 26144.793086347, "confirmed": "Zooming In With Full Hand"}
+{"i": 1038, "t": 26144.824929228, "confirmed": "Zooming In With Full Hand"}
+{"i": 1039, "t": 26144.860848087, "confirmed": "Zooming In With Full Hand"}
+{"i": 1040, "t": 26144.892893991, "confirmed": "Zooming In With Full Hand"}
+{"i": 1041, "t": 26144.92796111, "confirmed": "Zooming In With Full Hand"}
+{"i": 1042, "t": 26144.960929273, "confirmed": "Zooming In With Full Hand"}
+{"i": 1043, "t": 26144.992911888, "confirmed": "Zooming In With Full Hand"}
+{"i": 1044, "t": 26145.025009968, "confirmed": "Zooming In With Full Hand"}
+{"i": 1045, "t": 26145.060948697, "confirmed": "Zooming In With Full Hand"}
+{"i": 1046, "t": 26145.092916008, "confirmed": "Zooming In With Full Hand"}
+{"i": 1047, "t": 26145.12498786, "confirmed": "Zooming In With Full Hand"}
+{"i": 1048, "t": 26145.160979987, "confirmed": "Zooming In With Full Hand"}
+{"i": 1049, "t": 26145.192897161, "confirmed": "Zooming In With Full Hand"}
+{"i": 1050, "t": 26145.229009266, "confirmed": "Zooming In With Full Hand"}
+{"i": 1051, "t": 26145.260871989, "confirmed": "Zooming In With Full Hand"}
+{"i": 1052, "t": 26145.29296793, "confirmed": "Zooming In With Full Hand"}
+{"i": 1053, "t": 26145.328921897, "confirmed": "Zooming In With Full Hand"}
+{"i": 1054, "t": 26145.360891019, "confirmed": "Zooming In With Full Hand"}
+{"i": 1055, "t": 26145.392823541, "confirmed": "Zooming In With Full Hand"}
+{"i": 1056, "t": 26145.428663131, "confirmed": "Zooming In With Full Hand"}
+{"i": 1057, "t": 26145.460775457, "confirmed": "Zooming In With Full Hand"}
+{"i": 1058, "t": 26145.492976474, "confirmed": "Zooming In With Full Hand"}
+{"i": 1059, "t": 26145.535729782, "confirmed": "Zooming In With Full Hand"}
+{"i": 1060, "t": 26145.563294469, "confirmed": "Zooming In With Full Hand"}
+{"i": 1061, "t": 26145.597149865, "confirmed": "Zooming In With Full Hand"}
+{"i": 1062, "t": 26145.628836203, "confirmed": "Zooming In With Full Hand"}
+{"i": 1063, "t": 26145.661278164, "confirmed": "Zooming In With Full Hand"}
+{"i": 1064, "t": 26145.696916555, "confirmed": "Zooming In With Full Hand"}
+{"i": 1065, "t": 26145.729393738, "confirmed": "Zooming In With Full Hand"}
+{"i": 1066, "t": 26145.760859516, "confirmed": "Zooming In With Full Hand"}
+{"i": 1067, "t": 26145.797660289, "confirmed": "Zooming In With Full Hand"}
+{"i": 1068, "t": 26145.8288302, "confirmed": "Zooming In With Full Hand"}
+{"i": 1069, "t": 26145.861231608, "confirmed": "Zooming In With Full Hand"}
+{"i": 1070, "t": 26145.897023678, "confirmed": "Zooming In With Full Hand"}
+{"i": 1071, "t": 26145.929163225, "confirmed": "Zooming In With Full Hand"}
+{"i": 1072, "t": 26145.96102269, "confirmed": "Zooming In With Full Hand"}
+{"i": 1073, "t": 26145.997136193, "confirmed": "Zooming In With Full Hand"}
+{"i": 1074, "t": 26146.028809738, "confirmed": "Zooming In With Full Hand"}
+{"i": 1075, "t": 26146.064923318, "confirmed": "Zooming In With Full Hand"}
+{"i": 1076, "t": 26146.097046634, "confirmed": null}
+{"i": 1077, "t": 26146.129411579, "confirmed": null}
+{"i": 1078, "t": 26146.164683016, "confirmed": null}
+{"i": 1079, "t": 26146.196838663, "confirmed": null}
+{"i": 1080, "t": 26146.228882823, "confirmed": null}
+{"i": 1081, "t": 26146.26487289, "confirmed": null}
+{"i": 1082, "t": 26146.296978645, "confirmed": null}
+{"i": 1083, "t": 26146.329099394, "confirmed": null}
+{"i": 1084, "t": 26146.365038969, "confirmed": null}
+{"i": 1085, "t": 26146.397043682, "confirmed": null}
+{"i": 1086, "t": 26146.43305287, "confirmed": null}
+{"i": 1087, "t": 26146.465115997, "confirmed": null}
+{"i": 1088, "t": 26146.496785241, "confirmed": null}
+{"i": 1089, "t": 26146.532905737, "confirmed": null}
+{"i": 1090, "t": 26146.564764564, "confirmed": null}
+{"i": 1091, "t": 26146.596801985, "confirmed": null}
+{"i": 1092, "t": 26146.6328995, "confirmed": null}
+{"i": 1093, "t": 26146.666188854, "confirmed": null}
+{"i": 1094, "t": 26146.6968702, "confirmed": null}
+{"i": 1095, "t": 26146.732685391, "confirmed": null}
+{"i": 1096, "t": 26146.764913228, "confirmed": null}
+{"i": 1097, "t": 26146.797264049, "confirmed": null}
+{"i": 1098, "t": 26146.832851534, "confirmed": null}
+{"i": 1099, "t": 26146.865102462, "confirmed": null}
+{"i": 1100, "t": 26146.900926122, "confirmed": null}
+{"i": 1101, "t": 26146.932981356, "confirmed": null}
+{"i": 1102, "t": 26146.967384259, "confirmed": null}
+{"i": 1103, "t": 26147.000903661, "confirmed": null}
+{"i": 1104, "t": 26147.03288647, "confirmed": null}
+{"i": 1105, "t": 26147.06467478, "confirmed": null}
+{"i": 1106, "t": 26147.101126903, "confirmed": null}
+{"i": 1107, "t": 26147.132973024, "confirmed": null}
+{"i": 1108, "t": 26147.164802212, "confirmed": null}
+{"i": 1109, "t": 26147.200744494, "confirmed": null}
+{"i": 1110, "t": 26147.233110311, "confirmed": null}
+{"i": 1111, "t": 26147.268813441, "confirmed": null}
+{"i": 1112, "t": 26147.3008337, "confirmed": null}
+{"i": 1113, "t": 26147.332810491, "confirmed": null}
+{"i": 1114, "t": 26147.368668777, "confirmed": null}
+{"i": 1115, "t": 26147.400798223, "confirmed": null}
+{"i": 1116, "t": 26147.432588358, "confirmed": null}
+{"i": 1117, "t": 26147.468860386, "confirmed": null}
+{"i": 1118, "t": 26147.500770848, "confirmed": null}
+{"i": 1119, "t": 26147.532635877, "confirmed": null}
+{"i": 1120, "t": 26147.568782677, "confirmed": null}
+{"i": 1121, "t": 26147.600668369, "confirmed": null}
+{"i": 1122, "t": 26147.637118253, "confirmed": null}
+{"i": 1123, "t": 26147.668888019, "confirmed": null}
+{"i": 1124, "t": 26147.700803482, "confirmed": null}
+{"i": 1125, "t": 26147.736695535, "confirmed": null}
+{"i": 1126, "t": 26147.768907718, "confirmed": null}
+{"i": 1127, "t": 26147.800840958, "confirmed": null}
+{"i": 1128, "t": 26147.836947956, "confirmed": null}
+{"i": 1129, "t": 26147.868830581, "confirmed": null}
+{"i": 1130, "t": 26147.901010915, "confirmed": null}
+{"i": 1131, "t": 26147.93678138, "confirmed": null}
+{"i": 1132, "t": 26147.968562349, "confirmed": null}
+{"i": 1133, "t": 26148.000666766, "confirmed": null}
+{"i": 1134, "t": 26148.038470372, "confirmed": null}
+{"i": 1135, "t": 26148.071049296, "confirmed": null}
+{"i": 1136, "t": 26148.107376441, "confirmed": null}
+{"i": 1137, "t": 26148.136765293, "confirmed": null}
+{"i": 1138, "t": 26148.168792765, "confirmed": null}
+{"i": 1139, "t": 26148.204811939, "confirmed": null}
+{"i": 1140, "t": 26148.236764989, "confirmed": null}
+{"i": 1141, "t": 26148.268683547, "confirmed": null}
+{"i": 1142, "t": 26148.30477403, "confirmed": null}
+{"i": 1143, "t": 26148.336750211, "confirmed": null}
+{"i": 1144, "t": 26148.370030999, "confirmed": null}
+{"i": 1145, "t": 26148.405215939, "confirmed": null}
+{"i": 1146, "t": 26148.436888877, "confirmed": null}
+{"i": 1147, "t": 26148.472785443, "confirmed": null}
+{"i": 1148, "t": 26148.504816799, "confirmed": null}
+{"i": 1149, "t": 26148.536905463, "confirmed": null}
+{"i": 1150, "t": 26148.572629653, "confirmed": null}
+{"i": 1151, "t": 26148.604644291, "confirmed": null}
+{"i": 1152, "t": 26148.636847818, "confirmed": null}
+{"i": 1153, "t": 26148.67271584, "confirmed": null}
+{"i": 1154, "t": 26148.704956038, "confirmed": null}
+{"i": 1155, "t": 26148.736950671, "confirmed": null}
+{"i": 1156, "t": 26148.772825392, "confirmed": null}
+{"i": 1157, "t": 26148.804637806, "confirmed": null}
+{"i": 1158, "t": 26148.836788799, "confirmed": null}
+{"i": 1159, "t": 26148.872922982, "confirmed": null}
+{"i": 1160, "t": 26148.904961471, "confirmed": null}
+{"i": 1161, "t": 26148.940826837, "confirmed": null}
+{"i": 1162, "t": 26148.989716525, "confirmed": null}
+{"i": 1163, "t": 26149.005015285, "confirmed": null}
+{"i": 1164, "t": 26149.040659958, "confirmed": null}
+{"i": 1165, "t": 26149.072763021, "confirmed": null}
+{"i": 1166, "t": 26149.104845526, "confirmed": null}
+{"i": 1167, "t": 26149.140656557, "confirmed": null}
+{"i": 1168, "t": 26149.181816025, "confirmed": "Swiping Left"}
+{"i": 1169, "t": 26149.20454147, "confirmed": "Swiping Left"}
+{"i": 1170, "t": 26149.240797278, "confirmed": "Swiping Left"}
+{"i": 1171, "t": 26149.275567732, "confirmed": "Swiping Left"}
+{"i": 1172, "t": 26149.308656701, "confirmed": "Swiping Left"}
+{"i": 1173, "t": 26149.340755741, "confirmed": "Swiping Left"}
+{"i": 1174, "t": 26149.372875155, "confirmed": "Swiping Left"}
+{"i": 1175, "t": 26149.408730249, "confirmed": "Swiping Left"}
+{"i": 1176, "t": 26149.440750222, "confirmed": "Swiping Left"}
+{"i": 1177, "t": 26149.472771258, "confirmed": "Swiping Left"}
+{"i": 1178, "t": 26149.508524426, "confirmed": "Swiping Left"}
+{"i": 1179, "t": 26149.541085651, "confirmed": "Swiping Left"}
+{"i": 1180, "t": 26149.574708863, "confirmed": "Swiping Left"}
+{"i": 1181, "t": 26149.609039877, "confirmed": "Swiping Left"}
+{"i": 1182, "t": 26149.640634421, "confirmed": "Swiping Left"}
+{"i": 1183, "t": 26149.677032923, "confirmed": "Swiping Left"}
+{"i": 1184, "t": 26149.708648968, "confirmed": "Swiping Left"}
+{"i": 1185, "t": 26149.740614833, "confirmed": "Swiping Left"}
+{"i": 1186, "t": 26149.776631979, "confirmed": "Swiping Left"}
+{"i": 1187, "t": 26149.80925703, "confirmed": "Swiping Left"}
+{"i": 1188, "t": 26149.840581019, "confirmed": "Swiping Left"}
+{"i": 1189, "t": 26149.876583769, "confirmed": "Swiping Left"}
+{"i": 1190, "t": 26149.908512704, "confirmed": "Swiping Left"}
+{"i": 1191, "t": 26149.940635113, "confirmed": "Swiping Left"}
+{"i": 1192, "t": 26149.976595812, "confirmed": "Swiping Left"}
+{"i": 1193, "t": 26150.008769324, "confirmed": "Swiping Left"}
+{"i": 1194, "t": 26150.040822512, "confirmed": "Swiping Left"}
+{"i": 1195, "t": 26150.076758728, "confirmed": "Swiping Left"}
+{"i": 1196, "t": 26150.108914566, "confirmed": "Swiping Left"}
+{"i": 1197, "t": 26150.144579786, "confirmed": "Swiping Left"}
+{"i": 1198, "t": 26150.176791304, "confirmed": "Swiping Left"}
+{"i": 1199, "t": 26150.208572879, "confirmed": "Swiping Left"}
+{"i": 1200, "t": 26150.244645722, "confirmed": "Swiping Left"}
+{"i": 1201, "t": 26150.276710028, "confirmed": "Swiping Left"}
+{"i": 1202, "t": 26150.309072507, "confirmed": "Swiping Left"}
+{"i": 1203, "t": 26150.344830937, "confirmed": "Swiping Left"}
+{"i": 1204, "t": 26150.376803177, "confirmed": "Swiping Left"}
+{"i": 1205, "t": 26150.409316296, "confirmed": null}
+{"i": 1206, "t": 26150.444702478, "confirmed": null}
+{"i": 1207, "t": 26150.477282622, "confirmed": null}
+{"i": 1208, "t": 26150.512704631, "confirmed": null}
+{"i": 1209, "t": 26150.544621731, "confirmed": null}
+{"i": 1210, "t": 26150.576441891, "confirmed": null}
+{"i": 1211, "t": 26150.612553919, "confirmed": null}
+{"i": 1212, "t": 26150.644637531, "confirmed": null}
+{"i": 1213, "t": 26150.67653237, "confirmed": null}
+{"i": 1214, "t": 26150.712565483, "confirmed": null}
+{"i": 1215, "t": 26150.744500925, "confirmed": null}
+{"i": 1216, "t": 26150.776507627, "confirmed": null}
+{"i": 1217, "t": 26150.812653419, "confirmed": null}
+{"i": 1218, "t": 26150.844693169, "confirmed": null}
+{"i": 1219, "t": 26150.876697619, "confirmed": null}
+{"i": 1220, "t": 26150.912656251, "confirmed": null}
+{"i": 1221, "t": 26150.94467742, "confirmed": null}
+{"i": 1222, "t": 26150.980402695, "confirmed": null}
+{"i": 1223, "t": 26151.012496784, "confirmed": null}
+{"i": 1224, "t": 26151.044765283, "confirmed": null}
+{"i": 1225, "t": 26151.080742597, "confirmed": null}
+{"i": 1226, "t": 26151.112618067, "confirmed": null}
+{"i": 1227, "t": 26151.144678857, "confirmed": null}
+{"i": 1228, "t": 26151.181407564, "confirmed": null}
+{"i": 1229, "t": 26151.212405896, "confirmed": null}
+{"i": 1230, "t": 26151.244656414, "confirmed": null}
+{"i": 1231, "t": 26151.280627812, "confirmed": null}
+{"i": 1232, "t": 26151.312610937, "confirmed": null}
+{"i": 1233, "t": 26151.348584127, "confirmed": null}
+{"i": 1234, "t": 26151.384269171, "confirmed": null}
+{"i": 1235, "t": 26151.41279349, "confirmed": null}
+{"i": 1236, "t": 26151.448559131, "confirmed": null}
+{"i": 1237, "t": 26151.480659711, "confirmed": null}
+{"i": 1238, "t": 26151.512562256, "confirmed": null}
+{"i": 1239, "t": 26151.548842435, "confirmed": null}
+{"i": 1240, "t": 26151.580512258, "confirmed": null}
+{"i": 1241, "t": 26151.612678188, "confirmed": null}
+{"i": 1242, "t": 26151.64887156, "confirmed": null}
+{"i": 1243, "t": 26151.680472085, "confirmed": null}
+{"i": 1244, "t": 26151.716495801, "confirmed": null}
+{"i": 1245, "t": 26151.748572701, "confirmed": null}
+{"i": 1246, "t": 26151.785057619, "confirmed": null}
+{"i": 1247, "t": 26151.81649356, "confirmed": null}
+{"i": 1248, "t": 26151.848552038, "confirmed": null}
+{"i": 1249, "t": 26151.884511482, "confirmed": null}
+{"i": 1250, "t": 26151.916456762, "confirmed": null}
+{"i": 1251, "t": 26151.948463804, "confirmed": null}
+{"i": 1252, "t": 26151.980539006, "confirmed": null}
+{"i": 1253, "t": 26152.016571474, "confirmed": null}
+{"i": 1254, "t": 26152.048547931, "confirmed": null}
+{"i": 1255, "t": 26152.080661042, "confirmed": null}
+{"i": 1256, "t": 26152.116550792, "confirmed": null}
+{"i": 1257, "t": 26152.148547531, "confirmed": null}
+{"i": 1258, "t": 26152.184466837, "confirmed": null}
+{"i": 1259, "t": 26152.21672464, "confirmed": null}
+{"i": 1260, "t": 26152.248340332, "confirmed": null}
+{"i": 1261, "t": 26152.284397201, "confirmed": null}
+{"i": 1262, "t": 26152.316674231, "confirmed": null}
+{"i": 1263, "t": 26152.348595374, "confirmed": null}
+{"i": 1264, "t": 26152.384360331, "confirmed": null}
+{"i": 1265, "t": 26152.416524656, "confirmed": null}
+{"i": 1266, "t": 26152.448466995, "confirmed": "Thumb Down"}
+{"i": 1267, "t": 26152.48657625, "confirmed": "Thumb Down"}
+{"i": 1268, "t": 26152.51654408, "confirmed": "Thumb Down"}
+{"i": 1269, "t": 26152.552523904, "confirmed": "Thumb Down"}
+{"i": 1270, "t": 26152.584448614, "confirmed": "Thumb Down"}
+{"i": 1271, "t": 26152.616651614, "confirmed": "Thumb Down"}
+{"i": 1272, "t": 26152.652650459, "confirmed": "Thumb Down"}
+{"i": 1273, "t": 26152.684326558, "confirmed": "Thumb Down"}
+{"i": 1274, "t": 26152.716958876, "confirmed": "Thumb Down"}
+{"i": 1275, "t": 26152.752569073, "confirmed": "Thumb Down"}
+{"i": 1276, "t": 26152.785124541, "confirmed": "Thumb Down"}
+{"i": 1277, "t": 26152.816655204, "confirmed": "Thumb Down"}
+{"i": 1278, "t": 26152.852651074, "confirmed": "Thumb Down"}
+{"i": 1279, "t": 26152.884507036, "confirmed": "Thumb Down"}
+{"i": 1280, "t": 26152.916500572, "confirmed": "Thumb Down"}
+{"i": 1281, "t": 26152.952551249, "confirmed": "Thumb Down"}
+{"i": 1282, "t": 26152.984533144, "confirmed": "Thumb Down"}
+{"i": 1283, "t": 26153.020696591, "confirmed": "Thumb Down"}
+{"i": 1284, "t": 26153.052596674, "confirmed": "Thumb Down"}
+{"i": 1285, "t": 26153.084803143, "confirmed": "Thumb Down"}
+{"i": 1286, "t": 26153.120381624, "confirmed": "Thumb Down"}
+{"i": 1287, "t": 26153.15248632, "confirmed": "Thumb Down"}
+{"i": 1288, "t": 26153.18463855, "confirmed": "Thumb Down"}
+{"i": 1289, "t": 26153.22056062, "confirmed": "Thumb Down"}
+{"i": 1290, "t": 26153.252847031, "confirmed": "Thumb Down"}
+{"i": 1291, "t": 26153.284718169, "confirmed": "Thumb Down"}
+{"i": 1292, "t": 26153.320290289, "confirmed": "Thumb Down"}
+{"i": 1293, "t": 26153.352323584, "confirmed": "Thumb Down"}
+{"i": 1294, "t": 26153.388628573, "confirmed": "Thumb Down"}
+{"i": 1295, "t": 26153.421063282, "confirmed": "Thumb Down"}
+{"i": 1296, "t": 26153.452650438, "confirmed": "Thumb Down"}
+{"i": 1297, "t": 26153.488462083, "confirmed": "Thumb Down"}
+{"i": 1298, "t": 26153.520576814, "confirmed": "Thumb Down"}
+{"i": 1299, "t": 26153.552303732, "confirmed": "Thumb Down"}
+{"i": 1300, "t": 26153.588557288, "confirmed": "Thumb Down"}
+{"i": 1301, "t": 26153.620403934, "confirmed": "Thumb Down"}
+{"i": 1302, "t": 26153.652468896, "confirmed": "Thumb Down"}
+{"i": 1303, "t": 26153.688555421, "confirmed": "Thumb Down"}
+{"i": 1304, "t": 26153.720642444, "confirmed": "Thumb Down"}
+{"i": 1305, "t": 26153.756504299, "confirmed": "Thumb Down"}
+{"i": 1306, "t": 26153.788867046, "confirmed": "Thumb Down"}
+{"i": 1307, "t": 26153.820303938, "confirmed": "Thumb Down"}
+{"i": 1308, "t": 26153.856655503, "confirmed": "Thumb Down"}
+{"i": 1309, "t": 26153.888459539, "confirmed": "Thumb Down"}
+{"i": 1310, "t": 26153.920555294, "confirmed": "Thumb Down"}
+{"i": 1311, "t": 26153.95652882, "confirmed": "Thumb Down"}
+{"i": 1312, "t": 26153.988248269, "confirmed": "Thumb Down"}
+{"i": 1313, "t": 26154.020458524, "confirmed": "Thumb Down"}
+{"i": 1314, "t": 26154.056647958, "confirmed": "Thumb Down"}
+{"i": 1315, "t": 26154.088320803, "confirmed": "Thumb Down"}
+{"i": 1316, "t": 26154.120587873, "confirmed": "Thumb Down"}
+{"i": 1317, "t": 26154.15650147, "confirmed": "Thumb Down"}
+{"i": 1318, "t": 26154.188389375, "confirmed": "Thumb Down"}
+{"i": 1319, "t": 26154.224444028, "confirmed": "Thumb Down"}
+{"i": 1320, "t": 26154.256459464, "confirmed": "Thumb Down"}
+{"i": 1321, "t": 26154.288530845, "confirmed": "Thumb Down"}
+{"i": 1322, "t": 26154.32452745, "confirmed": "Thumb Down"}
+{"i": 1323, "t": 26154.356521212, "confirmed": "Thumb Down"}
+{"i": 1324, "t": 26154.388466891, "confirmed": "Thumb Down"}
+{"i": 1325, "t": 26154.42446314, "confirmed": "Thumb Down"}
+{"i": 1326, "t": 26154.456483822, "confirmed": "Thumb Down"}
+{"i": 1327, "t": 26154.488266661, "confirmed": "Thumb Down"}
+{"i": 1328, "t": 26154.524455503, "confirmed": "Thumb Down"}
+{"i": 1329, "t": 26154.556519865, "confirmed": "Thumb Down"}
+{"i": 1330, "t": 26154.592287219, "confirmed": "Thumb Down"}
+{"i": 1331, "t": 26154.624355966, "confirmed": "Thumb Down"}
+{"i": 1332, "t": 26154.656468062, "confirmed": "Thumb Down"}
+{"i": 1333, "t": 26154.692398479, "confirmed": "Thumb Down"}
+{"i": 1334, "t": 26154.724544842, "confirmed": "Thumb Down"}
+{"i": 1335, "t": 26154.756580849, "confirmed": "Thumb Down"}
+{"i": 1336, "t": 26154.792291044, "confirmed": "Thumb Down"}
+{"i": 1337, "t": 26154.824363272, "confirmed": "Thumb Down"}
+{"i": 1338, "t": 26154.856453365, "confirmed": "Thumb Down"}
+{"i": 1339, "t": 26154.892677158, "confirmed": "Thumb Down"}
+{"i": 1340, "t": 26154.924640784, "confirmed": "Thumb Down"}
+{"i": 1341, "t": 26154.960979063, "confirmed": "Thumb Down"}
+{"i": 1342, "t": 26154.992436836, "confirmed": "Thumb Down"}
+{"i": 1343, "t": 26155.024373491, "confirmed": "Thumb Down"}
+{"i": 1344, "t": 26155.06041227, "confirmed": "Thumb Down"}
+{"i": 1345, "t": 26155.093144801, "confirmed": "Thumb Down"}
+{"i": 1346, "t": 26155.124800867, "confirmed": "Thumb Down"}
+{"i": 1347, "t": 26155.160358336, "confirmed": "Thumb Down"}
+{"i": 1348, "t": 26155.192395632, "confirmed": null}
+{"i": 1349, "t": 26155.224556289, "confirmed": null}
+{"i": 1350, "t": 26155.260403093, "confirmed": null}
+{"i": 1351, "t": 26155.292999304, "confirmed": null}
+{"i": 1352, "t": 26155.324642779, "confirmed": null}
+{"i": 1353, "t": 26155.362229557, "confirmed": null}
+{"i": 1354, "t": 26155.392614548, "confirmed": null}
+{"i": 1355, "t": 26155.428465539, "confirmed": null}
+{"i": 1356, "t": 26155.460546182, "confirmed": null}
+{"i": 1357, "t": 26155.501719389, "confirmed": null}
+{"i": 1358, "t": 26155.528703858, "confirmed": null}
+{"i": 1359, "t": 26155.560517388, "confirmed": null}
+{"i": 1360, "t": 26155.592356184, "confirmed": null}
+{"i": 1361, "t": 26155.628503699, "confirmed": null}
+{"i": 1362, "t": 26155.66033239, "confirmed": null}
+{"i": 1363, "t": 26155.69224481, "confirmed": null}
+{"i": 1364, "t": 26155.728249491, "confirmed": null}
+{"i": 1365, "t": 26155.760558588, "confirmed": null}
+{"i": 1366, "t": 26155.796437789, "confirmed": null}
+{"i": 1367, "t": 26155.828792053, "confirmed": null}
+{"i": 1368, "t": 26155.860438915, "confirmed": null}
+{"i": 1369, "t": 26155.896273852, "confirmed": null}
+{"i": 1370, "t": 26155.928415744, "confirmed": null}
+{"i": 1371, "t": 26155.960434362, "confirmed": null}
+{"i": 1372, "t": 26155.996404618, "confirmed": null}
+{"i": 1373, "t": 26156.028635438, "confirmed": null}
+{"i": 1374, "t": 26156.060402859, "confirmed": null}
+{"i": 1375, "t": 26156.096366746, "confirmed": null}
+{"i": 1376, "t": 26156.128395205, "confirmed": null}
+{"i": 1377, "t": 26156.160480771, "confirmed": null}
+{"i": 1378, "t": 26156.196413894, "confirmed": null}
+{"i": 1379, "t": 26156.228878493, "confirmed": null}
+{"i": 1380, "t": 26156.26482331, "confirmed": null}
+{"i": 1381, "t": 26156.313208855, "confirmed": null}
+{"i": 1382, "t": 26156.328456389, "confirmed": null}
+{"i": 1383, "t": 26156.364578316, "confirmed": null}
+{"i": 1384, "t": 26156.396342434, "confirmed": null}
+{"i": 1385, "t": 26156.43006725, "confirmed": null}
+{"i": 1386, "t": 26156.464404321, "confirmed": null}
+{"i": 1387, "t": 26156.496611131, "confirmed": null}
+{"i": 1388, "t": 26156.528317549, "confirmed": null}
+{"i": 1389, "t": 26156.564341049, "confirmed": null}
+{"i": 1390, "t": 26156.596344384, "confirmed": null}
+{"i": 1391, "t": 26156.632469521, "confirmed": null}
+{"i": 1392, "t": 26156.664389484, "confirmed": null}
+{"i": 1393, "t": 26156.696342336, "confirmed": null}
+{"i": 1394, "t": 26156.732195417, "confirmed": null}
+{"i": 1395, "t": 26156.764172144, "confirmed": null}
+{"i": 1396, "t": 26156.79843201, "confirmed": null}
+{"i": 1397, "t": 26156.832337619, "confirmed": null}
+{"i": 1398, "t": 26156.866091829, "confirmed": null}
+{"i": 1399, "t": 26156.896372055, "confirmed": null}
+{"i": 1400, "t": 26156.93232889, "confirmed": null}
+{"i": 1401, "t": 26156.964836901, "confirmed": null}
+{"i": 1402, "t": 26157.00073338, "confirmed": null}
+{"i": 1403, "t": 26157.032538199, "confirmed": null}
+{"i": 1404, "t": 26157.064445734, "confirmed": null}
+{"i": 1405, "t": 26157.10059856, "confirmed": null}
+{"i": 1406, "t": 26157.13249339, "confirmed": null}
+{"i": 1407, "t": 26157.164333456, "confirmed": null}
+{"i": 1408, "t": 26157.200407577, "confirmed": null}
+{"i": 1409, "t": 26157.233240497, "confirmed": null}
+{"i": 1410, "t": 26157.264231112, "confirmed": null}
+{"i": 1411, "t": 26157.300314609, "confirmed": null}
+{"i": 1412, "t": 26157.332215376, "confirmed": null}
+{"i": 1413, "t": 26157.364301174, "confirmed": null}
+{"i": 1414, "t": 26157.401900093, "confirmed": null}
+{"i": 1415, "t": 26157.432258599, "confirmed": null}
+{"i": 1416, "t": 26157.468349392, "confirmed": null}
+{"i": 1417, "t": 26157.500288258, "confirmed": null}
+{"i": 1418, "t": 26157.532445839, "confirmed": null}
+{"i": 1419, "t": 26157.568840488, "confirmed": null}
+{"i": 1420, "t": 26157.604738914, "confirmed": null}
+{"i": 1421, "t": 26157.632476473, "confirmed": null}
+{"i": 1422, "t": 26157.668242389, "confirmed": null}
+{"i": 1423, "t": 26157.700342904, "confirmed": null}
+{"i": 1424, "t": 26157.732253707, "confirmed": null}
+{"i": 1425, "t": 26157.768259224, "confirmed": null}
+{"i": 1426, "t": 26157.800680716, "confirmed": null}
+{"i": 1427, "t": 26157.851085519, "confirmed": null}
+{"i": 1428, "t": 26157.868266937, "confirmed": null}
+{"i": 1429, "t": 26157.900325041, "confirmed": null}
+{"i": 1430, "t": 26157.936226847, "confirmed": null}
+{"i": 1431, "t": 26157.968304477, "confirmed": null}
+{"i": 1432, "t": 26158.000232195, "confirmed": null}
+{"i": 1433, "t": 26158.03647547, "confirmed": null}
+{"i": 1434, "t": 26158.068056372, "confirmed": null}
+{"i": 1435, "t": 26158.100354201, "confirmed": null}
+{"i": 1436, "t": 26158.136196213, "confirmed": null}
+{"i": 1437, "t": 26158.16819615, "confirmed": null}
+{"i": 1438, "t": 26158.200285314, "confirmed": null}
+{"i": 1439, "t": 26158.236208643, "confirmed": null}
+{"i": 1440, "t": 26158.26828574, "confirmed": null}
+{"i": 1441, "t": 26158.304162958, "confirmed": null}
+{"i": 1442, "t": 26158.336852745, "confirmed": null}
+{"i": 1443, "t": 26158.368282645, "confirmed": null}
+{"i": 1444, "t": 26158.404057497, "confirmed": null}
+{"i": 1445, "t": 26158.436624209, "confirmed": null}
+{"i": 1446, "t": 26158.468363693, "confirmed": null}
+{"i": 1447, "t": 26158.504442827, "confirmed": null}
+{"i": 1448, "t": 26158.537323191, "confirmed": null}
+{"i": 1449, "t": 26158.56928022, "confirmed": null}
+{"i": 1450, "t": 26158.604563962, "confirmed": null}
+{"i": 1451, "t": 26158.6369009, "confirmed": null}
+{"i": 1452, "t": 26158.672353463, "confirmed": null}
+{"i": 1453, "t": 26158.708137342, "confirmed": null}
+{"i": 1454, "t": 26158.736273721, "confirmed": null}
+{"i": 1455, "t": 26158.772736508, "confirmed": null}
+{"i": 1456, "t": 26158.80406661, "confirmed": null}
+{"i": 1457, "t": 26158.836167009, "confirmed": null}
+{"i": 1458, "t": 26158.872204069, "confirmed": null}
+{"i": 1459, "t": 26158.904359063, "confirmed": null}
+{"i": 1460, "t": 26158.936315072, "confirmed": null}
+{"i": 1461, "t": 26158.972153296, "confirmed": null}
+{"i": 1462, "t": 26159.004428426, "confirmed": null}
+{"i": 1463, "t": 26159.040364988, "confirmed": null}
+{"i": 1464, "t": 26159.072187551, "confirmed": null}
+{"i": 1465, "t": 26159.109368099, "confirmed": null}
+{"i": 1466, "t": 26159.140193612, "confirmed": null}
+{"i": 1467, "t": 26159.172275996, "confirmed": null}
+{"i": 1468, "t": 26159.204229339, "confirmed": null}
+{"i": 1469, "t": 26159.240532134, "confirmed": null}
+{"i": 1470, "t": 26159.271986681, "confirmed": null}
+{"i": 1471, "t": 26159.304353477, "confirmed": null}
+{"i": 1472, "t": 26159.340209811, "confirmed": null}
+{"i": 1473, "t": 26159.372398003, "confirmed": null}
+{"i": 1474, "t": 26159.404281423, "confirmed": null}
+{"i": 1475, "t": 26159.440058686, "confirmed": null}
+{"i": 1476, "t": 26159.472419228, "confirmed": null}
+{"i": 1477, "t": 26159.508059127, "confirmed": null}
+{"i": 1478, "t": 26159.540223892, "confirmed": null}
+{"i": 1479, "t": 26159.572058669, "confirmed": null}
+{"i": 1480, "t": 26159.60822893, "confirmed": null}
+{"i": 1481, "t": 26159.640206666, "confirmed": null}
+{"i": 1482, "t": 26159.67223978, "confirmed": null}
+{"i": 1483, "t": 26159.709345908, "confirmed": null}
+{"i": 1484, "t": 26159.740096239, "confirmed": null}
+{"i": 1485, "t": 26159.772297103, "confirmed": null}
+{"i": 1486, "t": 26159.828932585, "confirmed": null}
+{"i": 1487, "t": 26159.840575475, "confirmed": null}
+{"i": 1488, "t": 26159.876282751, "confirmed": null}
+{"i": 1489, "t": 26159.908114228, "confirmed": null}
+{"i": 1490, "t": 26159.940618391, "confirmed": null}
+{"i": 1491, "t": 26159.976143125, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1492, "t": 26160.010415291, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1493, "t": 26160.040261884, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1494, "t": 26160.076277268, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1495, "t": 26160.107953568, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1496, "t": 26160.140169388, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1497, "t": 26160.176270536, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1498, "t": 26160.208074136, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1499, "t": 26160.24025559, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1500, "t": 26160.276185441, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1501, "t": 26160.308008609, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1502, "t": 26160.344193698, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1503, "t": 26160.376370779, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1504, "t": 26160.415568857, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1505, "t": 26160.443928205, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1506, "t": 26160.476116686, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1507, "t": 26160.508962903, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1508, "t": 26160.544107924, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1509, "t": 26160.576406384, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1510, "t": 26160.612021956, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1511, "t": 26160.644339373, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1512, "t": 26160.678897019, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1513, "t": 26160.712173258, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1514, "t": 26160.744082948, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1515, "t": 26160.776050262, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1516, "t": 26160.812385994, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1517, "t": 26160.844036721, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1518, "t": 26160.876135586, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1519, "t": 26160.912164564, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1520, "t": 26160.944273644, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1521, "t": 26160.976384826, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1522, "t": 26161.013279015, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1523, "t": 26161.044846746, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1524, "t": 26161.081232834, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1525, "t": 26161.120631203, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1526, "t": 26161.143993578, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1527, "t": 26161.180378122, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1528, "t": 26161.212222511, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1529, "t": 26161.244268698, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1530, "t": 26161.279974588, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1531, "t": 26161.324736598, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1532, "t": 26161.344218863, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1533, "t": 26161.380624103, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1534, "t": 26161.412485549, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1535, "t": 26161.444546198, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1536, "t": 26161.480174386, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1537, "t": 26161.512102564, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1538, "t": 26161.548257481, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1539, "t": 26161.580010752, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1540, "t": 26161.61558314, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1541, "t": 26161.648079622, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1542, "t": 26161.680051077, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1543, "t": 26161.712110989, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1544, "t": 26161.74811833, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1545, "t": 26161.78022857, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1546, "t": 26161.812167654, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1547, "t": 26161.848175771, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1548, "t": 26161.884837068, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1549, "t": 26161.916792863, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1550, "t": 26161.948175201, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1551, "t": 26161.979884961, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1552, "t": 26162.016062646, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1553, "t": 26162.047891375, "confirmed": null}
+{"i": 1554, "t": 26162.08017034, "confirmed": null}
+{"i": 1555, "t": 26162.115911744, "confirmed": null}
+{"i": 1556, "t": 26162.148041343, "confirmed": null}
+{"i": 1557, "t": 26162.180842, "confirmed": null}
+{"i": 1558, "t": 26162.215898188, "confirmed": null}
+{"i": 1559, "t": 26162.248193195, "confirmed": null}
+{"i": 1560, "t": 26162.280129764, "confirmed": null}
+{"i": 1561, "t": 26162.31590885, "confirmed": null}
+{"i": 1562, "t": 26162.349919769, "confirmed": null}
+{"i": 1563, "t": 26162.384158162, "confirmed": null}
+{"i": 1564, "t": 26162.415815152, "confirmed": null}
+{"i": 1565, "t": 26162.448032616, "confirmed": null}
+{"i": 1566, "t": 26162.484115898, "confirmed": null}
+{"i": 1567, "t": 26162.516040728, "confirmed": null}
+{"i": 1568, "t": 26162.548265697, "confirmed": null}
+{"i": 1569, "t": 26162.584026691, "confirmed": null}
+{"i": 1570, "t": 26162.615876402, "confirmed": null}
+{"i": 1571, "t": 26162.647815148, "confirmed": null}
+{"i": 1572, "t": 26162.683975028, "confirmed": null}
+{"i": 1573, "t": 26162.716027589, "confirmed": null}
+{"i": 1574, "t": 26162.752079427, "confirmed": "Turning Hand Clockwise"}
+{"i": 1575, "t": 26162.784063285, "confirmed": "Turning Hand Clockwise"}
+{"i": 1576, "t": 26162.816015347, "confirmed": "Turning Hand Clockwise"}
+{"i": 1577, "t": 26162.852048961, "confirmed": "Turning Hand Clockwise"}
+{"i": 1578, "t": 26162.883912709, "confirmed": "Turning Hand Clockwise"}
+{"i": 1579, "t": 26162.917523411, "confirmed": "Turning Hand Clockwise"}
+{"i": 1580, "t": 26162.951905221, "confirmed": "Turning Hand Clockwise"}
+{"i": 1581, "t": 26162.984577555, "confirmed": "Turning Hand Clockwise"}
+{"i": 1582, "t": 26163.01606555, "confirmed": "Turning Hand Clockwise"}
+{"i": 1583, "t": 26163.051975495, "confirmed": "Turning Hand Clockwise"}
+{"i": 1584, "t": 26163.084093551, "confirmed": "Turning Hand Clockwise"}
+{"i": 1585, "t": 26163.119943014, "confirmed": "Turning Hand Clockwise"}
+{"i": 1586, "t": 26163.152043572, "confirmed": "Turning Hand Clockwise"}
+{"i": 1587, "t": 26163.184230656, "confirmed": "Turning Hand Clockwise"}
+{"i": 1588, "t": 26163.220045359, "confirmed": "Turning Hand Clockwise"}
+{"i": 1589, "t": 26163.252367626, "confirmed": "Turning Hand Clockwise"}
+{"i": 1590, "t": 26163.284341059, "confirmed": "Turning Hand Clockwise"}
+{"i": 1591, "t": 26163.320038692, "confirmed": "Turning Hand Clockwise"}
+{"i": 1592, "t": 26163.352385509, "confirmed": "Turning Hand Clockwise"}
+{"i": 1593, "t": 26163.384049251, "confirmed": "Turning Hand Clockwise"}
+{"i": 1594, "t": 26163.420131157, "confirmed": "Turning Hand Clockwise"}
+{"i": 1595, "t": 26163.451917938, "confirmed": "Turning Hand Clockwise"}
+{"i": 1596, "t": 26163.484170096, "confirmed": "Turning Hand Clockwise"}
+{"i": 1597, "t": 26163.51994755, "confirmed": "Turning Hand Clockwise"}
+{"i": 1598, "t": 26163.551930002, "confirmed": "Turning Hand Clockwise"}
+{"i": 1599, "t": 26163.588074673, "confirmed": "Turning Hand Clockwise"}
+{"i": 1600, "t": 26163.620228588, "confirmed": "Turning Hand Clockwise"}
+{"i": 1601, "t": 26163.652083228, "confirmed": "Turning Hand Clockwise"}
+{"i": 1602, "t": 26163.688193318, "confirmed": "Turning Hand Clockwise"}
+{"i": 1603, "t": 26163.719832428, "confirmed": "Turning Hand Clockwise"}
+{"i": 1604, "t": 26163.752132138, "confirmed": "Turning Hand Clockwise"}
+{"i": 1605, "t": 26163.787843225, "confirmed": "Turning Hand Clockwise"}
+{"i": 1606, "t": 26163.820043241, "confirmed": "Turning Hand Clockwise"}
+{"i": 1607, "t": 26163.851725849, "confirmed": "Turning Hand Clockwise"}
+{"i": 1608, "t": 26163.887954628, "confirmed": "Turning Hand Clockwise"}
+{"i": 1609, "t": 26163.919965742, "confirmed": "Turning Hand Clockwise"}
+{"i": 1610, "t": 26163.955939638, "confirmed": "Turning Hand Clockwise"}
+{"i": 1611, "t": 26163.988058699, "confirmed": "Turning Hand Clockwise"}
+{"i": 1612, "t": 26164.020097105, "confirmed": "Turning Hand Clockwise"}
+{"i": 1613, "t": 26164.056071298, "confirmed": "Turning Hand Clockwise"}
+{"i": 1614, "t": 26164.088018623, "confirmed": "Turning Hand Clockwise"}
+{"i": 1615, "t": 26164.119847877, "confirmed": "Turning Hand Clockwise"}
+{"i": 1616, "t": 26164.155868498, "confirmed": "Turning Hand Clockwise"}
+{"i": 1617, "t": 26164.188354861, "confirmed": "Turning Hand Clockwise"}
+{"i": 1618, "t": 26164.220665403, "confirmed": "Turning Hand Clockwise"}
+{"i": 1619, "t": 26164.256006952, "confirmed": "Turning Hand Clockwise"}
+{"i": 1620, "t": 26164.28818795, "confirmed": "Turning Hand Clockwise"}
+{"i": 1621, "t": 26164.325735842, "confirmed": "Turning Hand Clockwise"}
+{"i": 1622, "t": 26164.355953083, "confirmed": "Turning Hand Clockwise"}
+{"i": 1623, "t": 26164.387857648, "confirmed": "Turning Hand Clockwise"}
+{"i": 1624, "t": 26164.42410426, "confirmed": "Turning Hand Clockwise"}
+{"i": 1625, "t": 26164.456009603, "confirmed": "Turning Hand Clockwise"}
+{"i": 1626, "t": 26164.488078257, "confirmed": "Turning Hand Clockwise"}
+{"i": 1627, "t": 26164.525139554, "confirmed": "Turning Hand Clockwise"}
+{"i": 1628, "t": 26164.556087993, "confirmed": "Turning Hand Clockwise"}
+{"i": 1629, "t": 26164.589638834, "confirmed": "Turning Hand Clockwise"}
+{"i": 1630, "t": 26164.6239542, "confirmed": "Turning Hand Clockwise"}
+{"i": 1631, "t": 26164.655907388, "confirmed": "Turning Hand Clockwise"}
+{"i": 1632, "t": 26164.688017099, "confirmed": null}
+{"i": 1633, "t": 26164.723770284, "confirmed": null}
+{"i": 1634, "t": 26164.755878874, "confirmed": null}
+{"i": 1635, "t": 26164.791620164, "confirmed": null}
+{"i": 1636, "t": 26164.824032971, "confirmed": null}
+{"i": 1637, "t": 26164.856605757, "confirmed": null}
+{"i": 1638, "t": 26164.891843001, "confirmed": null}
+{"i": 1639, "t": 26164.924092141, "confirmed": null}
+{"i": 1640, "t": 26164.956160956, "confirmed": null}
+{"i": 1641, "t": 26164.991912635, "confirmed": null}
+{"i": 1642, "t": 26165.023957962, "confirmed": null}
+{"i": 1643, "t": 26165.055893843, "confirmed": null}
+{"i": 1644, "t": 26165.09212298, "confirmed": null}
+{"i": 1645, "t": 26165.1238833, "confirmed": null}
+{"i": 1646, "t": 26165.160026581, "confirmed": null}
+{"i": 1647, "t": 26165.191706091, "confirmed": null}
+{"i": 1648, "t": 26165.22478979, "confirmed": null}
+{"i": 1649, "t": 26165.259660177, "confirmed": null}
+{"i": 1650, "t": 26165.29199186, "confirmed": null}
+{"i": 1651, "t": 26165.323967741, "confirmed": null}
+{"i": 1652, "t": 26165.360244289, "confirmed": null}
+{"i": 1653, "t": 26165.396327142, "confirmed": null}
+{"i": 1654, "t": 26165.423802469, "confirmed": null}
+{"i": 1655, "t": 26165.461369741, "confirmed": null}
+{"i": 1656, "t": 26165.491886019, "confirmed": null}
+{"i": 1657, "t": 26165.523884419, "confirmed": null}
+{"i": 1658, "t": 26165.559828313, "confirmed": null}
+{"i": 1659, "t": 26165.59208581, "confirmed": null}
+{"i": 1660, "t": 26165.627662918, "confirmed": null}
+{"i": 1661, "t": 26165.660032733, "confirmed": null}
+{"i": 1662, "t": 26165.691861453, "confirmed": null}
+{"i": 1663, "t": 26165.728144516, "confirmed": null}
+{"i": 1664, "t": 26165.759758459, "confirmed": null}
+{"i": 1665, "t": 26165.792534388, "confirmed": null}
+{"i": 1666, "t": 26165.828361528, "confirmed": null}
+{"i": 1667, "t": 26165.86009849, "confirmed": null}
+{"i": 1668, "t": 26165.892222627, "confirmed": null}
+{"i": 1669, "t": 26165.927892267, "confirmed": null}
+{"i": 1670, "t": 26165.960198579, "confirmed": null}
+{"i": 1671, "t": 26165.995768948, "confirmed": null}
+{"i": 1672, "t": 26166.036294809, "confirmed": null}
+{"i": 1673, "t": 26166.059751701, "confirmed": null}
+{"i": 1674, "t": 26166.095904964, "confirmed": null}
+{"i": 1675, "t": 26166.128409628, "confirmed": null}
+{"i": 1676, "t": 26166.160217029, "confirmed": null}
+{"i": 1677, "t": 26166.19591805, "confirmed": null}
+{"i": 1678, "t": 26166.231854847, "confirmed": null}
+{"i": 1679, "t": 26166.260118793, "confirmed": null}
+{"i": 1680, "t": 26166.295873032, "confirmed": null}
+{"i": 1681, "t": 26166.328888341, "confirmed": null}
+{"i": 1682, "t": 26166.364006276, "confirmed": null}
+{"i": 1683, "t": 26166.395852229, "confirmed": null}
+{"i": 1684, "t": 26166.429193026, "confirmed": null}
+{"i": 1685, "t": 26166.464045576, "confirmed": null}
+{"i": 1686, "t": 26166.495967969, "confirmed": null}
+{"i": 1687, "t": 26166.527818538, "confirmed": null}
+{"i": 1688, "t": 26166.564158473, "confirmed": null}
+{"i": 1689, "t": 26166.595799302, "confirmed": null}
+{"i": 1690, "t": 26166.627749864, "confirmed": null}
+{"i": 1691, "t": 26166.663753432, "confirmed": null}
+{"i": 1692, "t": 26166.696087347, "confirmed": null}
+{"i": 1693, "t": 26166.729442051, "confirmed": null}
+{"i": 1694, "t": 26166.763990259, "confirmed": null}
+{"i": 1695, "t": 26166.796141939, "confirmed": null}
+{"i": 1696, "t": 26166.831716555, "confirmed": null}
+{"i": 1697, "t": 26166.86361164, "confirmed": null}
+{"i": 1698, "t": 26166.89592211, "confirmed": null}
+{"i": 1699, "t": 26166.931698886, "confirmed": null}
+{"i": 1700, "t": 26166.964111054, "confirmed": null}
+{"i": 1701, "t": 26166.996107962, "confirmed": null}
+{"i": 1702, "t": 26167.037517176, "confirmed": null}
+{"i": 1703, "t": 26167.063746935, "confirmed": null}
+{"i": 1704, "t": 26167.09583496, "confirmed": null}
+{"i": 1705, "t": 26167.131845547, "confirmed": "Turning Hand Clockwise"}
+{"i": 1706, "t": 26167.163805454, "confirmed": "Turning Hand Clockwise"}
+{"i": 1707, "t": 26167.200800263, "confirmed": "Turning Hand Clockwise"}
+{"i": 1708, "t": 26167.231965485, "confirmed": "Turning Hand Clockwise"}
+{"i": 1709, "t": 26167.264066175, "confirmed": "Turning Hand Clockwise"}
+{"i": 1710, "t": 26167.299880308, "confirmed": "Turning Hand Clockwise"}
+{"i": 1711, "t": 26167.350190525, "confirmed": "Turning Hand Clockwise"}
+{"i": 1712, "t": 26167.369439687, "confirmed": "Turning Hand Clockwise"}
+{"i": 1713, "t": 26167.399998688, "confirmed": "Turning Hand Clockwise"}
+{"i": 1714, "t": 26167.435009085, "confirmed": "Turning Hand Clockwise"}
+{"i": 1715, "t": 26167.463774717, "confirmed": "Turning Hand Clockwise"}
+{"i": 1716, "t": 26167.499780168, "confirmed": "Turning Hand Clockwise"}
+{"i": 1717, "t": 26167.532303548, "confirmed": "Turning Hand Clockwise"}
+{"i": 1718, "t": 26167.564093359, "confirmed": "Turning Hand Clockwise"}
+{"i": 1719, "t": 26167.599755227, "confirmed": "Turning Hand Clockwise"}
+{"i": 1720, "t": 26167.631772844, "confirmed": "Turning Hand Clockwise"}
+{"i": 1721, "t": 26167.667962675, "confirmed": "Turning Hand Clockwise"}
+{"i": 1722, "t": 26167.699775919, "confirmed": "Turning Hand Clockwise"}
+{"i": 1723, "t": 26167.731962004, "confirmed": "Turning Hand Clockwise"}
+{"i": 1724, "t": 26167.76761485, "confirmed": "Turning Hand Clockwise"}
+{"i": 1725, "t": 26167.799671025, "confirmed": "Turning Hand Clockwise"}
+{"i": 1726, "t": 26167.831805939, "confirmed": "Turning Hand Clockwise"}
+{"i": 1727, "t": 26167.868268154, "confirmed": "Turning Hand Clockwise"}
+{"i": 1728, "t": 26167.899933769, "confirmed": "Turning Hand Clockwise"}
+{"i": 1729, "t": 26167.931936916, "confirmed": "Turning Hand Clockwise"}
+{"i": 1730, "t": 26167.968280018, "confirmed": "Turning Hand Clockwise"}
+{"i": 1731, "t": 26167.999570462, "confirmed": "Turning Hand Clockwise"}
+{"i": 1732, "t": 26168.035674911, "confirmed": "Turning Hand Clockwise"}
+{"i": 1733, "t": 26168.067799035, "confirmed": "Turning Hand Clockwise"}
+{"i": 1734, "t": 26168.099845682, "confirmed": "Turning Hand Clockwise"}
+{"i": 1735, "t": 26168.13565055, "confirmed": "Turning Hand Clockwise"}
+{"i": 1736, "t": 26168.16787162, "confirmed": "Turning Hand Clockwise"}
+{"i": 1737, "t": 26168.199693932, "confirmed": "Turning Hand Clockwise"}
+{"i": 1738, "t": 26168.244025913, "confirmed": "Turning Hand Clockwise"}
+{"i": 1739, "t": 26168.26767932, "confirmed": "Turning Hand Clockwise"}
+{"i": 1740, "t": 26168.299913404, "confirmed": "Turning Hand Clockwise"}
+{"i": 1741, "t": 26168.336108333, "confirmed": "Turning Hand Clockwise"}
+{"i": 1742, "t": 26168.368239283, "confirmed": "Turning Hand Clockwise"}
+{"i": 1743, "t": 26168.405818107, "confirmed": "Turning Hand Clockwise"}
+{"i": 1744, "t": 26168.444254014, "confirmed": "Turning Hand Clockwise"}
+{"i": 1745, "t": 26168.467687584, "confirmed": "Turning Hand Clockwise"}
+{"i": 1746, "t": 26168.50370316, "confirmed": "Turning Hand Clockwise"}
+{"i": 1747, "t": 26168.535713287, "confirmed": "Turning Hand Clockwise"}
+{"i": 1748, "t": 26168.56794561, "confirmed": "Turning Hand Clockwise"}
+{"i": 1749, "t": 26168.603703369, "confirmed": "Turning Hand Clockwise"}
+{"i": 1750, "t": 26168.635534378, "confirmed": "Turning Hand Clockwise"}
+{"i": 1751, "t": 26168.667768366, "confirmed": "Turning Hand Clockwise"}
+{"i": 1752, "t": 26168.703805908, "confirmed": "Turning Hand Clockwise"}
+{"i": 1753, "t": 26168.73599596, "confirmed": "Turning Hand Clockwise"}
+{"i": 1754, "t": 26168.767602625, "confirmed": "Turning Hand Clockwise"}
+{"i": 1755, "t": 26168.803965952, "confirmed": null}
+{"i": 1756, "t": 26168.838526054, "confirmed": null}
+{"i": 1757, "t": 26168.871637448, "confirmed": null}
+{"i": 1758, "t": 26168.903730317, "confirmed": null}
+{"i": 1759, "t": 26168.93563201, "confirmed": null}
+{"i": 1760, "t": 26168.971628452, "confirmed": null}
+{"i": 1761, "t": 26169.003589752, "confirmed": null}
+{"i": 1762, "t": 26169.038166457, "confirmed": null}
+{"i": 1763, "t": 26169.071686294, "confirmed": null}
+{"i": 1764, "t": 26169.103692071, "confirmed": null}
+{"i": 1765, "t": 26169.136287573, "confirmed": null}
+{"i": 1766, "t": 26169.17226313, "confirmed": null}
+{"i": 1767, "t": 26169.203598311, "confirmed": null}
+{"i": 1768, "t": 26169.239769964, "confirmed": null}
+{"i": 1769, "t": 26169.271673475, "confirmed": null}
+{"i": 1770, "t": 26169.304120653, "confirmed": null}
+{"i": 1771, "t": 26169.339485732, "confirmed": null}
+{"i": 1772, "t": 26169.371664652, "confirmed": null}
+{"i": 1773, "t": 26169.403546081, "confirmed": null}
+{"i": 1774, "t": 26169.439700642, "confirmed": null}
+{"i": 1775, "t": 26169.47156777, "confirmed": null}
+{"i": 1776, "t": 26169.503627834, "confirmed": null}
+{"i": 1777, "t": 26169.53966945, "confirmed": null}
+{"i": 1778, "t": 26169.571654941, "confirmed": null}
+{"i": 1779, "t": 26169.603617445, "confirmed": null}
+{"i": 1780, "t": 26169.639492525, "confirmed": null}
+{"i": 1781, "t": 26169.671474378, "confirmed": null}
+{"i": 1782, "t": 26169.70785911, "confirmed": null}
+{"i": 1783, "t": 26169.739759041, "confirmed": null}
+{"i": 1784, "t": 26169.771622542, "confirmed": null}
+{"i": 1785, "t": 26169.807566338, "confirmed": null}
+{"i": 1786, "t": 26169.8399425, "confirmed": null}
+{"i": 1787, "t": 26169.871651254, "confirmed": null}
+{"i": 1788, "t": 26169.907853866, "confirmed": null}
+{"i": 1789, "t": 26169.939866745, "confirmed": null}
+{"i": 1790, "t": 26169.971458718, "confirmed": null}
+{"i": 1791, "t": 26170.007789354, "confirmed": null}
+{"i": 1792, "t": 26170.039635192, "confirmed": null}
+{"i": 1793, "t": 26170.075711479, "confirmed": null}
+{"i": 1794, "t": 26170.107610712, "confirmed": null}
+{"i": 1795, "t": 26170.139577902, "confirmed": null}
+{"i": 1796, "t": 26170.175638499, "confirmed": null}
+{"i": 1797, "t": 26170.207688191, "confirmed": null}
+{"i": 1798, "t": 26170.239690004, "confirmed": null}
+{"i": 1799, "t": 26170.275649328, "confirmed": null}
+{"i": 1800, "t": 26170.307690006, "confirmed": null}
+{"i": 1801, "t": 26170.339897424, "confirmed": null}
+{"i": 1802, "t": 26170.375776263, "confirmed": null}
+{"i": 1803, "t": 26170.407400756, "confirmed": null}
+{"i": 1804, "t": 26170.443698446, "confirmed": null}
+{"i": 1805, "t": 26170.475450919, "confirmed": null}
+{"i": 1806, "t": 26170.507736361, "confirmed": null}
+{"i": 1807, "t": 26170.543606379, "confirmed": null}
+{"i": 1808, "t": 26170.575624514, "confirmed": null}
+{"i": 1809, "t": 26170.607564145, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1810, "t": 26170.663650076, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1811, "t": 26170.675526075, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1812, "t": 26170.709222714, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1813, "t": 26170.743671928, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1814, "t": 26170.775483773, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1815, "t": 26170.807701965, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1816, "t": 26170.853857401, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1817, "t": 26170.875330452, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1818, "t": 26170.911502634, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1819, "t": 26170.945910821, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1820, "t": 26170.975583867, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1821, "t": 26171.011499225, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1822, "t": 26171.043685594, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1823, "t": 26171.075519314, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1824, "t": 26171.111570109, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1825, "t": 26171.143500401, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1826, "t": 26171.175622005, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1827, "t": 26171.211612279, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1828, "t": 26171.246136336, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1829, "t": 26171.279501644, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1830, "t": 26171.312345806, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1831, "t": 26171.344567064, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1832, "t": 26171.380885739, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1833, "t": 26171.411525728, "confirmed": null}
+{"i": 1834, "t": 26171.44388177, "confirmed": null}
+{"i": 1835, "t": 26171.479499536, "confirmed": null}
+{"i": 1836, "t": 26171.511672586, "confirmed": null}
+{"i": 1837, "t": 26171.543591904, "confirmed": null}
+{"i": 1838, "t": 26171.579553317, "confirmed": null}
+{"i": 1839, "t": 26171.611569137, "confirmed": null}
+{"i": 1840, "t": 26171.643597679, "confirmed": null}
+{"i": 1841, "t": 26171.679719962, "confirmed": null}
+{"i": 1842, "t": 26171.711496187, "confirmed": null}
+{"i": 1843, "t": 26171.74728669, "confirmed": null}
+{"i": 1844, "t": 26171.779580734, "confirmed": null}
+{"i": 1845, "t": 26171.811603714, "confirmed": null}
+{"i": 1846, "t": 26171.847520129, "confirmed": null}
+{"i": 1847, "t": 26171.879582523, "confirmed": null}
+{"i": 1848, "t": 26171.911426021, "confirmed": null}
+{"i": 1849, "t": 26171.953963418, "confirmed": null}
+{"i": 1850, "t": 26171.979892019, "confirmed": null}
+{"i": 1851, "t": 26172.011391387, "confirmed": null}
+{"i": 1852, "t": 26172.049581373, "confirmed": null}
+{"i": 1853, "t": 26172.079749319, "confirmed": null}
+{"i": 1854, "t": 26172.115428408, "confirmed": null}
+{"i": 1855, "t": 26172.156241805, "confirmed": null}
+{"i": 1856, "t": 26172.179606987, "confirmed": null}
+{"i": 1857, "t": 26172.215678918, "confirmed": null}
+{"i": 1858, "t": 26172.249921946, "confirmed": null}
+{"i": 1859, "t": 26172.279500648, "confirmed": null}
+{"i": 1860, "t": 26172.315802324, "confirmed": null}
+{"i": 1861, "t": 26172.354157556, "confirmed": null}
+{"i": 1862, "t": 26172.379607025, "confirmed": null}
+{"i": 1863, "t": 26172.415634775, "confirmed": null}
+{"i": 1864, "t": 26172.456036458, "confirmed": null}
+{"i": 1865, "t": 26172.483654954, "confirmed": null}
+{"i": 1866, "t": 26172.51571104, "confirmed": null}
+{"i": 1867, "t": 26172.549248691, "confirmed": null}
+{"i": 1868, "t": 26172.583486298, "confirmed": null}
+{"i": 1869, "t": 26172.615553832, "confirmed": null}
+{"i": 1870, "t": 26172.649829027, "confirmed": null}
+{"i": 1871, "t": 26172.68364198, "confirmed": null}
+{"i": 1872, "t": 26172.715574725, "confirmed": null}
+{"i": 1873, "t": 26172.75296554, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1874, "t": 26172.783475564, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1875, "t": 26172.815363469, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1876, "t": 26172.852963318, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1877, "t": 26172.883398184, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1878, "t": 26172.915521865, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1879, "t": 26172.9534346, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1880, "t": 26172.983567223, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1881, "t": 26173.015454262, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1882, "t": 26173.051565, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1883, "t": 26173.083526528, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1884, "t": 26173.116062097, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1885, "t": 26173.151689044, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1886, "t": 26173.183614973, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1887, "t": 26173.215491103, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1888, "t": 26173.251473106, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1889, "t": 26173.283546207, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1890, "t": 26173.319596686, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1891, "t": 26173.351763715, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1892, "t": 26173.38358551, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1893, "t": 26173.419396371, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1894, "t": 26173.451477484, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1895, "t": 26173.483478324, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1896, "t": 26173.519237625, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1897, "t": 26173.551508195, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1898, "t": 26173.583185687, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1899, "t": 26173.619407592, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1900, "t": 26173.651319061, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1901, "t": 26173.683318061, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1902, "t": 26173.71942308, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1903, "t": 26173.754724807, "confirmed": "Turning Hand Counterclockwise"}
+{"i": 1904, "t": 26173.787338782, "confirmed": null}
+{"i": 1905, "t": 26173.82018839, "confirmed": null}
+{"i": 1906, "t": 26173.851246891, "confirmed": null}
+{"i": 1907, "t": 26173.887367728, "confirmed": null}
+{"i": 1908, "t": 26173.919412549, "confirmed": null}
+{"i": 1909, "t": 26173.951576622, "confirmed": null}
+{"i": 1910, "t": 26173.989013633, "confirmed": null}
+{"i": 1911, "t": 26174.019414827, "confirmed": null}
+{"i": 1912, "t": 26174.051499433, "confirmed": null}
+{"i": 1913, "t": 26174.087314082, "confirmed": null}
+{"i": 1914, "t": 26174.119403408, "confirmed": null}
+{"i": 1915, "t": 26174.155730748, "confirmed": null}
+{"i": 1916, "t": 26174.187331512, "confirmed": null}
+{"i": 1917, "t": 26174.21940748, "confirmed": null}
+{"i": 1918, "t": 26174.255390625, "confirmed": null}
+{"i": 1919, "t": 26174.287534456, "confirmed": null}
+{"i": 1920, "t": 26174.320039813, "confirmed": null}

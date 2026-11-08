@@ -23,6 +23,8 @@ Work in this order. Steps 37 and 38 are offline on existing clips and can run in
 7. **Steps 46-49 (set by Sahaj 25 Oct evening, after the Step 45 live runs):** first Step 46 (1.0 x 0.5625 m panel, side-by-side live depth view, per-frame tag logging, review of the live runs), then Step 47 (tracking stability: smoothing, source policy, map), then Step 48 (depth edge or segmentation guidance), Step 49 only if needed. See "Sahaj's live-run notes" just before Step 46.
 8. **Step 48 work order (set by Sahaj 26 Oct, NEXT):** see "Step 48 work order" just before Step 48c. Task 0 (floor map) is cancelled: write and check the 48a and 48b code (tasks 1-2) on the existing map and recordings with `--replay-run`, then report (task 3).
 9. **Step 50 (set by Sahaj 26 Oct afternoon; DO THIS NEXT, before the Step 48 work order in item 8: integration first, depth refinement after):** projection array of 4 panels with yaw/scale and gesture control from the laptop camera in a separate thread. See Step 50 after Step 49. Integration first; speed and occlusion refinement after Sahaj sees the performance.
+10. **Step 51 (set by Sahaj 28 Oct; DONE 28 Oct):** pose-filter comparison (EMA vs 1€ vs Kalman) on the logged poses of `Integration/runs/20261027T033608-9db092df` (static) and `Integration/runs/20261027T042028-839c66ed` (movement). Offline only. See Step 51 before section 6.
+11. **Step 52 (set by Sahaj 30 Oct; NEXT):** demo video. Record live at full rate (`--no-occlusion --record-input`), render AR views offline with `--replay-run` (`--replay-actions`, `--occlusion`, `--save-video`), assemble with `scripts/rec_video.py` and `recording/plan.json`. Shot list and commands in Step 52 before section 6.
 
 Standing decisions from this session:
 - The occlusion method must generalise to any occluder (person, box, chair, thin objects), not only hands. Do not add hand-specific code unless Sahaj approves it after Step 40. If a segmentation aid is ever needed, prefer a class-agnostic one.
@@ -1222,6 +1224,170 @@ Context: Sahaj is building a **new map in a new scene with the tag lying on the 
 - Report to Sahaj: files and config fields changed, test count, timings, the live command (AR camera + `--gesture-camera` or config index), and a short live test list: each gesture once, rotate to +-60 deg, scale to 2.0x close up (clipping), hand over each panel.
 - Result: _(fill in)_
 
+### Step 51: pose-filter comparison, EMA vs 1€ vs Kalman (offline, on logged poses; set by Sahaj 28 Oct)
+- [x] Goal: measure jitter (camera still) and lag (camera moving) of the current EMA pose filter against a 1€ filter and a constant-velocity Kalman filter, each tuned fairly, and decide which filter the live tracker uses. Output feeds paper section 4.3 ("Jitter in image pixels").
+
+**Data (Sahaj, 28 Oct). Both runs use the same map (`ar/data/logitech-landmark-map-scene2.npz`), localize mode, joint pose, array enabled at yaw 0 / scale 1, EMA weight 0.4.**
+- Static: `Integration/runs/20261027T033608-9db092df`. 1458 frames, 148.5 s, valid pose 96%, almost all `joint`, 1 source switch, camera position range 2-4 cm (treat as still; remove slow drift, see metrics).
+- Movement: `Integration/runs/20261027T042028-839c66ed`. 1007 frames, 81.1 s, valid pose 73%, sources tag 624 / landmark 88 / joint 19 / none 276, 30 source switches, camera moves about 2 x 4 x 0.5 m.
+- Frame interval is about 0.10 s (median dt 0.093-0.103 s), so the loop ran at about 10 fps, not 30. Every per-frame filter must use the real `source_time_s` differences, and lag must be reported in ms as well as frames. EMA with weight 0.4 at 10 fps lags about 1.5 frames, about 150 ms.
+- Read-only inputs. Write outputs to `Integration/runs/step51-filters/` (json, md, png). Do not re-record.
+
+**Work offline on the logged raw poses. No replay and no depth model are needed.** The filter only changes the drawn pose (`render_T_CW`), so applying a filter to `raw_pose.T_CW` frame by frame reproduces what the live filter would draw. First check this: running the current `PoseSmoother` (EMA 0.4) offline with the reset rule below must reproduce the logged `render_T_CW` to within 1e-6 (rotation in rad, translation in m). If it does not, stop and report why.
+
+**Reset rule (same for every filter, copied from `pipeline.py`):** reset the filter state on the first valid pose after any invalid frame (state LOST), and whenever dt > `pose.max_prediction_gap_s` (0.2 s). After a reset the output equals the measurement. Frames with an invalid raw pose produce no output (the live tracker draws nothing then). The static run has 105 resets (57 invalid frames plus the frames after them); keep them, do not interpolate across gaps.
+
+**Pose representation (all filters):** filter the camera pose in world, T_WC = inverse(T_CW): position c (3-vector, metres) and rotation R_WC. Rotation updates use the rotation vector (axis-angle) via `cv2.Rodrigues`, written here as Exp() and Log(), in the same convention as the current `PoseSmoother`: the rotation error of a new measurement R_m against a state R is e = Log(R_m R^T) (3-vector, rad), and a correction by vector a is R <- Exp(a) R.
+
+**Filter equations.** k is the frame index, dt_k = t_k - t_{k-1} in seconds.
+
+1. EMA (current, `rendering.PoseSmoother`), weight w in (0, 1]:
+   - c_k = (1 - w) c_{k-1} + w c_m
+   - R_k = Exp(w Log(R_m R_{k-1}^T)) R_{k-1}
+   - w = 1 means no filter (raw). Equivalent time constant for reporting: tau = -dt / ln(1 - w) (about 0.20 s for w = 0.4 at dt = 0.1 s).
+   - Also implement a dt-aware variant for reference: w_k = 1 - exp(-dt_k / tau). Report it only if it differs from the fixed-weight EMA by more than 5% on any metric.
+
+2. 1€ filter (Casiez, Roussel, Vogel, CHI 2012), applied to the pose as one 6-DoF signal with one shared adaptive cutoff:
+   - smoothing factor for cutoff f (Hz): alpha(f, dt) = 1 / (1 + tau_f / dt), tau_f = 1 / (2 pi f)
+   - raw speed of the pose, in m/s, combining translation and rotation through a scene distance d (use d = the median camera-to-tag distance of the run, about 2 m; make it a parameter): s_k = ||c_m - c_{k-1}|| / dt_k + d * ||Log(R_m R_{k-1}^T)|| / dt_k (here c_{k-1}, R_{k-1} are the previous filtered values)
+   - filtered speed: s^_k = s^_{k-1} + alpha(f_d, dt_k) (s_k - s^_{k-1}), with derivative cutoff f_d = 1.0 Hz (Casiez default; keep fixed)
+   - cutoff: f_c = f_min + beta * s^_k
+   - update with a = alpha(f_c, dt_k): c_k = c_{k-1} + a (c_m - c_{k-1}); R_k = Exp(a Log(R_m R_{k-1}^T)) R_{k-1}
+   - parameters to tune: f_min (Hz) and beta (1/m). On reset, s^ = 0.
+   - Check: with beta = 0 it equals the dt-aware EMA with w = alpha(f_min, dt).
+
+3. Kalman filter, constant velocity (KF-CV), linear for position and error-state for rotation, both with state [x, v] per axis:
+   - Prediction with F = [[I, dt I], [0, I]] and continuous white-noise-acceleration process noise Q = q * [[dt^3/3 I, dt^2/2 I], [dt^2/2 I, dt I]] (q in m^2/s^3 for position, rad^2/s^3 for rotation). Position: x = c, v = linear velocity. Rotation: x = small rotation error theta (3-vector) about the current estimate R^, v = angular velocity omega; predict R^- = Exp(omega dt) R^ and theta = 0.
+   - Measurement: position z = c_m, H = [I 0]. Rotation z = Log(R_m (R^-)^T), H = [I 0]. Standard update: S = H P H^T + Rm, K = P H^T S^-1, x = x + K (z - H x), P = (I - K H) P. After the rotation update, fold theta into the rotation: R^ = Exp(theta) R^-, then set theta = 0.
+   - Tie rotation to position with the same scene distance d: q_rot = q_pos / d^2 and r_rot = r_pos / d (so one q and one measurement noise describe both in metres at the scene).
+   - Measurement noise Rm (fixed variant, "KF-fixed"): measure it, do not guess. From the static run, take the raw pose after removing slow drift (subtract a centred 2 s moving median), compute the per-axis standard deviation of c (m) and of the rotation vector (rad), and use Rm = diag(sigma^2). Then only q is tuned.
+   - Variant "KF-cov": use the logged per-frame `raw_pose.covariance` (6 x 6, order [dt_x, dt_y, dt_z, dr_x, dr_y, dr_z], a left perturbation of T_CW, see `covariance_assumptions` in `frames.jsonl`) as Rm, times one scale factor s_R. Convert it to the T_WC (c, rotation) parameters with a numerical Jacobian: perturb T_CW by +-h along each of the 6 directions using the same retraction the logger states, map to (c, Log rotation) of T_WC, central differences, Sigma' = J Sigma J^T. Frames with no covariance fall back to KF-fixed Rm.
+   - Innovation gate (both KF variants): d^2 = y^T S^-1 y on the full 6-vector. If d^2 > 22.46 (chi-square, 6 dof, p = 0.999), skip the update for that frame (prediction only). After 2 consecutive skipped frames, reset to the measurement. Log gate events; they mark pose-source jumps.
+   - Initial P on reset: position and rotation variance = Rm, velocity variance large (1 m^2/s^2, 1 rad^2/s^2).
+
+**Evaluation points (what the viewer sees):** world points = the 4 corners of each of the 4 array panels at yaw 0, scale 1 (both runs never changed the array state; check `diagnostics.array` and say so), from the config in each run's `config.json` and the Step 50 layout code. Project them with K from `metadata.json` (rectified pixels, zero distortion), using raw, reference and each filtered pose. Skip points behind the camera or more than 200 px outside the image. Report per-run results averaged over points, and separately for the centre panel corners and the outer corners (longest lever arm).
+
+**Metrics**
+
+- Static run (jitter):
+  - Drift removal: p_ref(t) = centred moving median of the raw projected point over 2 s (window in frames from the real dt). Jitter J = RMS over frames and points of ||p_f(t) - p_ref(t)|| in px. Also report J without drift removal (mean point instead of moving median).
+  - STag-style pose jitter: std of rotation angle (deg) and of position (mm) about the drift-removed reference.
+  - Also report raw (w = 1) J, so every filter shows its noise reduction factor J / J_raw.
+
+- Movement run (lag and tracking error):
+  - Reference trajectory: zero-phase smoothing of the raw pose within each valid segment (between resets). Apply a centred Savitzky-Golay filter (order 2) to c and to the rotation vector unwrapped relative to the segment's first rotation, window 5 frames; repeat the whole evaluation with window 7 and report both. Segments shorter than the window are excluded from motion metrics.
+  - Moving frames: reference point speed > 30 px/s (median over points). Still frames inside the movement run are reported separately.
+  - Tracking error E_dyn = RMS ||p_f(t) - p_ref(t)|| over moving frames, px.
+  - Lag (ms): the delay tau that minimises the sum over moving frames of ||p_f(t) - p_ref(t - tau)||^2, with p_ref linearly interpolated in time; search tau from -100 to 400 ms in 5 ms steps, refine with a parabola. Report per filter.
+  - Noise passed during motion: RMS of p_f minus its own window-5 Savitzky-Golay smoothing, moving frames only.
+  - Overshoot: for each stop (reference speed drops from > 60 px/s to < 15 px/s), the largest distance the filtered point goes past the reference along the motion direction within the next 1 s; report median and max.
+  - Source switches: for each change of `actual_pose_source` between two valid frames, the largest frame-to-frame step of p_f within +-3 frames, compared with raw. This is where EMA may win; report it on its own.
+
+**Tuning (fair: every filter gets its own best settings, compared on one jitter-versus-error plane)**
+- Split: tune on the first 50% of the movement run (by time) and on the full static run; report all final numbers on the second 50% of the movement run and on the static run. State this split in the report.
+- Sweeps:
+  - EMA: w in {0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0}.
+  - 1€: Casiez's procedure, done as a grid. f_min in {0.05, 0.1, 0.2, 0.3, 0.5, 0.75, 1, 1.5, 2, 3, 5} Hz and beta in {0, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10} 1/m. (The manual procedure the grid replaces: beta = 0, lower f_min until static jitter is acceptable; then raise beta until lag in motion is acceptable.)
+  - KF-fixed: q_pos on a log grid from 1e-4 to 1e2 m^2/s^3 (13 values), Rm fixed from the static run.
+  - KF-cov: same q grid, s_R in {0.25, 0.5, 1, 2, 4}. Pick s_R first by the normalised innovation squared test on the static run: mean NIS should be about 6; choose the s_R closest, then sweep q.
+  - Scene distance d: fixed at the run median; one sensitivity check at 0.5 d and 2 d for the chosen settings.
+- Pareto front: for each filter, plot static jitter J (x) against movement error E_dyn (y) for every setting (tuning half), and draw each filter's lower-left front.
+- Operating points:
+  - Equal jitter: J target = J of the current EMA w = 0.4. For each filter, take the setting on its front with J <= target and the lowest E_dyn. Report E_dyn, lag, overshoot, motion noise and switch steps on the test half.
+  - Equal lag: lag target = EMA 0.4's lag. Report each filter's J at that lag.
+  - Also report each filter's "knee" (front point closest to the origin after scaling both axes by EMA 0.4's values).
+
+**Code**
+- `ar_projection/filters.py`: `OneEuroPose` and `KalmanPose` with the same interface as `PoseSmoother` (`update(T_CW, t, covariance=None) -> T_CW`, `reset()`). `PoseSmoother` gets an optional time argument but keeps its current behaviour by default.
+- Config: `filter.mode` in {"ema", "one_euro", "kalman", "kalman_cov"} plus their parameters (`min_cutoff_hz`, `beta`, `d_cutoff_hz`, `scene_distance_m`, `q`, `r_scale`, gate threshold). Default stays "ema" with weight 0.4, so old configs and runs reproduce.
+- `pipeline.py`: pass the frame time and the pose covariance to the filter. No other change.
+- `scripts/step51_filters.py`: the offline evaluation above (reads the two runs, runs every filter setting, writes `runs/step51-filters/results.json`, `report.md`, plots).
+- Tests: constant input converges to it; EMA step response never overshoots; KF-CV on a constant-velocity ramp has steady-state error under 1e-3 m; 1€ with beta = 0 equals dt-aware EMA; reset rule; offline EMA reproduces logged `render_T_CW` on 100 frames of the static run; the gate rejects a 20 cm jump and then resets after 2 frames.
+
+**Plots** (`runs/step51-filters/`): (1) Pareto fronts, J vs E_dyn, one colour per filter, current EMA 0.4 marked; (2) one centre-panel corner, x and y in px over a 5 s motion segment with a stop: raw, reference, and each filter at the equal-jitter setting; (3) the same over a 5 s window of the static run; (4) bar chart at equal jitter: E_dyn, lag, overshoot, switch step.
+
+**Report to Sahaj:** a table at equal jitter and at equal lag (static J px, rotation std deg, position std mm, E_dyn px, lag ms, motion noise px, overshoot px, switch step px) for raw, EMA 0.4, best EMA, 1€, KF-fixed, KF-cov; the chosen settings; the train/test split; the Savitzky-Golay window sensitivity; a recommendation of which filter to make the default, with the trade-off. Expected outcome (state whether it held): 1€ beats fixed EMA at equal jitter; KF-CV has the least lag in smooth motion but overshoots at stops; EMA does best on source-switch steps and needs no tuning beyond one weight. Do not change the live default until Sahaj decides.
+- Result: Done 2026-10-28, offline. Outputs in `Integration/runs/step51-filters/` (`report.md`, `results.json`, `pareto.png`, `motion_segment.png`, `static_segment.png`, `equal_jitter_bars.png`); re-run with `../.venv/bin/python scripts/step51_filters.py`. Code: `ar_projection/filters.py` (`OneEuroPose`, `KalmanPose`, `covariance_wc`, `make_smoother`), `Filter` config fields, `pipeline.py` passes `packet.timestamp` and `pose.covariance`, `tests/test_filters.py` (9 tests, all pass; the 4 failures left in the suite are the `test_array.py` tests broken by the edited `config-array.json`, unrelated).
+  - Acceptance check passed: offline `PoseSmoother` reproduces the logged `render_T_CW` with max abs difference 0 (386 frames of the static run). Resets: 48 reset events on the first valid pose after an invalid frame (105 counting the invalid frames, as the Step text does).
+  - Equal jitter (static J <= EMA 0.4's 0.337 px; selection on the first half of the movement run, numbers on the second half): EMA 0.4 has E_dyn 31.9 px and lag 127 ms. 1 euro (f_min 0.1 Hz, beta 10) has the same J (0.336 px), E_dyn 4.9 px and lag 12 ms. Neither Kalman variant reaches that J: KF-fixed's lowest J is 0.411 px (E_dyn 10.0, lag 5 ms), KF-cov's 0.359 px (E_dyn 10.8, lag 3 ms), both with q below the specified grid (extension 1e-8..1e-5 added, marked * in the report; 1 euro beta 20 and 50 added too, not chosen). Raw is J 0.587 px, E_dyn 4.0 px.
+  - Equal lag (<= 129 ms): 1 euro f_min 0.3, beta 0.5 gives J 0.280 px at 104 ms, against 0.337 px for EMA 0.4. Knee of each front: EMA w 0.5, 1 euro (0.05 Hz, 5), KF q 1e-5 / 1e-6.
+  - Source-switch steps (largest frame step within +-3 frames, mean over 9 test-half switches; raw 43.0 px): EMA 0.4 26.6 px, 1 euro 40.4, KF-fixed 49.5, KF-cov 55.6. EMA is the only filter that clearly softens them; the Kalman filters are worse than raw.
+  - Overshoot at stops: only ONE stop in the whole movement run (the camera was almost never still: 34 still frames, 462 moving), so the overshoot column is one event and proves nothing (EMA 4.3 px, 1 euro 3.4, KF-fixed 1.7, KF-cov 6.8, raw 1.1). Needs a recording with several deliberate stops.
+  - Measured KF measurement noise from the static run: sigma_c = [2.7, 1.9, 2.6] mm, sigma_rot = [0.8, 1.0, 0.9] mrad (now `DEFAULT_SIGMA`). NIS test for s_R (at q = 1e-5): s_R 0.25 gives 4.2, the smallest grid value; NIS stays near 6.4-7.3 for s_R 0.03-0.12, so the logged covariance is several times too large; the grid choice is s_R = 0.25 as specified.
+  - Reading of the Kalman results: segments are short (the movement run resets every ~13 valid frames on average, the static run every ~30), so the filter spends most of its time just after a reset with the large initial velocity variance and never reaches steady state; that is why E_dyn is flat across q and why low q does not lower J. A fair Kalman test needs longer valid segments (or a state that survives short gaps).
+  - Sensitivity: Savitzky-Golay window 7 instead of 5 leaves EMA unchanged (31.9 / 31.9 px) but moves 1 euro's E_dyn from 4.9 to 6.3 px and the Kalman variants from 10.0 / 10.8 to 11.4 / 12.3 px, so the absolute E_dyn of the low-lag filters depends on the reference; the ordering does not change. Scene distance d x0.5 / x2: 1 euro J 0.320 / 0.362 px, E_dyn 6.3 / 4.2 px; Kalman results move little. dt-aware EMA differs from the fixed-weight EMA by up to 11% (E_dyn, lag), table in `report.md`; it does not change the conclusion.
+  - Expected outcome check: (1) 1 euro beats fixed EMA at equal jitter: held, by a wide margin (E_dyn 6x lower, lag 10x lower). (2) KF-CV has the least lag: held (3-5 ms), but at higher static jitter than EMA; overshoot at stops cannot be judged from one event (cov variant 6.8 px, fixed 1.7 px). (3) EMA best on source-switch steps: held.
+  - Recommendation (live default NOT changed, Sahaj decides): 1 euro, f_min about 0.1-0.3 Hz and beta 0.5-10 tuned to taste; it keeps EMA's jitter and removes almost all the lag. Keep EMA if source-switch jumps matter more than lag, since 1 euro lets them through (40 px against 27 px). Kalman is not worth its two noise parameters on this data. Caveats: one movement recording (1 stop, short valid segments), tuning half and test half come from the same run, and the lag metric measures against a smoothed copy of the raw track, so it cannot see error in the raw pose itself.
+
+### Step 52: demo video recording (shot list, recording commands, offline rendering; set by Sahaj 30 Oct)
+- [ ] Goal: record short clips and stitch them into one demo video with transitions between differently arranged video arrays (grids of synchronised panes). Sahaj records; Claude prepared the code, the compositor and this shot list on 30 Oct.
+
+**Segments (Sahaj, 30 Oct)**
+
+| # | Segment | Grid | Length | Panes (left to right, top to bottom) |
+|---|---|---|---|---|
+| 1 | Map building | 1x2 | 5 s | camera view while building (features, landmark count) / third-person phone video of the person building the map |
+| 2 | RGB + depth, occlusion | 1x3 | 7 s | camera / this frame's depth / AR with occlusion; one person walks in front of the array, one walks behind it |
+| 3 | RGB + camera pose with covariance (post-processed) | 1x2 | 5 s | camera with the array / top-down map: landmarks, tag, array, trajectory coloured by pose source, camera frustum, 2-sigma position ellipse, sigma strip |
+| 4 | Gestures | 3 rows of 1x2 | ~10 s | each row: AR / laptop camera with the classifier overlay; rows: rotate, swipe, zoom, all playing at once |
+| 5 | RGB + game + video classification | 1x3 | 10 s | AR / the broadcast game video the centre panel shows / the top-down shot-classification video the left panel shows, at the same frames |
+
+Assumption (ask Sahaj if wrong): "video classification" in segment 5 is the top-down current-shot video (`DataToProject/TopDownDerived`, the right half of `FullOriginal/*_projection_current_shot.mp4`). Set `"source": "full"` in the plan to show the whole side-by-side original instead.
+
+**Principle: record live at full rate, render offline.** Live, run without the depth model (`--no-occlusion`) so the loop is not limited to about 10 fps by depth, and record the lossless input (`--record-input`). Then render every AR view offline with `--replay-run` (same poses: a replay of a recording reproduced the live `T_CW` to 2e-9 on 120 frames, 30 Oct) with occlusion, the clean or minimal HUD and `--save-video`. A replay never opens the laptop camera; `--replay-actions` re-applies the gesture/key actions logged live at the same frames, and the panel videos now follow the recorded source time, so the replay shows the same panel frames as the live run. Only the laptop-camera gesture video must be captured live (written automatically when gestures run with `--record-input`). Give the replay the same `--config` and `--map` as the live take.
+
+**Code added for this step (30 Oct)**
+- CLI: `--no-occlusion` (never load the depth model), `--minimal-hud` (`display.minimal`: features, tag outline, corner ellipses, one large status line), `--replay-actions` (with `--replay-run`). `--replay-run` now forces `gestures.enabled=false` unless `--gesture-camera` is given.
+- `--save-video` also writes `rgb.avi` (rectified camera image, no overlay). `--depth-video` also writes `scene_depth.avi` (this frame's aligned depth; `depth.avi` stays the stored background when the background prior is on, which does not show people).
+- Gesture worker: when the live run records (`--record-input` or `--save-video`), it writes `gesture.avi` (laptop camera with the webcam_stable overlay, camera rate) and `gesture_frames.jsonl` (`time.monotonic()` per frame, the same clock as the AR `source_time_s`).
+- Panel videos (`content.VideoLoop`) run on the frame's source time instead of the wall clock; `diagnostics.array.video_frames` logs `[game, frame index]` per AR frame for the game and left panels.
+- Bug fix: `config-array.json` has no `games` key, but the defaults filled in 3 placeholder games before the manifest check, so `array.games_manifest` was ignored (runs from 27 Oct show "Game 1-3", 26 Oct runs show the 9 rallies). The manifest is now loaded whenever the user config has no `games`.
+- `scripts/rec_video.py`: `probe RUN` (streams, per-second pose validity, logged actions and gesture events in run-relative seconds, best windows, darkest frames for sync), `segment PLAN NAME`, `stitch PLAN`, `all PLAN`. Frames are resampled to 30 fps by sample-and-hold on the logged times (the .avi nominal fps is wrong for the live loop). Output H.264 via ffmpeg; stitching uses ffmpeg `xfade` transitions (fade, slideleft, wipeleft, slideup, circleopen; per segment in the plan).
+- `recording/plan.json`: the five segments with `REPLACE_...` placeholders for run ids, start times and the phone video.
+- Tests: `tests/test_recording.py` (4: source-clock video loop, identical panel frames on identical timestamps and the swipe restart, manifest loading, compositor time alignment). Full suite in a copy on 30 Oct: 120 pass, 1 skipped, 4 fail; the 4 failures also fail without the Step 52 changes (3 `test_array.py` geometry tests expect the old 5 cm gap, 5 deg toe-in and +-60 deg limit defaults that `config.py` no longer has; the manifest test failed on the bug above and passes now on a machine with the flag images).
+
+**Before recording**
+- Logitech at index 4 (v4l2), laptop camera at index 0. Check the floor tag and the map scene have not moved since the map was built; if they have, record segment 1 first and use its map for the other segments (`--map`).
+- Good, constant light. Optional: fix exposure and focus (`v4l2-ctl -d /dev/video4 -c auto_exposure=1 -c focus_automatic_continuous=0`; control names vary by camera, list them with `v4l2-ctl -d /dev/video4 -L`).
+- Start every take with 2-3 s of the tag clearly in view, so the pose is valid before the action starts. Record each segment two or three times; keep the best take.
+- All commands from `Integration/ar`, `../.venv/bin/python`. After each take run `../.venv/bin/python scripts/rec_video.py probe ../runs/<id>` and note the run id and the start time in `recording/plan.json`.
+
+**Segment 1: map building (5 s, 1x2)**
+1. Start the phone recording (landscape, the person and the laptop screen in view).
+2. Run `../.venv/bin/python april-tag-projection.py --config config-logitech-floor.json --mapping-mode build --map data/logitech-landmark-map-demo-final.npz --save-map --record-input --save-video --minimal-hud`. This map is built: `data/logitech-landmark-map-demo-final.npz` is the map used from now (set as `mapping.map_path` in `config-array.json`); do not rebuild it or use `--replace-map`.
+3. Sync mark: cover the Logitech lens with a hand for about 1 s in view of the phone.
+4. Move slowly through translated viewpoints (not only rotation) until the map saves; then `q`.
+5. `probe` prints the darkest frames (the sync mark) in run seconds `t_run`. Find the same moment in the phone video (`t_phone`). For a segment that starts at run second `S`, the phone pane's `start` is `t_phone + (S - t_run)`.
+- Panes: `run` annotated (built live: map building is timing-dependent, so the live view is the honest one), `file` phone video.
+
+**Segment 2: RGB + depth with occlusion (7 s, 1x3)**
+1. Camera on a tripod or held still, about 2.5-3 m from the array, tag in view. Live: `../.venv/bin/python april-tag-projection.py --config config-array.json --no-occlusion --no-gestures --record-input`.
+2. After 3 s, person A walks across between the camera and the array (about 1-1.5 m from the camera); then person B walks across behind the array (about 0.5-1 m behind its pivot). Slow walking, whole body in view. `q`.
+3. Render: `../.venv/bin/python april-tag-projection.py --config config-array.json --replay-run ../runs/<live id> --occlusion --save-video --depth-video --clean --headless`.
+- Panes: `rgb`, `scene_depth`, `annotated` of the replay run. Occlusion with people has not been scored; check the render and pick the best take. If the array is hidden by the depth of the floor or a wall, note the run and frame for the depth work (Step 48).
+
+**Segment 3: RGB + camera pose with covariance (5 s, 1x2)**
+1. Live, handheld: `../.venv/bin/python april-tag-projection.py --config config-array.json --no-occlusion --no-gestures --record-input`. Walk a slow arc of 1-2 m around the array at 1.5-3 m; for 1-2 s turn so the tag leaves the image (landmark pose, larger ellipse), then come back.
+2. Render: `../.venv/bin/python april-tag-projection.py --config config-array.json --replay-run ../runs/<live id> --no-occlusion --save-video --minimal-hud --headless` (or `--occlusion --clean` for a clean AR view).
+- Panes: `annotated` of the replay, `posemap` of the replay. The map draws the raw pose; the ellipse is the logged conditional covariance (CONTEXT.md section 11), magnified by the stated factor (auto: the median ellipse is about 14 px). Step 51 found this covariance several times too large on the static run (NIS), so it shows relative, not calibrated, uncertainty; say so in the video caption or the paper.
+
+**Segment 4: gestures (about 10 s, 3 rows of 1x2)**
+1. Live, three takes (or one long take): `../.venv/bin/python april-tag-projection.py --config config-array.json --no-occlusion --gesture-camera 0 --record-input`. Keep the gesture pane on (`g`) to see the classifier. Take A: turn hand clockwise, then counterclockwise. Take B: swipe right, then left. Take C: zoom in, then out. Wait about 3 s between gestures (3 s window, 4 of 5 votes, 1 s cooldown).
+2. `probe` lists the gesture events with run times. Choose each row's `start` about 2 s before the first event, so the row shows the hand moving, the confirmation, and the array changing.
+3. Render each take: `../.venv/bin/python april-tag-projection.py --config config-array.json --replay-run ../runs/<live id> --replay-actions --no-occlusion --save-video --clean --headless` (`--occlusion` instead of `--no-occlusion` if the occlusion render looks right).
+- Panes per row: `run` annotated of the replay, `gesture` of the LIVE run (the replay has no laptop-camera video). Both share the live run's timeline, so use the same `start`.
+
+**Segment 5: RGB + game + video classification (10 s, 1x3)**
+1. Live: `../.venv/bin/python april-tag-projection.py --config config-array.json --no-occlusion --no-gestures --record-input`. Camera still or moving slowly, the whole array in view, the game playing (it plays from the start; `t` plays, `x` stops, `,`/`.` change game).
+2. Render: `../.venv/bin/python april-tag-projection.py --config config-array.json --replay-run ../runs/<live id> --replay-actions --occlusion --save-video --clean --headless` (or `--no-occlusion`).
+- Panes: `annotated`, `panel` `video`, `panel` `topdown` of the replay run. The side panes read the frame index the panels showed, so they match the AR panels frame for frame.
+
+**Assemble**
+- Fill in `recording/plan.json`, then `../.venv/bin/python scripts/rec_video.py segment recording/plan.json 03_pose` to check one segment, and `../.venv/bin/python scripts/rec_video.py all recording/plan.json` for everything. Output: `runs/step52-video/<segment>.mp4` and `runs/step52-video/MOCam_demo.mp4` (1920x1080, 30 fps, 0.6 s transitions; the intro card is optional, delete `intro` to drop it).
+- Check the final video: each segment's length, that the gesture rows show the event and the array change, that the side panes of segment 5 match the AR panels, and the sync of segment 1.
+
+- Result: _(fill in: run ids per segment, starts, takes kept, anything that failed)_
+
 ## 6. Architecture change log
 
 Record every structural change here: new modules, new config fields, schema or format changes, changed data flow. Keep entries short and dated.
@@ -1254,6 +1420,7 @@ Record every structural change here: new modules, new config fields, schema or f
 | 2026-10-24 | 27b | `--checkpoint` CLI argument added to `scripts/step27_depth_env.py`, `step30_scale.py`, `step31_masks.py` (also gained `--slope-sign` and `--output-root`); checkpoint path/name/SHA-256 written into each script's output JSON | `scripts/step27_depth_env.py`, `step30_scale.py`, `step31_masks.py` | N/A (standalone scripts, not part of the package; defaults preserve the old hardcoded checkpoint path) |
 
 | 2026-10-25 | 36 | `occlusion.plane_depth(T_CW, point_world, normal_world, camera)` -- analytic camera-Z of an infinite plane at every pixel (oracle depth for a flat surface), same ray-plane algebra as `panel_layer()` generalized from a quad's own corners to an arbitrary point+normal, not clipped to any polygon. `scripts/step36_depth_sources.py` (offline diagnostic, `.venv-depth`), `scripts/step36_figures.py` and `scripts/step36_summary.py` (system `python3`, need matplotlib which neither project venv has) | `ar_projection/occlusion.py`, `tests/test_experiments.py`, `scripts/step36_*.py` | Yes -- `plane_depth` is a new pure function, nothing else changed; 82/82 tests pass |
+| 2026-10-28 | 51 | `ar_projection/filters.py` (new): `OneEuroPose`, `KalmanPose`, `covariance_wc`, `make_smoother`; `Filter` config gained `min_cutoff_hz`, `beta`, `d_cutoff_hz`, `scene_distance_m`, `q`, `r_scale`, `gate_chi2`, `measurement_sigma` (all defaulted) and `mode` now accepts `one_euro`/`kalman`/`kalman_cov`; `PoseSmoother.update(T, t=None, covariance=None)`; `pipeline.py` builds the smoother with `make_smoother` and passes the frame time and pose covariance. New `scripts/step51_filters.py`, `tests/test_filters.py` | `ar_projection/filters.py`, `config.py`, `rendering.py`, `pipeline.py`, `scripts/step51_filters.py`, `tests/test_filters.py` | Yes - default `filter.mode` stays `ema` (weight 0.4); old configs load via the field defaults; EMA output is unchanged (reproduces logged `render_T_CW` exactly) |
 
 Planned (not yet implemented), added 23 Oct 2026 (after Steps 18-21):
 - `scripts/step22_frames.py` and contact-sheet output (Step 22).
@@ -1623,5 +1790,13 @@ Append newest entries at the bottom. Use this template:
 |---|---|---|---|---|
 | 2026-10-26 | 50 | New `array` and `gestures` config blocks (defaults off); `array.py`, `content.py`, `gestures.py` modules; `visible_panel` clips to camera Z >= 0.05 m (was: dropped when any corner was behind the camera); `panel_layer` accepts a `PanelSet` (single quad path unchanged apart from the flip fix); `annotate` draws a layer whenever one is given; `run()` gained `left_video`, `array_script`; CLI `--array-script`, `--no-gestures`, `--gesture-camera` | `ar_projection/{config,array,content,gestures,rendering,occlusion,pipeline,cli}.py`, `tests/test_array.py` | Yes for configs without the blocks (93 old tests pass unchanged); a panel partly behind the camera now renders its visible part instead of vanishing |
 | 2026-10-26 | 50 | `webcam.load_job` for the DD-Net job folder without `experiment.json` (Integration copy only) | `gestures/webcam.py`, `gestures/smoke_ddnet.py` | Yes (new function) |
+| 2026-10-30 | 52 | CLI `--no-occlusion`, `--minimal-hud` (`display.minimal`), `--replay-actions`; replay forces gestures off; `--save-video` adds `rgb.avi`, `--depth-video` adds `scene_depth.avi`; gesture worker records `gesture.avi` + `gesture_frames.jsonl` when the run records; panel videos run on the frame source time and `diagnostics.array.video_frames` logs the shown frames; fix: `games_manifest` ignored when the config has no `games` key; `scripts/rec_video.py`, `recording/plan.json`, `tests/test_recording.py` | `ar_projection/{cli,config,content,gestures,pipeline,rendering}.py`, `scripts/rec_video.py`, `recording/plan.json`, `tests/test_recording.py` | Yes; live panel videos behave as before (source time = monotonic acquisition time); configs without `games` now get the manifest's games, as intended in Step 50 |
 
 **Step 50 addendum (26 Oct): gesture tuning pane.** With the display on and gestures enabled, the AR window gets the laptop camera with the webcam_stable overlay (state, raw prediction and score, threshold, vote settings) on its right, and trackbars `Threshold %`, `Vote window`, `Required votes` (required is clamped to the window). Keys: `[` / `]` threshold -/+ 5 points, `g` hides/shows the pane. The worker thread draws the overlay and publishes the frame; the main thread only reads it and posts settings (`GestureWorker.request`), the worker applies them itself. Every change is logged in `gestures.jsonl` as `{"settings": ...}`. Tuned values are not saved: copy the last logged ones into `gestures.min_confidence/vote_window/required_votes` in `config-array.json`. Checked: 300-frame replay with the display and the gesture pane on, no errors; trackbar interaction not exercised by Claude.
+
+## Per-game panel data (games.json)
+- `ar/scripts/build_game_info.py` writes `DataToProject/games.json` + `Info/flags/*.png`. Config: `array.games_manifest`.
+- Scores come from `cleaned_rallies/set-1/<match>/set1.csv` (A = first-named player). Shown = score going INTO the rally; `score_after` also stored.
+- Height/Weight/Rank are hand-collected (web); Rank = career-high. Sources conflict for Momota weight (68 vs 72 kg) and Antonsen height (1.85–1.88 m). Edit the PLAYERS dict and rerun, or edit games.json.
+- Swipe (`game:±1`) swaps score/stats textures and restarts the game + top-down videos. `--panel-video` overrides the left video for all games.
+- Tested: unit tests only (112 pass); swipe switching not yet run live.

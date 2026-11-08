@@ -140,11 +140,22 @@ class Uncertainty:
     min_scaled_singular_value_ratio: float
 
 
+DEFAULT_SIGMA = [0.0027, 0.0019, 0.0026, 0.0008, 0.0010, 0.0009]   # measured on the static run 20261027T033608-9db092df (Step 51)
+
+
 @dataclass(frozen=True)
 class Filter:
     enabled: bool
-    mode: str
-    measurement_weight: float
+    mode: str                        # ema | one_euro | kalman | kalman_cov (Step 51; ema stays the default)
+    measurement_weight: float        # ema weight
+    min_cutoff_hz: float = 1.0       # one_euro
+    beta: float = 0.0
+    d_cutoff_hz: float = 1.0
+    scene_distance_m: float = 2.0    # metres per radian when rotation and translation share one number (one_euro, kalman)
+    q: float = 1.0                   # kalman white-noise-acceleration, m^2/s^3 (rotation q/d^2)
+    r_scale: float = 1.0             # kalman_cov: scale on the logged pose covariance
+    gate_chi2: float = 22.46         # kalman innovation gate, chi-square 6 dof p = 0.999
+    measurement_sigma: Optional[list] = None   # kalman: six std devs, c (m) then rotation vector (rad); null = DEFAULT_SIGMA
 
 
 @dataclass(frozen=True)
@@ -161,6 +172,8 @@ class Display:
     debug: bool
     draw_features: bool
     draw_uncertainty: bool
+    clean: bool = False   # only the camera image + projection, no text or overlays
+    minimal: bool = False  # Step 52 recording HUD: projection, features, tag outline, ellipses, one large status line
 
 
 @dataclass(frozen=True)
@@ -209,26 +222,28 @@ def _default_panels():
     # Viewer-centric layout at scale 1, yaw 0 (x right, y away, z up); see Instruction.md Step 50. toe_in_deg > 0 turns the
     # panel's outer end towards the viewer. "above" stacks a panel on the named one (+ gap_m).
     return [{"name": "game", "role": "game", "side": "center", "width_m": 0.5, "height_m": 0.28125, "toe_in_deg": 0.0, "above": None},
-            {"name": "video", "role": "video", "side": "left", "width_m": 0.25, "height_m": 0.4444, "toe_in_deg": 5.0, "above": None},
-            {"name": "stats", "role": "stats", "side": "right", "width_m": 0.25, "height_m": 0.1875, "toe_in_deg": 0.0, "above": None},
-            {"name": "score", "role": "score", "side": "right", "width_m": 0.25, "height_m": 0.1875, "toe_in_deg": 0.0, "above": "stats"}]
+            {"name": "video", "role": "video", "side": "left", "width_m": 0.25, "height_m": 0.4444, "toe_in_deg": 15.0, "above": None},
+            {"name": "stats", "role": "stats", "side": "right", "width_m": 0.25, "height_m": 0.1875, "toe_in_deg": 15.0, "above": None},
+            {"name": "score", "role": "score", "side": "right", "width_m": 0.25, "height_m": 0.1875, "toe_in_deg": 15.0, "above": "stats"}]
 
 
 @dataclass(frozen=True)
 class Array:
     """Step 50 array of upright, world-anchored panels (replaces the single panel when enabled). Off by default."""
     enabled: bool = False
-    gap_m: float = 0.05
+    gap_m: float = 0.02
+    lift_m: float = 0.0              # raises the whole array (pivot) above the tag plane
     facing_yaw_deg: float = 180.0   # viewer-centric layout -> world: 180 puts the viewer on the +Y side of the tag (as in the live runs)
-    yaw_step_deg: float = 15.0
-    yaw_limit_deg: float = 60.0
-    scale_step: float = 1.1
+    yaw_step_deg: float = 30.0
+    yaw_limit_deg: float = 90.0
+    scale_step: float = 1.5
     scale_min: float = 0.5
     scale_max: float = 2.0
     near_plane_m: float = 0.05
     texture_long_px: int = 400
     video_fit: str = "contain"      # contain | cover | stretch, for video frames on a panel of another aspect ratio
     left_video: Optional[str] = None
+    games_manifest: Optional[str] = None   # JSON list of games (videos, players, scores); replaces `games`; paths in it are relative to the manifest
     score: str = "1:0"
     panels: list = field(default_factory=_default_panels)
     games: list = field(default_factory=lambda: [{"name": "Game 1", "video": None}, {"name": "Game 2", "video": None}, {"name": "Game 3", "video": None}])
@@ -318,7 +333,7 @@ def typed(cls, data, prefix=""):
 def validate(c: Config) -> None:
     enums = {"camera.source_type": ("camera", "video"), "camera.backend": ("auto", "dshow", "msmf", "v4l2", "avfoundation", "ffmpeg"),
              "tags.family": ("APRILTAG_36h11",), "features.backend": ("orb",), "mapping.mode": ("off", "build", "localize"),
-             "pose.mode": ("tag_only", "landmark_only", "joint"), "pose.robust_loss": ("linear", "huber", "soft_l1", "cauchy", "arctan"), "filter.mode": ("ema",),
+             "pose.mode": ("tag_only", "landmark_only", "joint"), "pose.robust_loss": ("linear", "huber", "soft_l1", "cauchy", "arctan"), "filter.mode": ("ema", "one_euro", "kalman", "kalman_cov"),
              "logging.input_codec": ("FFV1", "HFYU"), "features.id_revalidation.mode": ("off", "loss_clear", "age_expire", "descriptor_check"), "occlusion.model": ("relative", "metric"), "occlusion.reference": ("line", "plane")}
     for label, choices in enums.items():
         obj = c
@@ -326,7 +341,7 @@ def validate(c: Config) -> None:
             obj = getattr(obj, part)
         if obj not in choices:
             raise ValueError(f"{label}: supported values {choices}")
-    nonnegative = {"index", "anchor_id", "fast_threshold", "edge_threshold", "tag_mask_margin_px", "redetect_below_tracks", "max_level", "offset_y_m", "ambiguity_error_gap_px", "ambiguity_rotation_gap_deg", "seed", "multiview_descriptor_bank", "max_age_frames", "max_descriptor_distance", "refinement_max_evaluations", "prior_grace_s", "camera_index", "cooldown_s"}
+    nonnegative = {"index", "anchor_id", "fast_threshold", "edge_threshold", "tag_mask_margin_px", "redetect_below_tracks", "max_level", "offset_y_m", "ambiguity_error_gap_px", "ambiguity_rotation_gap_deg", "seed", "multiview_descriptor_bank", "max_age_frames", "max_descriptor_distance", "refinement_max_evaluations", "prior_grace_s", "camera_index", "cooldown_s", "lift_m", "beta"}
     signed = {"tilt_x_deg", "facing_yaw_deg"}
     def bounds(obj, prefix=""):
         for f in fields(obj):
@@ -343,6 +358,9 @@ def validate(c: Config) -> None:
                         ("features.guided_matching.ratio_test", c.features.guided_matching.ratio_test)):
         if not 0 < value < 1:
             raise ValueError(f"{label}: must be between 0 and 1")
+    sigma = c.filter.measurement_sigma
+    if sigma is not None and (len(sigma) != 6 or not all(type(v) in (int, float) and v > 0 for v in sigma)):
+        raise ValueError("filter.measurement_sigma: six positive numbers (c in m, then rotation vector in rad)")
     if not 0 < c.filter.measurement_weight <= 1 or not 0 < c.uncertainty.min_scaled_singular_value_ratio < 1:
         raise ValueError("filter.measurement_weight or uncertainty.min_scaled_singular_value_ratio: invalid fraction")
     if (c.features.scale_factor <= 1 or c.features.max_hamming_distance > 256 or c.features.id_revalidation.max_descriptor_distance > 256
@@ -412,14 +430,31 @@ def load_config(filename=DEFAULT_PATH, overrides=None) -> Config:
     data["mapping"].setdefault("multiview_descriptor_bank", 0)
     data["logging"].setdefault("input_codec", "FFV1")
     data["logging"].setdefault("association_dump", False)
+    data["display"].setdefault("clean", False)
+    data["display"].setdefault("minimal", False)
     data["occlusion"] = {**asdict(Occlusion()), **data.get("occlusion", {})}
+    user_games = data.get("array", {}).get("games")      # before the defaults fill in the 3 placeholder games (Step 52 fix)
     data["array"] = {**asdict(Array()), **data.get("array", {})}
     data["gestures"] = {**asdict(Gestures()), **data.get("gestures", {})}
     for label, value in (overrides or {}).items():
-        section, name = label.split(".")
-        if section not in data or name not in data[section]:
+        *path, name = label.split(".")
+        node = data
+        for part in path:
+            node = node.get(part) if isinstance(node, dict) else None
+        if not isinstance(node, dict) or name not in node:
             raise ValueError(f"{label}: unknown override")
-        data[section][name] = value
+        node[name] = value
+    manifest = data["array"].get("games_manifest")
+    if manifest and not user_games:   # a run's saved config already embeds the resolved games
+        path = (filename.parent/manifest).resolve()
+        games = json.loads(path.read_text(encoding="utf-8-sig"))
+        for g in games:
+            for key in ("video", "topdown"):
+                if g.get(key):
+                    g[key] = str((path.parent/g[key]).resolve())
+            for p in g.get("players", []):
+                p["flag"] = str((path.parent/p["flag"]).resolve())
+        data["array"]["games"] = games
     c = typed(Config, data)
     validate(c)
     for section, name in (("camera", "video_path"), ("camera", "timestamps_path"), ("camera", "calibration_path"), ("mapping", "map_path"), ("logging", "output_dir"), ("gestures", "gestures_dir")):

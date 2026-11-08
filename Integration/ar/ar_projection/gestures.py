@@ -31,9 +31,11 @@ def action_for(table, label):
 
 
 class GestureWorker(threading.Thread):
-    def __init__(self, cfg, events, log_path=None):
+    def __init__(self, cfg, events, log_path=None, record_dir=None):
+        """record_dir (Step 52): also write every laptop-camera frame, with the webcam_stable overlay, to record_dir/gesture.avi
+        (MJPG, the camera's own rate) and its time.monotonic() stamp (the AR source-time clock) to record_dir/gesture_frames.jsonl."""
         super().__init__(daemon=True, name="gesture-worker")
-        self.cfg, self.events, self.log_path = cfg, events, log_path
+        self.cfg, self.events, self.log_path, self.record_dir = cfg, events, log_path, record_dir
         self.stop_flag = threading.Event()
         self.ready = threading.Event()
         self.error = None
@@ -57,7 +59,7 @@ class GestureWorker(threading.Thread):
             file.flush()
 
     def run(self):
-        capture = detector = log = None
+        capture = detector = log = writer = stamps = None
         try:
             import cv2
             gdir = Path(self.cfg.gestures_dir).resolve()
@@ -92,10 +94,18 @@ class GestureWorker(threading.Thread):
                     self._log(log, {"t": now, "settings": {"min_confidence": pending[0], "vote_window": pending[1], "required_votes": pending[2]}})
                 fresh = session.predict_if_due(now)
                 controller.update(session, now, fresh)
-                if self.preview:
+                if self.preview or self.record_dir is not None:
                     webcam._draw(frame, session, self.rate_hz, now, prediction_prefix="Raw prediction (uncalibrated softmax score)",
                                  extra_lines=controller.display_lines())
                     self.frame = frame
+                if self.record_dir is not None:
+                    if writer is None:
+                        writer = cv2.VideoWriter(str(Path(self.record_dir)/"gesture.avi"), cv2.VideoWriter_fourcc(*"MJPG"),
+                                                 capture.get(cv2.CAP_PROP_FPS) or 30., (frame.shape[1], frame.shape[0]))
+                        stamps, n_rec = open(Path(self.record_dir)/"gesture_frames.jsonl", "w", encoding="utf-8"), 0
+                    writer.write(frame)
+                    stamps.write(json.dumps({"i": n_rec, "t": now, "confirmed": controller.confirmed_label})+"\n")
+                    n_rec += 1
                 if fresh and session.prediction:
                     self._log(log, {"t": now, "prediction": session.prediction[0], "score": session.prediction[1], "confirmed": controller.confirmed_label})
                 label = trigger.update(controller.confirmed_label, now)
@@ -111,7 +121,8 @@ class GestureWorker(threading.Thread):
             logging.error("Gestures disabled: %s", self.error)
         finally:
             self.ready.set()
-            for closer in (getattr(capture, "release", None), getattr(detector, "close", None), getattr(log, "close", None)):
+            for closer in (getattr(capture, "release", None), getattr(detector, "close", None), getattr(log, "close", None),
+                           getattr(writer, "release", None), getattr(stamps, "close", None)):
                 if closer:
                     try:
                         closer()

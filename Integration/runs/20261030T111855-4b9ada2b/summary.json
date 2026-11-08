@@ -1,0 +1,89 @@
+{
+  "frames": 1345,
+  "valid_pose_percent": 98.95910780669145,
+  "pose_source_counts": {
+    "tag": 1331,
+    "none": 14
+  },
+  "failure_durations_s": [
+    0.7030589309979405,
+    0.11593438999989303
+  ],
+  "median_processing_ms": 85.95916800186387,
+  "p95_processing_ms": 113.73121120195718,
+  "throughput_fps": 12.578993107211199,
+  "throughput_note": "processing including video encoding, not capture-to-display latency",
+  "map": {
+    "schema_version": 1,
+    "units": "metres",
+    "world_frame": "anchor: X right, Y up, Z printed front",
+    "transform": "T_CW",
+    "anchor_id": 0,
+    "tag_family": "APRILTAG_36h11",
+    "tag_size_m": 0.17,
+    "feature_backend": "orb",
+    "camera": {
+      "calibration_sha256": "e70a5bee9591f6196dbdfbb12c0366e9c9ab41b559ca692e38402f7cd005b751",
+      "approximate": false,
+      "size": [
+        640,
+        480
+      ],
+      "undistort": true,
+      "K": [
+        [
+          597.1328577780656,
+          0.0,
+          317.1013147461914
+        ],
+        [
+          0.0,
+          599.8120170977288,
+          226.35911097047054
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "distortion": [
+        0.0726527830816204,
+        -2.075960822235014,
+        0.0016299276915649104,
+        0.007319459433787838,
+        6.124735432252368
+      ]
+    }
+  },
+  "bootstrap_at_last_frame": {
+    "bootstrap_reason": "refining 307 landmarks across 49 keyframes (background)",
+    "bootstrap_refinement": {
+      "outcome": "accepted",
+      "keyframes": 49,
+      "landmarks": 307,
+      "feature_observations": 1564,
+      "max_evaluations": 40000,
+      "optimizer_status": 2,
+      "message": "`ftol` termination condition is satisfied.",
+      "nfev": 35,
+      "njev": 35,
+      "residual_evaluations": 1015,
+      "elapsed_ms": 9923.151592000067,
+      "cost": 143.8223938147682,
+      "optimality": 0.14413149008903048
+    },
+    "bootstrap_worker": {
+      "background": true,
+      "running": true,
+      "pending": true,
+      "snapshot_keyframes": 49,
+      "queued_keyframes": 6,
+      "retry_in_s": 0.0
+    },
+    "stable_landmarks": 307,
+    "keyframes": 55,
+    "map_ready": false
+  },
+  "exit_reason": "failed"
+}

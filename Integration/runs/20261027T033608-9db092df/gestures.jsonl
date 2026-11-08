@@ -1,0 +1,207 @@
+{"t": 2614.45999202, "loop_hz": 27.316833773030446}
+{"t": 2615.664077043, "prediction": "Doing other things", "score": 0.5703421831130981, "confirmed": null}
+{"t": 2616.064028563, "prediction": "Doing other things", "score": 0.3586311638355255, "confirmed": null}
+{"t": 2616.268097713, "prediction": "Doing other things", "score": 0.4047831594944, "confirmed": null}
+{"t": 2616.468248028, "loop_hz": 29.876668990899052}
+{"t": 2618.372008575, "prediction": "Doing other things", "score": 0.36369019746780396, "confirmed": null}
+{"t": 2618.472155084, "loop_hz": 29.941508424927925}
+{"t": 2620.480102699, "loop_hz": 29.88125763430455}
+{"t": 2622.488217836, "loop_hz": 29.87876486486535}
+{"t": 2624.492217118, "loop_hz": 29.940130487528457}
+{"t": 2626.500113081, "loop_hz": 29.882026312933874}
+{"t": 2628.508593231, "loop_hz": 29.873334819867516}
+{"t": 2630.512413158, "loop_hz": 29.942810325188137}
+{"t": 2632.220218276, "prediction": "No gesture", "score": 0.4294755756855011, "confirmed": null}
+{"t": 2632.520304738, "loop_hz": 29.882091542014766}
+{"t": 2633.524682546, "prediction": "No gesture", "score": 0.36987459659576416, "confirmed": null}
+{"t": 2633.756610146, "prediction": "No gesture", "score": 0.3242627680301666, "confirmed": null}
+{"t": 2634.528372308, "loop_hz": 29.879472631489783}
+{"t": 2635.028866915, "prediction": "Doing other things", "score": 0.49069133400917053, "confirmed": null}
+{"t": 2635.264393643, "prediction": "Doing other things", "score": 0.6019251346588135, "confirmed": null}
+{"t": 2635.496308196, "prediction": "Doing other things", "score": 0.593343198299408, "confirmed": null}
+{"t": 2635.696316949, "prediction": "Doing other things", "score": 0.6759305000305176, "confirmed": null}
+{"t": 2635.896505493, "prediction": "Doing other things", "score": 0.6900055408477783, "confirmed": null}
+{"t": 2636.100269623, "prediction": "Doing other things", "score": 0.6763390302658081, "confirmed": null}
+{"t": 2636.332294647, "prediction": "Doing other things", "score": 0.5810478925704956, "confirmed": null}
+{"t": 2636.532422993, "prediction": "Doing other things", "score": 0.6497135758399963, "confirmed": null}
+{"t": 2636.532422993, "loop_hz": 29.93936253663108}
+{"t": 2636.768740161, "prediction": "Doing other things", "score": 0.7920628190040588, "confirmed": null}
+{"t": 2637.000692985, "prediction": "Doing other things", "score": 0.5691424608230591, "confirmed": null}
+{"t": 2637.236445969, "prediction": "Doing other things", "score": 0.36573609709739685, "confirmed": null}
+{"t": 2637.468410847, "prediction": "Doing other things", "score": 0.3207271695137024, "confirmed": null}
+{"t": 2638.140412049, "prediction": "No gesture", "score": 0.3821350038051605, "confirmed": null}
+{"t": 2638.372543612, "prediction": "No gesture", "score": 0.3482276499271393, "confirmed": null}
+{"t": 2638.540453356, "loop_hz": 29.880026271299528}
+{"t": 2638.608499859, "prediction": "Thumb Up", "score": 0.33028843998908997, "confirmed": null}
+{"t": 2638.840261351, "prediction": "Thumb Up", "score": 0.6571982502937317, "confirmed": null}
+{"t": 2639.040285996, "prediction": "Thumb Up", "score": 0.8349440693855286, "confirmed": null}
+{"t": 2639.24450003, "prediction": "Thumb Up", "score": 0.8395796418190002, "confirmed": null}
+{"t": 2639.476481757, "prediction": "Thumb Up", "score": 0.8554518818855286, "confirmed": null}
+{"t": 2639.676801058, "prediction": "Thumb Up", "score": 0.825303852558136, "confirmed": "Thumb Up"}
+{"t": 2639.676801058, "event": "Thumb Up"}
+{"t": 2639.876844761, "prediction": "Thumb Up", "score": 0.9077250957489014, "confirmed": "Thumb Up"}
+{"t": 2640.080439032, "prediction": "Thumb Up", "score": 0.9185926914215088, "confirmed": "Thumb Up"}
+{"t": 2640.344350619, "prediction": "Thumb Up", "score": 0.9517033100128174, "confirmed": "Thumb Up"}
+{"t": 2640.548433058, "prediction": "Thumb Up", "score": 0.8622393608093262, "confirmed": "Thumb Up"}
+{"t": 2640.548433058, "loop_hz": 29.880780139482255}
+{"t": 2640.748529389, "prediction": "Thumb Up", "score": 0.6984564661979675, "confirmed": null}
+{"t": 2640.948631961, "prediction": "Thumb Up", "score": 0.5036481022834778, "confirmed": null}
+{"t": 2641.148760545, "prediction": "Thumb Up", "score": 0.5050811767578125, "confirmed": null}
+{"t": 2641.384492385, "prediction": "Thumb Up", "score": 0.6438595652580261, "confirmed": null}
+{"t": 2641.584514807, "prediction": "Thumb Up", "score": 0.7103691697120667, "confirmed": null}
+{"t": 2641.816385217, "prediction": "Thumb Up", "score": 0.5155481100082397, "confirmed": null}
+{"t": 2642.016496379, "prediction": "Thumb Down", "score": 0.4130569398403168, "confirmed": null}
+{"t": 2642.220446004, "prediction": "Thumb Down", "score": 0.40622878074645996, "confirmed": null}
+{"t": 2642.420505747, "prediction": "Thumb Down", "score": 0.4684349298477173, "confirmed": null}
+{"t": 2642.552509765, "loop_hz": 29.93897378798653}
+{"t": 2642.652745699, "prediction": "Doing other things", "score": 0.41864076256752014, "confirmed": null}
+{"t": 2642.888460261, "prediction": "Doing other things", "score": 0.8594262003898621, "confirmed": null}
+{"t": 2643.120417493, "prediction": "Doing other things", "score": 0.9160805344581604, "confirmed": null}
+{"t": 2643.324489771, "prediction": "Doing other things", "score": 0.9202967286109924, "confirmed": null}
+{"t": 2643.525923376, "prediction": "Doing other things", "score": 0.873911440372467, "confirmed": null}
+{"t": 2643.75666205, "prediction": "Doing other things", "score": 0.9734376668930054, "confirmed": null}
+{"t": 2643.95693989, "prediction": "Doing other things", "score": 0.9730114340782166, "confirmed": null}
+{"t": 2644.160506883, "prediction": "Doing other things", "score": 0.981642484664917, "confirmed": null}
+{"t": 2644.392563777, "prediction": "Doing other things", "score": 0.9625734090805054, "confirmed": null}
+{"t": 2644.560422883, "loop_hz": 29.88177100998082}
+{"t": 2644.592592127, "prediction": "Doing other things", "score": 0.9329279065132141, "confirmed": null}
+{"t": 2644.792687252, "prediction": "Doing other things", "score": 0.953088104724884, "confirmed": null}
+{"t": 2644.996598011, "prediction": "Doing other things", "score": 0.9708173871040344, "confirmed": null}
+{"t": 2645.22903497, "prediction": "Doing other things", "score": 0.9745279550552368, "confirmed": null}
+{"t": 2645.464571168, "prediction": "Doing other things", "score": 0.9716910719871521, "confirmed": null}
+{"t": 2645.696464455, "prediction": "Doing other things", "score": 0.9779171943664551, "confirmed": null}
+{"t": 2645.896471956, "prediction": "Doing other things", "score": 0.9566681981086731, "confirmed": null}
+{"t": 2646.132607515, "prediction": "Doing other things", "score": 0.9364871382713318, "confirmed": null}
+{"t": 2646.3643904, "prediction": "Doing other things", "score": 0.9292786121368408, "confirmed": null}
+{"t": 2646.568906565, "prediction": "Doing other things", "score": 0.9278628826141357, "confirmed": null}
+{"t": 2646.568906565, "loop_hz": 29.873282286391028}
+{"t": 2646.80075373, "prediction": "Doing other things", "score": 0.9313210248947144, "confirmed": null}
+{"t": 2647.036574105, "prediction": "Doing other things", "score": 0.8985209465026855, "confirmed": null}
+{"t": 2647.236586145, "prediction": "Doing other things", "score": 0.8899585008621216, "confirmed": null}
+{"t": 2647.46935521, "prediction": "Doing other things", "score": 0.9068920016288757, "confirmed": null}
+{"t": 2647.704612002, "prediction": "Doing other things", "score": 0.7316470146179199, "confirmed": null}
+{"t": 2647.936475889, "prediction": "Doing other things", "score": 0.7100882530212402, "confirmed": null}
+{"t": 2648.136595782, "prediction": "Doing other things", "score": 0.843081533908844, "confirmed": null}
+{"t": 2648.340941126, "prediction": "Doing other things", "score": 0.9244370460510254, "confirmed": null}
+{"t": 2648.572666919, "prediction": "Doing other things", "score": 0.8252800107002258, "confirmed": null}
+{"t": 2648.572666919, "loop_hz": 29.943700542945002}
+{"t": 2648.808864737, "prediction": "Doing other things", "score": 0.5707351565361023, "confirmed": null}
+{"t": 2649.040404105, "prediction": "Doing other things", "score": 0.7371021509170532, "confirmed": null}
+{"t": 2649.240519465, "prediction": "Doing other things", "score": 0.8433665037155151, "confirmed": null}
+{"t": 2649.444762427, "prediction": "Doing other things", "score": 0.8954398036003113, "confirmed": null}
+{"t": 2649.676519119, "prediction": "Doing other things", "score": 0.9405311942100525, "confirmed": null}
+{"t": 2649.876541253, "prediction": "Doing other things", "score": 0.9250257611274719, "confirmed": null}
+{"t": 2650.112491616, "prediction": "Doing other things", "score": 0.9139243364334106, "confirmed": null}
+{"t": 2650.312528886, "prediction": "Doing other things", "score": 0.8655450344085693, "confirmed": null}
+{"t": 2650.512570194, "prediction": "Doing other things", "score": 0.8981279730796814, "confirmed": null}
+{"t": 2650.580530547, "loop_hz": 29.882507538505067}
+{"t": 2650.712594163, "prediction": "Doing other things", "score": 0.9250652194023132, "confirmed": null}
+{"t": 2650.948538526, "prediction": "Doing other things", "score": 0.9213482737541199, "confirmed": null}
+{"t": 2651.148580245, "prediction": "Doing other things", "score": 0.8912098407745361, "confirmed": null}
+{"t": 2651.348726163, "prediction": "Doing other things", "score": 0.8880241513252258, "confirmed": null}
+{"t": 2651.584642558, "prediction": "Doing other things", "score": 0.8475605845451355, "confirmed": null}
+{"t": 2651.816512816, "prediction": "Doing other things", "score": 0.8605866432189941, "confirmed": null}
+{"t": 2652.016604588, "prediction": "Doing other things", "score": 0.8566015958786011, "confirmed": null}
+{"t": 2652.216621718, "prediction": "Doing other things", "score": 0.8206488490104675, "confirmed": null}
+{"t": 2652.420509316, "prediction": "Doing other things", "score": 0.6992671489715576, "confirmed": null}
+{"t": 2652.584585228, "loop_hz": 29.939302838812054}
+{"t": 2652.620662065, "prediction": "Doing other things", "score": 0.615215003490448, "confirmed": null}
+{"t": 2652.852434056, "prediction": "Doing other things", "score": 0.5639503598213196, "confirmed": null}
+{"t": 2653.052579734, "prediction": "Doing other things", "score": 0.6339675188064575, "confirmed": null}
+{"t": 2653.256449419, "prediction": "Doing other things", "score": 0.589551568031311, "confirmed": null}
+{"t": 2653.457197672, "prediction": "Doing other things", "score": 0.6302903890609741, "confirmed": null}
+{"t": 2653.68874982, "prediction": "Doing other things", "score": 0.6596327424049377, "confirmed": null}
+{"t": 2653.892614141, "prediction": "Doing other things", "score": 0.6150923371315002, "confirmed": null}
+{"t": 2654.092836873, "prediction": "Doing other things", "score": 0.497625470161438, "confirmed": null}
+{"t": 2654.293168905, "prediction": "Doing other things", "score": 0.4668011963367462, "confirmed": null}
+{"t": 2654.524616003, "prediction": "Doing other things", "score": 0.5595420002937317, "confirmed": null}
+{"t": 2654.592667506, "loop_hz": 29.879253782248547}
+{"t": 2654.7287818, "prediction": "Doing other things", "score": 0.6895917654037476, "confirmed": null}
+{"t": 2654.929301293, "prediction": "Doing other things", "score": 0.6072615385055542, "confirmed": null}
+{"t": 2655.160710619, "prediction": "Doing other things", "score": 0.6156330704689026, "confirmed": null}
+{"t": 2655.396592596, "prediction": "Doing other things", "score": 0.5899773836135864, "confirmed": null}
+{"t": 2655.596612034, "prediction": "Doing other things", "score": 0.563503086566925, "confirmed": null}
+{"t": 2655.796661397, "prediction": "Doing other things", "score": 0.6692392826080322, "confirmed": null}
+{"t": 2656.032640972, "prediction": "Doing other things", "score": 0.6086645126342773, "confirmed": null}
+{"t": 2656.232661917, "prediction": "Doing other things", "score": 0.6713595390319824, "confirmed": null}
+{"t": 2656.464681236, "prediction": "Doing other things", "score": 0.6492294669151306, "confirmed": null}
+{"t": 2656.60057447, "loop_hz": 29.88186259410645}
+{"t": 2656.664695361, "prediction": "Doing other things", "score": 0.6158754825592041, "confirmed": null}
+{"t": 2656.868553588, "prediction": "Doing other things", "score": 0.568511962890625, "confirmed": null}
+{"t": 2657.068634832, "prediction": "Doing other things", "score": 0.5993815660476685, "confirmed": null}
+{"t": 2657.268645242, "prediction": "Doing other things", "score": 0.575335681438446, "confirmed": null}
+{"t": 2657.469306753, "prediction": "Doing other things", "score": 0.6029777526855469, "confirmed": null}
+{"t": 2657.704637344, "prediction": "Doing other things", "score": 0.6918092966079712, "confirmed": null}
+{"t": 2657.904692899, "prediction": "Doing other things", "score": 0.6013255715370178, "confirmed": null}
+{"t": 2658.13669256, "prediction": "Doing other things", "score": 0.6612882614135742, "confirmed": null}
+{"t": 2658.336836586, "prediction": "Doing other things", "score": 0.6064556241035461, "confirmed": null}
+{"t": 2658.540656221, "prediction": "Doing other things", "score": 0.5018247365951538, "confirmed": null}
+{"t": 2658.604776596, "loop_hz": 29.93710026630155}
+{"t": 2658.772646631, "prediction": "Doing other things", "score": 0.6061251759529114, "confirmed": null}
+{"t": 2659.008771511, "prediction": "Doing other things", "score": 0.585149884223938, "confirmed": null}
+{"t": 2659.240812421, "prediction": "Doing other things", "score": 0.6317699551582336, "confirmed": null}
+{"t": 2659.476651348, "prediction": "Doing other things", "score": 0.6441065669059753, "confirmed": null}
+{"t": 2659.676985918, "prediction": "Doing other things", "score": 0.547274649143219, "confirmed": null}
+{"t": 2659.908856999, "prediction": "Doing other things", "score": 0.577465832233429, "confirmed": null}
+{"t": 2660.112821871, "prediction": "Doing other things", "score": 0.46497827768325806, "confirmed": null}
+{"t": 2660.344813744, "prediction": "Doing other things", "score": 0.6208929419517517, "confirmed": null}
+{"t": 2660.58080362, "prediction": "Doing other things", "score": 0.6561500430107117, "confirmed": null}
+{"t": 2660.612664463, "loop_hz": 29.882146800187588}
+{"t": 2660.813535375, "prediction": "Doing other things", "score": 0.6096725463867188, "confirmed": null}
+{"t": 2661.048570808, "prediction": "Doing other things", "score": 0.5984973311424255, "confirmed": null}
+{"t": 2661.248760773, "prediction": "Doing other things", "score": 0.6468924880027771, "confirmed": null}
+{"t": 2661.480711233, "prediction": "Doing other things", "score": 0.6466236114501953, "confirmed": null}
+{"t": 2661.684677817, "prediction": "Doing other things", "score": 0.6434023976325989, "confirmed": null}
+{"t": 2661.88473447, "prediction": "Doing other things", "score": 0.8033943772315979, "confirmed": null}
+{"t": 2662.116737788, "prediction": "Doing other things", "score": 0.5301179885864258, "confirmed": null}
+{"t": 2662.317037975, "prediction": "Doing other things", "score": 0.6963464617729187, "confirmed": null}
+{"t": 2662.62119723, "loop_hz": 29.87255223603868}
+{"t": 2664.624806246, "loop_hz": 29.94596227151104}
+{"t": 2666.634802694, "loop_hz": 29.850799019918895}
+{"t": 2668.640876398, "loop_hz": 29.90917027642999}
+{"t": 2670.64494114, "loop_hz": 29.939152534622824}
+{"t": 2672.65320346, "loop_hz": 29.876575088057944}
+{"t": 2674.661035104, "loop_hz": 29.882983555568853}
+{"t": 2676.664974954, "loop_hz": 29.94101843924689}
+{"t": 2678.673141879, "loop_hz": 29.877994330578243}
+{"t": 2680.677016901, "loop_hz": 29.94198707068716}
+{"t": 2682.685116787, "loop_hz": 29.87899178636991}
+{"t": 2684.693141476, "loop_hz": 29.880110702161883}
+{"t": 2686.697129914, "loop_hz": 29.940292499833504}
+{"t": 2688.705142811, "loop_hz": 29.880286172287796}
+{"t": 2690.712987682, "loop_hz": 29.882786696620926}
+{"t": 2692.717314881, "loop_hz": 29.93523214669096}
+{"t": 2694.725317604, "loop_hz": 29.88043756751921}
+{"t": 2696.73403718, "loop_hz": 29.86977411723792}
+{"t": 2698.737376079, "loop_hz": 29.949999987495463}
+{"t": 2700.745428544, "loop_hz": 29.8796973912766}
+{"t": 2702.749339589, "loop_hz": 29.941448823140416}
+{"t": 2704.757239455, "loop_hz": 29.881968227591152}
+{"t": 2706.76539504, "loop_hz": 29.87816305080195}
+{"t": 2708.76929924, "loop_hz": 29.941551098103613}
+{"t": 2710.77740021, "loop_hz": 29.878975657281618}
+{"t": 2712.785508869, "loop_hz": 29.87886125140434}
+{"t": 2714.789461773, "loop_hz": 29.940823399709757}
+{"t": 2716.797474845, "loop_hz": 29.88028356818985}
+{"t": 2718.80568294, "loop_hz": 29.877381805891492}
+{"t": 2720.809706186, "loop_hz": 29.939772465099928}
+{"t": 2722.81767332, "loop_hz": 29.880967165273006}
+{"t": 2724.825642908, "loop_hz": 29.88093064683841}
+{"t": 2726.829755014, "loop_hz": 29.93844497040527}
+{"t": 2728.837681694, "loop_hz": 29.881569181601957}
+{"t": 2730.841784696, "loop_hz": 29.938580971196128}
+{"t": 2732.849721095, "loop_hz": 29.881424546059346}
+{"t": 2734.857686009, "loop_hz": 29.88100020157664}
+{"t": 2736.862112383, "loop_hz": 29.933751011405565}
+{"t": 2738.869857082, "loop_hz": 29.884277632447038}
+{"t": 2740.877781753, "loop_hz": 29.88159907917588}
+{"t": 2742.882038284, "loop_hz": 29.93628763183494}
+{"t": 2744.890010127, "loop_hz": 29.880897089847636}
+{"t": 2746.89799113, "loop_hz": 29.88076077929337}
+{"t": 2748.901991017, "loop_hz": 29.94012144871657}
+{"t": 2750.909883929, "loop_hz": 29.88207171877319}
+{"t": 2752.91840555, "loop_hz": 29.872718009441833}
+{"t": 2754.323237466, "prediction": "No gesture", "score": 0.4290449023246765, "confirmed": null}
+{"t": 2754.922137809, "loop_hz": 29.94412039358024}
+{"t": 2756.93031417, "loop_hz": 29.87785394013864}
+{"t": 2758.934067298, "loop_hz": 29.943808526895964}

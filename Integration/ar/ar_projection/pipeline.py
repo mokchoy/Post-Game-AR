@@ -14,7 +14,8 @@ import queue
 from .content import ArrayRuntime
 from .gestures import GestureWorker
 from .occlusion import advance_panel_video, panel_layer
-from .rendering import PoseSmoother, annotate, open_window, side_by_side, toggle_fullscreen, panel_covariance, panel_geometry, visible_panel
+from .filters import make_smoother
+from .rendering import annotate, depth_pane, open_window, side_by_side, toggle_fullscreen, panel_covariance, panel_geometry, visible_panel
 from .tags import TagDetector
 from .types import FrameResult, PoseEstimate
 
@@ -29,7 +30,7 @@ class Pipeline:
         self.builder = MapBuilder(config, camera, background_mapping) if config.mapping.mode == "build" else None
         self.map = load_map(config.mapping.map_path, map_metadata(config, camera), config) if config.mapping.mode == "localize" else None
         self.solver = PoseSolver(config)
-        self.smoother = PoseSmoother(config.filter)
+        self.smoother = make_smoother(config.filter)
         self.panel = panel_geometry(config.panel)
         self.previous = None
         self.previous_time = None
@@ -127,7 +128,7 @@ class Pipeline:
             filter_reset = old_state == "LOST" or (old_state == "BOOTSTRAP" and self.state != "BOOTSTRAP") or gap
             if filter_reset:
                 self.smoother.reset()
-            render_pose = self.smoother.update(pose.T_CW)
+            render_pose = self.smoother.update(pose.T_CW, packet.timestamp, pose.covariance)
             raw_panel = visible_panel(pose.T_CW, self.panel, packet.camera)
             render_panel = visible_panel(render_pose, self.panel, packet.camera)
             pixel_cov = panel_covariance(pose.T_CW, self.panel, packet.camera, pose.covariance, self.config.uncertainty)
@@ -225,7 +226,10 @@ def run(config, save_when_ready=False, replace_map=False, max_frames=None, withh
             arr = ArrayRuntime(config, left_video)
             if config.gestures.enabled:
                 events = queue.Queue()
-                worker = GestureWorker(config.gestures, events, logger.path/"gestures.jsonl" if logger.path is not None else None)
+                record = (logger.path is not None and config.camera.source_type == "camera"
+                          and (config.logging.save_input_video or config.logging.save_annotated_video))
+                worker = GestureWorker(config.gestures, events, logger.path/"gestures.jsonl" if logger.path is not None else None,
+                                       logger.path if record else None)
                 worker.start()
         if display.enabled:
             open_window(WINDOW)
@@ -246,7 +250,7 @@ def run(config, save_when_ready=False, replace_map=False, max_frames=None, withh
                 arr.drain(events if worker is not None else None)
                 gesture_ms = (time.perf_counter()-before)*1000
                 before = time.perf_counter()
-                panelset = arr.panelset()
+                panelset = arr.panelset(packet.timestamp)
                 pipeline.panel = panelset.centre_corners
                 content_ms = (time.perf_counter()-before)*1000
             result = pipeline.process(packet, withhold_tag=withhold_this_frame)
@@ -276,7 +280,7 @@ def run(config, save_when_ready=False, replace_map=False, max_frames=None, withh
                     n_vis = np.bincount(ids[(ids >= 0) & layer[1]], minlength=len(panelset.names)) if layer is not None else None
                     visible = {n: (int(n_all[k]), float(n_vis[k]/n_all[k]) if n_vis is not None and n_all[k] else None) for k, n in enumerate(panelset.names)}
                 result.diagnostics["array"] = {"yaw_deg": arr.state.yaw_deg, "scale": arr.state.scale, "game": arr.state.game, "playing": arr.state.playing,
-                                               "actions": arr.take_log(), "panel_pixels": {n: v[0] for n, v in visible.items()},
+                                               "actions": arr.take_log(), "video_frames": arr.content.frames, "panel_pixels": {n: v[0] for n, v in visible.items()},
                                                "panel_visible_fraction": {n: v[1] for n, v in visible.items()},
                                                "gesture_worker": None if worker is None else {"alive": worker.is_alive(), "error": worker.error, "loop_hz": worker.rate_hz}}
             image = shown = None
@@ -293,6 +297,12 @@ def run(config, save_when_ready=False, replace_map=False, max_frames=None, withh
                 logger.video("input", packet.original)
             if config.logging.save_annotated_video:
                 logger.video("annotated", image)
+                logger.video("rgb", packet.bgr)        # Step 52: rectified camera image, no overlay, frame-aligned with annotated
+                if getattr(occlusion, "keep_view", False):
+                    view = getattr(occlusion, "view", None)
+                    logger.video("depth", depth_pane(view, image.shape))
+                    # Step 52: this frame's aligned depth (shows the people), not the stored background used by the prior
+                    logger.video("scene_depth", depth_pane(None if view is None else {**view, "prior": None}, image.shape))
             result.timings["recording"] = (time.perf_counter()-before)*1000
             result.timings["total"] += result.timings["recording"]
             if save_when_ready and not saved and pipeline.map is not None:

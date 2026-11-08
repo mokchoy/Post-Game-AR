@@ -66,9 +66,9 @@
  },
  "mapping": {
   "mode": "localize",
-  "map_path": "data/logitech-landmark-map-floor.npz",
+  "map_path": "data/logitech-landmark-map-demo-final.npz",
   "max_keyframes": 120,
-  "max_landmarks": 800,
+  "max_landmarks": 1500,
   "min_ready_landmarks": 300,
   "min_baseline_m": 0.1,
   "min_parallax_deg": 1.5,
@@ -155,7 +155,14 @@
   "require_tracking_acceptance": false
  },
  "array": {
-  "enabled": true
+  "enabled": true,
+  "lift_m": 0.5,
+   "yaw_step_deg": 45.0,
+   "yaw_limit_deg": 90.0,
+   "scale_step": 2.0,
+   "scale_min": 0.5,
+   "scale_max": 2.0,
+   "games_manifest": "../DataToProject/games.json"
  },
  "gestures": {
   "enabled": true,

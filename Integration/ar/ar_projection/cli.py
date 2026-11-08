@@ -1,5 +1,6 @@
 """Legacy arguments are explicit central-configuration overrides."""
 import argparse
+import json
 import logging
 from pathlib import Path
 from .config import DEFAULT_PATH, load_config
@@ -45,6 +46,14 @@ def main():
     parser.add_argument("--array-script", help="Replay aid for config.array: 'frame:action:value,...' e.g. 50:yaw:1,120:scale:1 (actions game yaw scale play stop reset)")
     parser.add_argument("--no-gestures", action="store_true", help="Run the array without the gesture thread even if gestures.enabled")
     parser.add_argument("--gesture-camera", type=int, help="Second (laptop) camera index for the gesture thread; overrides gestures.camera_index and enables gestures")
+    parser.add_argument("--save-video", action="store_true", help="Write the annotated frames (projections included) to RUN/annotated.*, also in --replay-run")
+    parser.add_argument("--no-smoothing", action="store_true", help="Override filter.enabled=false (pose smoothing off)")
+    parser.add_argument("--depth-video", action="store_true", help="With --save-video, also write RUN/depth.avi (the depth the occluder uses: stored background if the prior is on)")
+    parser.add_argument("--clean", action="store_true", help="Annotated video/display shows only the camera image and projection (display.clean)")
+    parser.add_argument("--no-background-prior", action="store_true", help="Override occlusion.background_prior.enabled=false")
+    parser.add_argument("--no-occlusion", action="store_true", help="Step 52: never load the depth model (live recording at full rate; add occlusion later in --replay-run)")
+    parser.add_argument("--minimal-hud", action="store_true", help="Step 52: recording overlay (features, tag, ellipses, one status line) instead of the debug text (display.minimal)")
+    parser.add_argument("--replay-actions", action="store_true", help="Step 52: with --replay-run, re-apply the array actions (gesture/key/script) logged in that run, at the same frames")
     parser.add_argument("--occlusion-output", help="New directory for frame-aligned visibility masks and virtual depth")
     arguments = {"camera": (int, "camera.index"), "calibration": (str, "camera.calibration_path"), "video": (str, "camera.video_path"),
                  "backend": (str, "camera.backend"), "tag-size": (float, "tags.size_m"), "width": (float, "panel.width_m"),
@@ -77,6 +86,8 @@ def main():
             parser.error("--replay-run cannot be combined with --video or --timestamps")
         if args.config == str(DEFAULT_PATH):
             config_path = recording/"config.json"
+        if args.gesture_camera is None:
+            overrides["gestures.enabled"] = False     # a replay never opens the laptop camera; logged actions come from --replay-actions
         overrides.update({"camera.source_type": "video", "camera.video_path": str(recording/"input.avi"),
                           "camera.timestamps_path": str(recording/"frames.jsonl"),
                           "logging.save_input_video": False, "logging.save_annotated_video": False})
@@ -84,6 +95,16 @@ def main():
         if not args.video:
             parser.error("--timestamps requires --video")
         overrides["camera.timestamps_path"] = args.timestamps
+    if args.save_video:
+        overrides.update({"logging.enabled": True, "logging.save_annotated_video": True})
+    if args.clean:
+        overrides["display.clean"] = True
+    if args.minimal_hud:
+        overrides["display.minimal"] = True
+    if args.no_background_prior:
+        overrides["occlusion.background_prior.enabled"] = False
+    if args.no_smoothing:
+        overrides["filter.enabled"] = False
     if args.record_input:
         overrides.update({"logging.enabled": True, "logging.save_input_video": True})
     withhold_tag_windows = None
@@ -112,7 +133,9 @@ def main():
                  config.camera.source_type, config.camera.index, config.camera.backend,
                  config.camera.calibration_path, config.pose.mode, config.mapping.mode)
     occlusion = None
-    if args.occlusion or config.occlusion.enabled or args.depth_repo or args.depth_weights or args.occlusion_output:
+    if args.no_occlusion and args.occlusion:
+        parser.error("--occlusion and --no-occlusion are exclusive")
+    if not args.no_occlusion and (args.occlusion or (config.occlusion.enabled and config.mapping.mode == "localize") or args.depth_repo or args.depth_weights or args.occlusion_output):
         block = config.occlusion
         model_name = args.depth_model or block.model
         repo, weights = args.depth_repo or block.repo, args.depth_weights or block.checkpoint
@@ -140,12 +163,25 @@ def main():
             if config.array.enabled:
                 parser.error("array.enabled supports the relative depth model only")
             occlusion = DepthPrototype(MetricDepth(repo, weights, args.depth_input_size), args.occlusion_output)
+    if args.depth_video and occlusion is not None and hasattr(occlusion, "keep_view"):
+        occlusion.keep_view = True
     script = None
     if args.array_script:
         script = {}
         for item in args.array_script.split(","):
             frame, action, value = item.split(":")
             script.setdefault(int(frame), []).append((action, float(value)))
+    if args.replay_actions:
+        if not args.replay_run:
+            parser.error("--replay-actions requires --replay-run")
+        script = script or {}
+        n = 0
+        for line in (Path(args.replay_run)/"frames.jsonl").read_text(encoding="utf-8").splitlines():
+            row = json.loads(line)
+            for act in ((row.get("diagnostics") or {}).get("array") or {}).get("actions") or ():
+                script.setdefault(int(row["frame_index"]), []).append((act["action"], float(act["value"])))
+                n += 1
+        logging.info("--replay-actions: %d logged array actions re-applied", n)
     if args.panel_video and not config.array.enabled:
         if occlusion is None:
             parser.error("--panel-video needs --occlusion")

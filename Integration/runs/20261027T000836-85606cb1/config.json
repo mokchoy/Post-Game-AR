@@ -1,0 +1,563 @@
+{
+  "schema_version": 1,
+  "seed": 7,
+  "camera": {
+    "source_type": "video",
+    "index": 4,
+    "video_path": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/runs/20261026T233156-5c2eb3ab/input.avi",
+    "backend": "v4l2",
+    "width": 640,
+    "height": 480,
+    "calibration_path": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/ar/logitech-camera-calibration.npz",
+    "undistort": true,
+    "demo_approx": false,
+    "timestamps_path": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/runs/20261026T233156-5c2eb3ab/frames.jsonl"
+  },
+  "tags": {
+    "enabled": true,
+    "family": "APRILTAG_36h11",
+    "anchor_id": 0,
+    "size_m": 0.17,
+    "corner_refinement_window_px": 3,
+    "corner_sigma_px": 1.0,
+    "max_reprojection_rms_px": 3.0,
+    "min_side_px": 25.0,
+    "ambiguity_error_gap_px": 0.3,
+    "ambiguity_rotation_gap_deg": 5.0
+  },
+  "features": {
+    "enabled": true,
+    "backend": "orb",
+    "max_features": 500,
+    "grid_rows": 4,
+    "grid_cols": 6,
+    "scale_factor": 1.2,
+    "nlevels": 8,
+    "fast_threshold": 10,
+    "edge_threshold": 31,
+    "patch_size": 31,
+    "ratio_test": 0.75,
+    "max_hamming_distance": 60,
+    "mutual_matching": true,
+    "observation_sigma_px": 1.5,
+    "exclude_tag_regions": true,
+    "tag_mask_margin_px": 10,
+    "exclude_rectangles": [],
+    "redetect_every_n_frames": 15,
+    "redetect_below_tracks": 80,
+    "lk": {
+      "enabled": true,
+      "window_size_px": 21,
+      "max_level": 3,
+      "max_iterations": 30,
+      "epsilon": 0.01,
+      "forward_backward_max_error_px": 5.0
+    },
+    "redetection_match_radius_px": 5.0,
+    "id_revalidation": {
+      "mode": "off",
+      "max_age_frames": 50,
+      "max_descriptor_distance": 60
+    },
+    "guided_matching": {
+      "enabled": true,
+      "search_radius_px": 12.0,
+      "max_hamming_distance": 128,
+      "ratio_test": 0.75,
+      "revalidate_existing": false,
+      "geometry_margin": 1.5,
+      "geometry_first": true
+    }
+  },
+  "mapping": {
+    "mode": "localize",
+    "map_path": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/ar/data/logitech-landmark-map-scene2.npz",
+    "max_keyframes": 120,
+    "max_landmarks": 800,
+    "min_ready_landmarks": 300,
+    "min_baseline_m": 0.1,
+    "min_parallax_deg": 1.5,
+    "min_confirming_views": 3,
+    "min_depth_m": 0.1,
+    "max_depth_m": 5.0,
+    "max_reprojection_rms_px": 2.0,
+    "refine_bootstrap_map": true,
+    "refinement_max_nfev": 400,
+    "refinement_time_budget_s": 5.0,
+    "refinement_retry_interval_s": 2.0,
+    "refinement_max_evaluations": 40000,
+    "multiview_descriptor_bank": 0
+  },
+  "pose": {
+    "mode": "joint",
+    "min_landmark_inliers": 12,
+    "min_occupied_grid_cells": 4,
+    "ransac_iterations": 100,
+    "ransac_reprojection_threshold_px": 3.0,
+    "ransac_confidence": 0.99,
+    "robust_loss": "huber",
+    "robust_f_scale": 2.5,
+    "max_nfev": 40,
+    "max_landmark_rms_px": 3.0,
+    "max_tag_rms_px": 3.0,
+    "max_linear_speed_m_s": 3.0,
+    "max_angular_speed_deg_s": 300.0,
+    "max_prediction_gap_s": 0.2,
+    "prior_grace_s": 0.0
+  },
+  "uncertainty": {
+    "enabled": true,
+    "project_to_panel_corners": true,
+    "translation_difference_step_m": 1e-05,
+    "rotation_difference_step_rad": 1e-06,
+    "conditioning_translation_scale_m": 0.1,
+    "conditioning_rotation_scale_rad": 0.1,
+    "min_scaled_singular_value_ratio": 1e-06
+  },
+  "filter": {
+    "enabled": true,
+    "mode": "ema",
+    "measurement_weight": 0.4
+  },
+  "panel": {
+    "width_m": 1.0,
+    "height_m": 0.5625,
+    "offset_y_m": 0.15,
+    "tilt_x_deg": 90.0
+  },
+  "display": {
+    "enabled": false,
+    "debug": true,
+    "draw_features": true,
+    "draw_uncertainty": true,
+    "clean": true
+  },
+  "logging": {
+    "enabled": true,
+    "output_dir": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/runs",
+    "save_input_video": false,
+    "save_annotated_video": true,
+    "input_codec": "HFYU",
+    "association_dump": false
+  },
+  "calibration": {
+    "columns": 7,
+    "rows": 9,
+    "square_size_m": 0.02,
+    "views": 15
+  },
+  "occlusion": {
+    "enabled": true,
+    "model": "relative",
+    "repo": "/home/sahaj/Desktop/Studies/compvis/Depth-Anything-V2",
+    "checkpoint": "/home/sahaj/Desktop/Studies/compvis/Depth-Anything-V2/metric_depth/checkpoints/depth_anything_v2_vits.pth",
+    "input_size": 252,
+    "margin_floor_m": 0.1,
+    "margin_fraction": 0.1,
+    "line_reference": true,
+    "line_hold_frames": 30,
+    "require_tracking_acceptance": false,
+    "reference": "plane",
+    "plane_extent_m": [
+      -1.0,
+      1.0,
+      -0.6,
+      0.9
+    ],
+    "plane_min_span": 0.3,
+    "plane_min_px": 3000,
+    "background_prior": {
+      "enabled": true,
+      "agree_tol": 0.15,
+      "near_ratio": 0.8,
+      "fg_slack": 0.1,
+      "count_cap": 20,
+      "min_count": 3,
+      "open_px": 7
+    }
+  },
+  "array": {
+    "enabled": true,
+    "gap_m": 0.02,
+    "lift_m": 0.5,
+    "facing_yaw_deg": 180.0,
+    "yaw_step_deg": 15.0,
+    "yaw_limit_deg": 60.0,
+    "scale_step": 1.1,
+    "scale_min": 0.5,
+    "scale_max": 2.0,
+    "near_plane_m": 0.05,
+    "texture_long_px": 400,
+    "video_fit": "contain",
+    "left_video": null,
+    "games_manifest": "../DataToProject/games.json",
+    "score": "1:0",
+    "panels": [
+      {
+        "name": "game",
+        "role": "game",
+        "side": "center",
+        "width_m": 0.5,
+        "height_m": 0.28125,
+        "toe_in_deg": 0.0,
+        "above": null
+      },
+      {
+        "name": "video",
+        "role": "video",
+        "side": "left",
+        "width_m": 0.25,
+        "height_m": 0.4444,
+        "toe_in_deg": 15.0,
+        "above": null
+      },
+      {
+        "name": "stats",
+        "role": "stats",
+        "side": "right",
+        "width_m": 0.25,
+        "height_m": 0.1875,
+        "toe_in_deg": 15.0,
+        "above": null
+      },
+      {
+        "name": "score",
+        "role": "score",
+        "side": "right",
+        "width_m": 0.25,
+        "height_m": 0.1875,
+        "toe_in_deg": 15.0,
+        "above": "stats"
+      }
+    ],
+    "games": [
+      {
+        "name": "Korea Open 2019 Final rally 002",
+        "video": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/GameRally/rally_002.mp4",
+        "topdown": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/TopDownDerived/rally_002.mp4",
+        "match": "Kento_MOMOTA_CHOU_Tien_Chen_KOREA_OPEN_2019_Final",
+        "rally": "rally_002",
+        "annotated_hits": 29,
+        "players": [
+          {
+            "name": "Kento MOMOTA",
+            "flag": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/Info/flags/JPN.png",
+            "height": "1.75 m",
+            "weight": "68 kg",
+            "rank": "No. 1 (peak)",
+            "score_before": 0,
+            "score_after": 1
+          },
+          {
+            "name": "CHOU Tien Chen",
+            "flag": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/Info/flags/TPE.png",
+            "height": "1.80 m",
+            "weight": "78 kg",
+            "rank": "No. 2 (peak)",
+            "score_before": 1,
+            "score_after": 1
+          }
+        ]
+      },
+      {
+        "name": "Korea Open 2019 Final rally 010",
+        "video": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/GameRally/rally_010.mp4",
+        "topdown": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/TopDownDerived/rally_010.mp4",
+        "match": "Kento_MOMOTA_CHOU_Tien_Chen_KOREA_OPEN_2019_Final",
+        "rally": "rally_010",
+        "annotated_hits": 12,
+        "players": [
+          {
+            "name": "Kento MOMOTA",
+            "flag": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/Info/flags/JPN.png",
+            "height": "1.75 m",
+            "weight": "68 kg",
+            "rank": "No. 1 (peak)",
+            "score_before": 5,
+            "score_after": 6
+          },
+          {
+            "name": "CHOU Tien Chen",
+            "flag": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/Info/flags/TPE.png",
+            "height": "1.80 m",
+            "weight": "78 kg",
+            "rank": "No. 2 (peak)",
+            "score_before": 4,
+            "score_after": 4
+          }
+        ]
+      },
+      {
+        "name": "Denmark Open 2019 QF rally 028",
+        "video": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/GameRally/rally_028.mp4",
+        "topdown": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/TopDownDerived/rally_028.mp4",
+        "match": "CHEN_Long_CHOU_Tien_Chen_Denmark_Open_2019_QuarterFinal",
+        "rally": "rally_028",
+        "annotated_hits": 20,
+        "players": [
+          {
+            "name": "CHEN Long",
+            "flag": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/Info/flags/CHN.png",
+            "height": "1.87 m",
+            "weight": "75 kg",
+            "rank": "No. 1 (peak)",
+            "score_before": 13,
+            "score_after": 14
+          },
+          {
+            "name": "CHOU Tien Chen",
+            "flag": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/Info/flags/TPE.png",
+            "height": "1.80 m",
+            "weight": "78 kg",
+            "rank": "No. 2 (peak)",
+            "score_before": 14,
+            "score_after": 14
+          }
+        ]
+      },
+      {
+        "name": "Denmark Open 2019 QF rally 031",
+        "video": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/GameRally/rally_031.mp4",
+        "topdown": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/TopDownDerived/rally_031.mp4",
+        "match": "CHEN_Long_CHOU_Tien_Chen_Denmark_Open_2019_QuarterFinal",
+        "rally": "rally_031",
+        "annotated_hits": 12,
+        "players": [
+          {
+            "name": "CHEN Long",
+            "flag": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/Info/flags/CHN.png",
+            "height": "1.87 m",
+            "weight": "75 kg",
+            "rank": "No. 1 (peak)",
+            "score_before": 16,
+            "score_after": 17
+          },
+          {
+            "name": "CHOU Tien Chen",
+            "flag": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/Info/flags/TPE.png",
+            "height": "1.80 m",
+            "weight": "78 kg",
+            "rank": "No. 2 (peak)",
+            "score_before": 14,
+            "score_after": 14
+          }
+        ]
+      },
+      {
+        "name": "Fuzhou Open 2019 SF rally 015",
+        "video": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/GameRally/rally_015.mp4",
+        "topdown": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/TopDownDerived/rally_015.mp4",
+        "match": "CHOU_Tien_Chen_Anders_ANTONSEN_Fuzhou_Open_2019_Semi-finals",
+        "rally": "rally_015",
+        "annotated_hits": 8,
+        "players": [
+          {
+            "name": "CHOU Tien Chen",
+            "flag": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/Info/flags/TPE.png",
+            "height": "1.80 m",
+            "weight": "78 kg",
+            "rank": "No. 2 (peak)",
+            "score_before": 8,
+            "score_after": 9
+          },
+          {
+            "name": "Anders ANTONSEN",
+            "flag": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/Info/flags/DEN.png",
+            "height": "1.85 m",
+            "weight": "80 kg",
+            "rank": "No. 2 (peak)",
+            "score_before": 6,
+            "score_after": 6
+          }
+        ]
+      },
+      {
+        "name": "World Tour Finals 2019 rally 017",
+        "video": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/GameRally/rally_017.mp4",
+        "topdown": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/TopDownDerived/rally_017.mp4",
+        "match": "CHEN_Long_CHOU_Tien_Chen_World_Tour_Finals_Group_Stage",
+        "rally": "rally_017",
+        "annotated_hits": 12,
+        "players": [
+          {
+            "name": "CHEN Long",
+            "flag": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/Info/flags/CHN.png",
+            "height": "1.87 m",
+            "weight": "75 kg",
+            "rank": "No. 1 (peak)",
+            "score_before": 10,
+            "score_after": 10
+          },
+          {
+            "name": "CHOU Tien Chen",
+            "flag": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/Info/flags/TPE.png",
+            "height": "1.80 m",
+            "weight": "78 kg",
+            "rank": "No. 2 (peak)",
+            "score_before": 6,
+            "score_after": 7
+          }
+        ]
+      },
+      {
+        "name": "World Tour Finals 2019 rally 029",
+        "video": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/GameRally/rally_029.mp4",
+        "topdown": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/TopDownDerived/rally_029.mp4",
+        "match": "CHEN_Long_CHOU_Tien_Chen_World_Tour_Finals_Group_Stage",
+        "rally": "rally_029",
+        "annotated_hits": 11,
+        "players": [
+          {
+            "name": "CHEN Long",
+            "flag": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/Info/flags/CHN.png",
+            "height": "1.87 m",
+            "weight": "75 kg",
+            "rank": "No. 1 (peak)",
+            "score_before": 17,
+            "score_after": 18
+          },
+          {
+            "name": "CHOU Tien Chen",
+            "flag": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/Info/flags/TPE.png",
+            "height": "1.80 m",
+            "weight": "78 kg",
+            "rank": "No. 2 (peak)",
+            "score_before": 11,
+            "score_after": 11
+          }
+        ]
+      },
+      {
+        "name": "Malaysia Open 2018 QF rally 016",
+        "video": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/GameRally/rally_016.mp4",
+        "topdown": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/TopDownDerived/rally_016.mp4",
+        "match": "Kento_MOMOTA_CHOU_Tien_Chen_Malaysia_Open_2018_QuarterFinals",
+        "rally": "rally_016",
+        "annotated_hits": 11,
+        "players": [
+          {
+            "name": "Kento MOMOTA",
+            "flag": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/Info/flags/JPN.png",
+            "height": "1.75 m",
+            "weight": "68 kg",
+            "rank": "No. 1 (peak)",
+            "score_before": 7,
+            "score_after": 8
+          },
+          {
+            "name": "CHOU Tien Chen",
+            "flag": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/Info/flags/TPE.png",
+            "height": "1.80 m",
+            "weight": "78 kg",
+            "rank": "No. 2 (peak)",
+            "score_before": 8,
+            "score_after": 8
+          }
+        ]
+      },
+      {
+        "name": "Malaysia Open 2018 QF rally 026",
+        "video": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/GameRally/rally_026.mp4",
+        "topdown": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/TopDownDerived/rally_026.mp4",
+        "match": "Kento_MOMOTA_CHOU_Tien_Chen_Malaysia_Open_2018_QuarterFinals",
+        "rally": "rally_026",
+        "annotated_hits": 13,
+        "players": [
+          {
+            "name": "Kento MOMOTA",
+            "flag": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/Info/flags/JPN.png",
+            "height": "1.75 m",
+            "weight": "68 kg",
+            "rank": "No. 1 (peak)",
+            "score_before": 12,
+            "score_after": 12
+          },
+          {
+            "name": "CHOU Tien Chen",
+            "flag": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/DataToProject/Info/flags/TPE.png",
+            "height": "1.80 m",
+            "weight": "78 kg",
+            "rank": "No. 2 (peak)",
+            "score_before": 13,
+            "score_after": 14
+          }
+        ]
+      }
+    ],
+    "players": [
+      {
+        "title": "Person 1",
+        "lines": [
+          "Height: //",
+          "Weight: //",
+          "Rank: //"
+        ]
+      },
+      {
+        "title": "Person 2",
+        "lines": [
+          "Height: //",
+          "Weight: //",
+          "Rank: //"
+        ]
+      }
+    ]
+  },
+  "gestures": {
+    "enabled": false,
+    "camera_index": 0,
+    "gestures_dir": "/home/sahaj/Desktop/Studies/compvis/Post-Game-AR/Integration/gestures",
+    "model": "ddnet",
+    "window_seconds": 3.0,
+    "min_confidence": 0.7,
+    "vote_window": 5,
+    "required_votes": 4,
+    "cooldown_s": 1.0,
+    "actions": {
+      "Swiping Left": [
+        "game",
+        -1
+      ],
+      "Swiping Right": [
+        "game",
+        1
+      ],
+      "Turning Hand Clockwise": [
+        "yaw",
+        1
+      ],
+      "Turning Hand Counterclockwise": [
+        "yaw",
+        -1
+      ],
+      "Zooming In With Full Hand": [
+        "scale",
+        1
+      ],
+      "Zooming Out With Full Hand": [
+        "scale",
+        -1
+      ],
+      "Zooming In With Two Fingers": [
+        "scale",
+        1
+      ],
+      "Zooming Out With Two Fingers": [
+        "scale",
+        -1
+      ],
+      "Thumb Up": [
+        "play",
+        1
+      ],
+      "Thumb Down": [
+        "reset",
+        0
+      ],
+      "Stop Sign": [
+        "stop",
+        0
+      ]
+    }
+  }
+}

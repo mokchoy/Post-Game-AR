@@ -1,0 +1,37 @@
+{
+  "frames": 242,
+  "valid_pose_percent": 73.14049586776859,
+  "pose_source_counts": {
+    "tag": 177,
+    "none": 65
+  },
+  "failure_durations_s": [
+    0.23749171800227487,
+    0.9876876620000985,
+    0.02855979599917191,
+    0.038446847996965516,
+    1.421561486000428,
+    0.436410946000251
+  ],
+  "median_processing_ms": 35.67922950060165,
+  "p95_processing_ms": 68.50612754715254,
+  "throughput_fps": 24.894274960711645,
+  "throughput_note": "processing including video encoding, not capture-to-display latency",
+  "map": null,
+  "bootstrap_at_last_frame": {
+    "bootstrap_reason": "waiting for unambiguous anchor and translated views (background)",
+    "bootstrap_refinement": {},
+    "bootstrap_worker": {
+      "background": true,
+      "running": true,
+      "pending": true,
+      "snapshot_keyframes": 14,
+      "queued_keyframes": 1,
+      "retry_in_s": 0.0
+    },
+    "stable_landmarks": 0,
+    "keyframes": 15,
+    "map_ready": false
+  },
+  "exit_reason": "failed"
+}

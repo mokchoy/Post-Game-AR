@@ -1,0 +1,64 @@
+{
+  "python": "3.10.12",
+  "numpy": "2.2.6",
+  "opencv": "4.14.0",
+  "scipy": "1.15.3",
+  "calibration": {
+    "calibration_sha256": "e70a5bee9591f6196dbdfbb12c0366e9c9ab41b559ca692e38402f7cd005b751",
+    "approximate": false,
+    "size": [
+      640,
+      480
+    ],
+    "undistort": true,
+    "K": [
+      [
+        597.1328577780656,
+        0.0,
+        317.1013147461914
+      ],
+      [
+        0.0,
+        599.8120170977288,
+        226.35911097047054
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion": [
+      0.0726527830816204,
+      -2.075960822235014,
+      0.0016299276915649104,
+      0.007319459433787838,
+      6.124735432252368
+    ]
+  },
+  "input": {
+    "type": "video",
+    "index": 4,
+    "path": "/sessions/rcw-017g6zzlvcnh6oicz3yfdlsg/mnt/Post-Game-AR/Integration/runs/20261030T094944-f7587e80/input.avi",
+    "size_bytes": 2116991456,
+    "mtime_ns": 1793354188274183007
+  },
+  "actual_dimensions": [
+    640,
+    480
+  ],
+  "timestamp_basis": "recorded source_time_s from frame JSONL",
+  "source_fps": 30.0,
+  "map": null,
+  "covariance": {
+    "label": "conditional_local_pose_covariance",
+    "order": "[dt_x,dt_y,dt_z,dr_x,dr_y,dr_z]",
+    "retraction": "Delta(dt,Rodrigues(dr)) @ T_CW; camera-side translation; not exact SE3 exponential",
+    "conditional_on": "fixed calibration, fixed final map, assumed pixel noise, selected pose mode",
+    "approximation": "inverse robust-weighted local information; per-coordinate rho-prime weights; not sandwich/posterior",
+    "excluded": "calibration/map error, correlation, gross mismatch and multiple planar modes"
+  },
+  "reproducibility": "seeded sequential replay; not bitwise across versions/backends",
+  "code_sha256": "cfb010d7d9ea3966eaaea5fb85a871fa0ebc33144290fedf57e8abdc2f5f5797",
+  "recording": "HFYU lossless input AVI; MJPG annotation; JSONL acquisition times authoritative"
+}

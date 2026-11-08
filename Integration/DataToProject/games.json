@@ -1,0 +1,254 @@
+[
+ {
+  "name": "Korea Open 2019 Final rally 002",
+  "video": "GameRally/rally_002.mp4",
+  "topdown": "TopDownDerived/rally_002.mp4",
+  "match": "Kento_MOMOTA_CHOU_Tien_Chen_KOREA_OPEN_2019_Final",
+  "rally": "rally_002",
+  "annotated_hits": 29,
+  "players": [
+   {
+    "name": "Kento MOMOTA",
+    "flag": "Info/flags/JPN.png",
+    "height": "1.75 m",
+    "weight": "68 kg",
+    "rank": "No. 1 (peak)",
+    "score_before": 0,
+    "score_after": 1
+   },
+   {
+    "name": "CHOU Tien Chen",
+    "flag": "Info/flags/TPE.png",
+    "height": "1.80 m",
+    "weight": "78 kg",
+    "rank": "No. 2 (peak)",
+    "score_before": 1,
+    "score_after": 1
+   }
+  ]
+ },
+ {
+  "name": "Korea Open 2019 Final rally 010",
+  "video": "GameRally/rally_010.mp4",
+  "topdown": "TopDownDerived/rally_010.mp4",
+  "match": "Kento_MOMOTA_CHOU_Tien_Chen_KOREA_OPEN_2019_Final",
+  "rally": "rally_010",
+  "annotated_hits": 12,
+  "players": [
+   {
+    "name": "Kento MOMOTA",
+    "flag": "Info/flags/JPN.png",
+    "height": "1.75 m",
+    "weight": "68 kg",
+    "rank": "No. 1 (peak)",
+    "score_before": 5,
+    "score_after": 6
+   },
+   {
+    "name": "CHOU Tien Chen",
+    "flag": "Info/flags/TPE.png",
+    "height": "1.80 m",
+    "weight": "78 kg",
+    "rank": "No. 2 (peak)",
+    "score_before": 4,
+    "score_after": 4
+   }
+  ]
+ },
+ {
+  "name": "Denmark Open 2019 QF rally 028",
+  "video": "GameRally/rally_028.mp4",
+  "topdown": "TopDownDerived/rally_028.mp4",
+  "match": "CHEN_Long_CHOU_Tien_Chen_Denmark_Open_2019_QuarterFinal",
+  "rally": "rally_028",
+  "annotated_hits": 20,
+  "players": [
+   {
+    "name": "CHEN Long",
+    "flag": "Info/flags/CHN.png",
+    "height": "1.87 m",
+    "weight": "75 kg",
+    "rank": "No. 1 (peak)",
+    "score_before": 13,
+    "score_after": 14
+   },
+   {
+    "name": "CHOU Tien Chen",
+    "flag": "Info/flags/TPE.png",
+    "height": "1.80 m",
+    "weight": "78 kg",
+    "rank": "No. 2 (peak)",
+    "score_before": 14,
+    "score_after": 14
+   }
+  ]
+ },
+ {
+  "name": "Denmark Open 2019 QF rally 031",
+  "video": "GameRally/rally_031.mp4",
+  "topdown": "TopDownDerived/rally_031.mp4",
+  "match": "CHEN_Long_CHOU_Tien_Chen_Denmark_Open_2019_QuarterFinal",
+  "rally": "rally_031",
+  "annotated_hits": 12,
+  "players": [
+   {
+    "name": "CHEN Long",
+    "flag": "Info/flags/CHN.png",
+    "height": "1.87 m",
+    "weight": "75 kg",
+    "rank": "No. 1 (peak)",
+    "score_before": 16,
+    "score_after": 17
+   },
+   {
+    "name": "CHOU Tien Chen",
+    "flag": "Info/flags/TPE.png",
+    "height": "1.80 m",
+    "weight": "78 kg",
+    "rank": "No. 2 (peak)",
+    "score_before": 14,
+    "score_after": 14
+   }
+  ]
+ },
+ {
+  "name": "Fuzhou Open 2019 SF rally 015",
+  "video": "GameRally/rally_015.mp4",
+  "topdown": "TopDownDerived/rally_015.mp4",
+  "match": "CHOU_Tien_Chen_Anders_ANTONSEN_Fuzhou_Open_2019_Semi-finals",
+  "rally": "rally_015",
+  "annotated_hits": 8,
+  "players": [
+   {
+    "name": "CHOU Tien Chen",
+    "flag": "Info/flags/TPE.png",
+    "height": "1.80 m",
+    "weight": "78 kg",
+    "rank": "No. 2 (peak)",
+    "score_before": 8,
+    "score_after": 9
+   },
+   {
+    "name": "Anders ANTONSEN",
+    "flag": "Info/flags/DEN.png",
+    "height": "1.85 m",
+    "weight": "80 kg",
+    "rank": "No. 2 (peak)",
+    "score_before": 6,
+    "score_after": 6
+   }
+  ]
+ },
+ {
+  "name": "World Tour Finals 2019 rally 017",
+  "video": "GameRally/rally_017.mp4",
+  "topdown": "TopDownDerived/rally_017.mp4",
+  "match": "CHEN_Long_CHOU_Tien_Chen_World_Tour_Finals_Group_Stage",
+  "rally": "rally_017",
+  "annotated_hits": 12,
+  "players": [
+   {
+    "name": "CHEN Long",
+    "flag": "Info/flags/CHN.png",
+    "height": "1.87 m",
+    "weight": "75 kg",
+    "rank": "No. 1 (peak)",
+    "score_before": 10,
+    "score_after": 10
+   },
+   {
+    "name": "CHOU Tien Chen",
+    "flag": "Info/flags/TPE.png",
+    "height": "1.80 m",
+    "weight": "78 kg",
+    "rank": "No. 2 (peak)",
+    "score_before": 6,
+    "score_after": 7
+   }
+  ]
+ },
+ {
+  "name": "World Tour Finals 2019 rally 029",
+  "video": "GameRally/rally_029.mp4",
+  "topdown": "TopDownDerived/rally_029.mp4",
+  "match": "CHEN_Long_CHOU_Tien_Chen_World_Tour_Finals_Group_Stage",
+  "rally": "rally_029",
+  "annotated_hits": 11,
+  "players": [
+   {
+    "name": "CHEN Long",
+    "flag": "Info/flags/CHN.png",
+    "height": "1.87 m",
+    "weight": "75 kg",
+    "rank": "No. 1 (peak)",
+    "score_before": 17,
+    "score_after": 18
+   },
+   {
+    "name": "CHOU Tien Chen",
+    "flag": "Info/flags/TPE.png",
+    "height": "1.80 m",
+    "weight": "78 kg",
+    "rank": "No. 2 (peak)",
+    "score_before": 11,
+    "score_after": 11
+   }
+  ]
+ },
+ {
+  "name": "Malaysia Open 2018 QF rally 016",
+  "video": "GameRally/rally_016.mp4",
+  "topdown": "TopDownDerived/rally_016.mp4",
+  "match": "Kento_MOMOTA_CHOU_Tien_Chen_Malaysia_Open_2018_QuarterFinals",
+  "rally": "rally_016",
+  "annotated_hits": 11,
+  "players": [
+   {
+    "name": "Kento MOMOTA",
+    "flag": "Info/flags/JPN.png",
+    "height": "1.75 m",
+    "weight": "68 kg",
+    "rank": "No. 1 (peak)",
+    "score_before": 7,
+    "score_after": 8
+   },
+   {
+    "name": "CHOU Tien Chen",
+    "flag": "Info/flags/TPE.png",
+    "height": "1.80 m",
+    "weight": "78 kg",
+    "rank": "No. 2 (peak)",
+    "score_before": 8,
+    "score_after": 8
+   }
+  ]
+ },
+ {
+  "name": "Malaysia Open 2018 QF rally 026",
+  "video": "GameRally/rally_026.mp4",
+  "topdown": "TopDownDerived/rally_026.mp4",
+  "match": "Kento_MOMOTA_CHOU_Tien_Chen_Malaysia_Open_2018_QuarterFinals",
+  "rally": "rally_026",
+  "annotated_hits": 13,
+  "players": [
+   {
+    "name": "Kento MOMOTA",
+    "flag": "Info/flags/JPN.png",
+    "height": "1.75 m",
+    "weight": "68 kg",
+    "rank": "No. 1 (peak)",
+    "score_before": 12,
+    "score_after": 12
+   },
+   {
+    "name": "CHOU Tien Chen",
+    "flag": "Info/flags/TPE.png",
+    "height": "1.80 m",
+    "weight": "78 kg",
+    "rank": "No. 2 (peak)",
+    "score_before": 13,
+    "score_after": 14
+   }
+  ]
+ }
+]

@@ -13,7 +13,7 @@ class PoseSmoother:
     def reset(self):
         self.previous = None
 
-    def update(self, T):
+    def update(self, T, t=None, covariance=None):   # t, covariance: unused, the interface the other filters share
         if not self.config.enabled:
             return T.copy()
         current = inverse(T)
@@ -63,6 +63,10 @@ def annotate(packet, result, tags, features, display, approximate=False, panel_l
         image[visible] = color[visible]
     elif result.render_panel is not None:
         cv2.fillConvexPoly(image, np.rint(result.render_panel).astype(np.int32), (0, 200, 0))
+    if display.clean:
+        return image
+    if display.minimal:
+        return minimal_hud(image, packet, result, tags, features, display)
     if display.debug:
         for tag in tags:
             cv2.polylines(image, [np.rint(tag.pixels).astype(np.int32)], True, (255, 180, 0), 2)
@@ -134,6 +138,33 @@ def annotate(packet, result, tags, features, display, approximate=False, panel_l
     return image
 
 
+def minimal_hud(image, packet, result, tags, features, display):
+    """Step 52 recording overlay: tag outline, features (magenta = matched to the map), raw ~2 sigma corner ellipses and one
+    large status line. No per-stage diagnostics text."""
+    for tag in tags:
+        cv2.polylines(image, [np.rint(tag.pixels).astype(np.int32)], True, (255, 180, 0), 2)
+    if display.draw_features:
+        for f in features:
+            cv2.circle(image, tuple(np.rint(f.pixel).astype(int)), 3, (255, 0, 255) if f.landmark_id is not None else (255, 200, 0), -1)
+    if display.draw_uncertainty and result.pixel_covariance is not None and result.raw_panel is not None and len(result.raw_panel) == len(result.pixel_covariance):
+        for p, cov in zip(result.raw_panel, result.pixel_covariance):
+            values, vectors = np.linalg.eigh(cov)
+            axes = tuple(np.maximum(1, np.rint(2*np.sqrt(np.maximum(values[::-1], 0)))).clip(1, 10000).astype(int))
+            angle = np.rad2deg(np.arctan2(vectors[1, -1], vectors[0, -1]))
+            cv2.ellipse(image, tuple(np.rint(p).astype(int)), axes, float(angle), 0, 360, (0, 180, 255), 2)
+    d = result.diagnostics
+    if d.get("mapping_mode") == "build":
+        text = f"Mapping | landmarks {d.get('stable_landmarks')} | keyframes {d.get('keyframes')}"
+        if d.get("map_ready"):
+            text += " | map ready"
+    else:
+        text = f"{result.state} | pose: {result.raw_pose.source} | {len(features)} features"
+    (w, h), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, .7, 2)
+    cv2.rectangle(image, (6, 6), (18+w, 18+h+8), (0, 0, 0), -1)
+    cv2.putText(image, text, (12, 14+h), cv2.FONT_HERSHEY_SIMPLEX, .7, (0, 255, 0) if result.raw_pose.valid else (0, 0, 255), 2, cv2.LINE_AA)
+    return image
+
+
 def side_by_side(left, view, z_range=(.3, 5.), diff_range=.5, pane=(480, 360)):
     """Debug window: masked camera image | aligned depth Z_real (fixed colour scale, panel outline, base line) |
     decision map Z_panel - Z_real inside the panel (red = scene nearer; white contour = where the mask flips)."""
@@ -164,6 +195,19 @@ def side_by_side(left, view, z_range=(.3, 5.), diff_range=.5, pane=(480, 360)):
         second = [cv2.resize(x, pane, interpolation=cv2.INTER_AREA) for x in (fg, stored)]+[np.zeros_like(panes[0])]
         return np.vstack([np.hstack(panes), np.hstack(second)])
     return np.hstack(panes)
+
+
+def depth_pane(view, shape, z_range=(.3, 5.)):
+    """Text-free turbo depth frame: the stored temporal background (grey = none) when the prior is on, else the one-shot depth."""
+    lo, hi = z_range
+    if view is None:
+        return np.zeros(shape, np.uint8)
+    prior = view.get("prior")
+    depth = prior if prior is not None else np.where(np.isfinite(view["scene"]), view["scene"], hi)
+    out = cv2.applyColorMap((np.clip((np.where(depth > 0, depth, hi)-lo)/(hi-lo), 0, 1)*255).astype(np.uint8), cv2.COLORMAP_TURBO)
+    if prior is not None:
+        out[prior <= 0] = 60
+    return out
 
 
 def open_window(name):

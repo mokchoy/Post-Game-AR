@@ -62,9 +62,9 @@ def local_corners(cfg):
 
 
 def world_corners(cfg, state, offset_y_m):
-    """name -> (4, 3) world corners for the current state. The pivot (0, offset_y_m, 0) never leaves the floor."""
+    """name -> (4, 3) world corners for the current state. The pivot (0, offset_y_m, lift_m) stays put."""
     R = _rz(cfg.facing_yaw_deg+state.yaw_deg)
-    pivot = np.array([0.0, offset_y_m, 0.0])
+    pivot = np.array([0.0, offset_y_m, cfg.lift_m])
     return {n: state.scale*(c @ R.T)+pivot for n, c in local_corners(cfg).items()}
 
 

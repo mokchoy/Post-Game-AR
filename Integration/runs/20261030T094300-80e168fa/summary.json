@@ -1,0 +1,109 @@
+{
+  "frames": 441,
+  "valid_pose_percent": 52.15419501133787,
+  "pose_source_counts": {
+    "none": 211,
+    "tag": 163,
+    "joint": 26,
+    "landmark": 41
+  },
+  "failure_durations_s": [
+    1.8589352940034587,
+    0.026497509003093,
+    0.03681427899937262,
+    1.8980642930000613,
+    0.027283605999400606,
+    1.5288016320009774,
+    0.10643211299975519,
+    0.4490847000015492,
+    0.05552011100007803,
+    0.09215224899890018,
+    0.1866318059983314,
+    0.09591445600017323,
+    0.11104746400087606,
+    0.14952227200046764,
+    0.08840633599902503,
+    0.08674126700134366,
+    0.16467358200316085,
+    0.057778518999839434,
+    0.057418020001932746,
+    3.0924102649987617
+  ],
+  "median_processing_ms": 29.23459499652381,
+  "p95_processing_ms": 85.9255920004216,
+  "throughput_fps": 24.22927196829867,
+  "throughput_note": "processing including video encoding, not capture-to-display latency",
+  "map": {
+    "schema_version": 1,
+    "units": "metres",
+    "world_frame": "anchor: X right, Y up, Z printed front",
+    "transform": "T_CW",
+    "anchor_id": 0,
+    "tag_family": "APRILTAG_36h11",
+    "tag_size_m": 0.17,
+    "feature_backend": "orb",
+    "camera": {
+      "calibration_sha256": "e70a5bee9591f6196dbdfbb12c0366e9c9ab41b559ca692e38402f7cd005b751",
+      "approximate": false,
+      "size": [
+        640,
+        480
+      ],
+      "undistort": true,
+      "K": [
+        [
+          597.1328577780656,
+          0.0,
+          317.1013147461914
+        ],
+        [
+          0.0,
+          599.8120170977288,
+          226.35911097047054
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "distortion": [
+        0.0726527830816204,
+        -2.075960822235014,
+        0.0016299276915649104,
+        0.007319459433787838,
+        6.124735432252368
+      ]
+    }
+  },
+  "bootstrap_at_last_frame": {
+    "bootstrap_reason": "map ready and frozen; explicit save required",
+    "bootstrap_refinement": {
+      "outcome": "accepted",
+      "keyframes": 8,
+      "landmarks": 305,
+      "feature_observations": 1218,
+      "max_evaluations": 40000,
+      "optimizer_status": 2,
+      "message": "`ftol` termination condition is satisfied.",
+      "nfev": 16,
+      "njev": 16,
+      "residual_evaluations": 336,
+      "elapsed_ms": 1000.8958340004028,
+      "cost": 78.60771686226585,
+      "optimality": 0.36931006449802517
+    },
+    "bootstrap_worker": {
+      "background": true,
+      "running": false,
+      "pending": false,
+      "snapshot_keyframes": 8,
+      "queued_keyframes": 2,
+      "retry_in_s": 0.0
+    },
+    "stable_landmarks": 305,
+    "keyframes": 10,
+    "map_ready": true
+  },
+  "exit_reason": "completed"
+}

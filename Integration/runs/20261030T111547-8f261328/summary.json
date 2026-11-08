@@ -1,0 +1,47 @@
+{
+  "frames": 2781,
+  "valid_pose_percent": 97.8784609852571,
+  "pose_source_counts": {
+    "none": 59,
+    "tag": 2722
+  },
+  "failure_durations_s": [
+    1.8905285069995443,
+    0.47167294300015783,
+    0.47802975900049205,
+    0.034976203001860995,
+    0.0919494970003143,
+    0.03204211499905796,
+    0.07233366600121371,
+    0.7098628950006969,
+    0.03121522699802881,
+    0.07092823900165968
+  ],
+  "median_processing_ms": 38.30829499929678,
+  "p95_processing_ms": 65.41348599785124,
+  "throughput_fps": 24.079122136095364,
+  "throughput_note": "processing including video encoding, not capture-to-display latency",
+  "map": null,
+  "bootstrap_at_last_frame": {
+    "bootstrap_reason": "refining 305 landmarks across 47 keyframes (background)",
+    "bootstrap_refinement": {
+      "outcome": "running",
+      "keyframes": 47,
+      "landmarks": 305,
+      "feature_observations": 1648,
+      "max_evaluations": 40000
+    },
+    "bootstrap_worker": {
+      "background": true,
+      "running": true,
+      "pending": true,
+      "snapshot_keyframes": 47,
+      "queued_keyframes": 8,
+      "retry_in_s": 0.0
+    },
+    "stable_landmarks": 305,
+    "keyframes": 55,
+    "map_ready": false
+  },
+  "exit_reason": "failed"
+}

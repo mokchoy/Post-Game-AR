@@ -213,6 +213,30 @@ class TuningRequests(unittest.TestCase):
         self.assertEqual(w.pending, (0.55, 6, 4))
 
 
+class PerGameContent(unittest.TestCase):
+    def test_manifest_games_swap_panel_content_and_restart_videos(self):
+        from ar_projection.content import ArrayRuntime
+        c = load_config(ROOT/"config-array.json")
+        self.assertEqual(len(c.array.games), 9)
+        g = c.array.games
+        self.assertTrue(Path(g[0]["video"]).is_file() and Path(g[0]["topdown"]).is_file() and Path(g[0]["players"][0]["flag"]).is_file())
+        self.assertEqual([p["score_before"] for p in g[0]["players"]], [0, 1])            # Korea rally 2: broadcast shows MOMOTA 0, CHOU 1
+        rt = ArrayRuntime(c)
+        first = rt.content.textures(rt.state)
+        rt.do("game", 1, "test")
+        second = rt.content.textures(rt.state)
+        self.assertFalse(np.array_equal(first["score"], second["score"]))                  # same players in games 0 and 1, different score
+        rt.do("game", 1, "test")                                                           # game 2: CHEN Long v CHOU, different stats
+        self.assertFalse(np.array_equal(first["stats"], rt.content.textures(rt.state)["stats"]))
+        rt.do("game", -1, "test")
+        rt.content.textures(rt.state)
+        self.assertLessEqual(rt.content.loops[(1, "video")].n, 3)                          # back on game 1: its video restarted from the top
+        rt.do("stop", 0, "test")
+        rt.do("game", 1, "test")
+        self.assertGreater(rt.content.textures(rt.state)["game"].std(), 20)                # stopped after a swipe still shows a frame
+        rt.close()
+
+
 class ConfigLoads(unittest.TestCase):
     def test_old_config_has_array_and_gestures_off(self):
         c = load_config(Path(__file__).parent/"fixtures"/"tracking-config.json")

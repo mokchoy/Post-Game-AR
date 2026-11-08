@@ -1,0 +1,240 @@
+{
+ "_comment": "Step 52 demo video. Replace every REPLACE_... run id and start time (run-relative seconds; use `rec_video.py probe RUN`). Paths are relative to this file. Render: ../../.venv/bin/python ../scripts/rec_video.py all plan.json",
+ "output_dir": "../../runs/step52-video",
+ "fps": 30,
+ "cell": [
+  640,
+  480
+ ],
+ "final": "MOCam_demo.mp4",
+ "final_size": [
+  1920,
+  1088
+ ],
+ "transition_s": 0.6,
+ "intro": {
+  "text": "MOCam\nMonocular AR projection and gesture control",
+  "duration": 2.5
+ },
+ "segments": [
+  {
+   "name": "01_map",
+   "title": "1. Building the landmark map",
+   "duration": 5,
+   "grid": [
+    1,
+    2
+   ],
+   "transition": "fade",
+   "panes": [
+    {
+     "kind": "run",
+     "run": "../../runs/20261030T112430-cf021cdd",
+     "stream": "annotated",
+     "start": 291,
+     "label": "Camera view (features, landmarks)"
+    },
+    {
+     "kind": "file",
+     "path": "../../runs/video-recording-for-map.mp4",
+     "start": 72.4,
+     "label": "Third person"
+    }
+   ]
+  },
+  {
+   "name": "02_depth",
+   "title": "2. Depth-based occlusion",
+   "duration": 7,
+   "grid": [
+    1,
+    3
+   ],
+   "transition": "slideleft",
+   "panes": [
+    {
+     "kind": "run",
+     "run": "../../runs/20261030T115204-815033c5",
+     "stream": "rgb",
+     "start": 6.5,
+     "label": "Camera"
+    },
+    {
+     "kind": "run",
+     "run": "../../runs/20261030T115204-815033c5",
+     "stream": "scene_depth",
+     "start": 6.5,
+     "label": "Depth (near = blue)"
+    },
+    {
+     "kind": "run",
+     "run": "../../runs/20261030T115204-815033c5",
+     "stream": "annotated",
+     "start": 6.5,
+     "label": "AR with occlusion"
+    }
+   ]
+  },
+  {
+   "name": "02b_depth_back",
+   "title": "2. Depth-based occlusion: person walking behind the array",
+   "duration": 5,
+   "grid": [
+    1,
+    3
+   ],
+   "transition": "fade",
+   "panes": [
+    {
+     "kind": "run",
+     "run": "../../runs/20261030T115204-815033c5",
+     "stream": "rgb",
+     "start": 16.2,
+     "label": "Camera"
+    },
+    {
+     "kind": "run",
+     "run": "../../runs/20261030T115204-815033c5",
+     "stream": "scene_depth",
+     "start": 16.2,
+     "label": "Depth (near = blue)"
+    },
+    {
+     "kind": "run",
+     "run": "../../runs/20261030T115204-815033c5",
+     "stream": "annotated",
+     "start": 16.2,
+     "label": "AR with occlusion"
+    }
+   ]
+  },
+  {
+   "name": "03_pose",
+   "title": "3. Camera pose and uncertainty (post-processed)",
+   "duration": 5,
+   "grid": [
+    1,
+    2
+   ],
+   "transition": "wipeleft",
+   "panes": [
+    {
+     "kind": "run",
+     "run": "../../runs/20261030T120050-cb2a2904",
+     "stream": "annotated",
+     "start": 7.5,
+     "label": "Camera + AR"
+    },
+    {
+     "kind": "posemap",
+     "run": "../../runs/20261030T120050-cb2a2904",
+     "start": 7.5,
+     "exaggerate": "auto",
+     "trail_s": 30,
+     "label": "Map and trajectory"
+    }
+   ]
+  },
+  {
+   "name": "04_gestures",
+   "title": "4. Gesture control: rotate, swipe, zoom, stop / start",
+   "duration": 10,
+   "grid": [
+    2,
+    4
+   ],
+   "cell": [
+    480,
+    360
+   ],
+   "transition": "slideup",
+   "panes": [
+    {
+     "kind": "run",
+     "run": "../../runs/20261030T121315-a4c4cbf7",
+     "stream": "annotated",
+     "start": 33,
+     "label": "AR"
+    },
+    {
+     "kind": "gesture",
+     "run": "../../runs/20261030T121149-c56610f5",
+     "start": 33,
+     "label": "Rotate (laptop camera)"
+    },
+    {
+     "kind": "run",
+     "run": "../../runs/20261030T121315-a4c4cbf7",
+     "stream": "annotated",
+     "start": 16.5,
+     "label": "AR"
+    },
+    {
+     "kind": "gesture",
+     "run": "../../runs/20261030T121149-c56610f5",
+     "start": 16.5,
+     "label": "Swipe (laptop camera)"
+    },
+    {
+     "kind": "run",
+     "run": "../../runs/20261030T121315-a4c4cbf7",
+     "stream": "annotated",
+     "start": 27.5,
+     "label": "AR"
+    },
+    {
+     "kind": "gesture",
+     "run": "../../runs/20261030T121149-c56610f5",
+     "start": 27.5,
+     "label": "Zoom (laptop camera)"
+    },
+    {
+     "kind": "run",
+     "run": "../../runs/20261030T121315-a4c4cbf7",
+     "stream": "annotated",
+     "start": 7,
+     "label": "AR"
+    },
+    {
+     "kind": "gesture",
+     "run": "../../runs/20261030T121149-c56610f5",
+     "start": 7,
+     "label": "Stop / start (laptop camera)"
+    }
+   ]
+  },
+  {
+   "name": "05_game",
+   "title": "5. Game, broadcast video and shot classification",
+   "duration": 10,
+   "grid": [
+    1,
+    3
+   ],
+   "transition": "circleopen",
+   "panes": [
+    {
+     "kind": "run",
+     "run": "../../runs/20261030T122236-8f1a242b",
+     "stream": "annotated",
+     "start": 1.5,
+     "label": "AR"
+    },
+    {
+     "kind": "panel",
+     "run": "../../runs/20261030T122236-8f1a242b",
+     "source": "video",
+     "start": 1.5,
+     "label": "Game (broadcast)"
+    },
+    {
+     "kind": "panel",
+     "run": "../../runs/20261030T122236-8f1a242b",
+     "source": "topdown",
+     "start": 1.5,
+     "label": "Shot classification (top-down)"
+    }
+   ]
+  }
+ ]
+}

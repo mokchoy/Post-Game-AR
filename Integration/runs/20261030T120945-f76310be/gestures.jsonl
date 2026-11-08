@@ -1,0 +1,22 @@
+{"t": 26088.021098047, "loop_hz": 27.31917290563357}
+{"t": 26090.0289918, "loop_hz": 29.882059202737892}
+{"t": 26090.329010668, "prediction": "Doing other things", "score": 0.8943479061126709, "confirmed": null}
+{"t": 26090.532101976, "prediction": "Doing other things", "score": 0.8500354290008545, "confirmed": null}
+{"t": 26090.765041433, "prediction": "Doing other things", "score": 0.9484754204750061, "confirmed": null}
+{"t": 26090.997446111, "prediction": "Doing other things", "score": 0.8837159276008606, "confirmed": null}
+{"t": 26091.201046711, "prediction": "Swiping Left", "score": 0.7006979584693909, "confirmed": null}
+{"t": 26091.40108108, "prediction": "Swiping Left", "score": 0.9222503304481506, "confirmed": null}
+{"t": 26091.63298867, "prediction": "Swiping Left", "score": 0.9705580472946167, "confirmed": null}
+{"t": 26091.868990137, "prediction": "Swiping Left", "score": 0.9796883463859558, "confirmed": "Swiping Left"}
+{"t": 26091.868990137, "event": "Swiping Left"}
+{"t": 26092.036900202, "loop_hz": 29.881841193671868}
+{"t": 26092.073952792, "prediction": "Swiping Left", "score": 0.9837945103645325, "confirmed": "Swiping Left"}
+{"t": 26092.300934955, "prediction": "Swiping Left", "score": 0.9840146899223328, "confirmed": "Swiping Left"}
+{"t": 26092.504896532, "prediction": "Swiping Left", "score": 0.994610071182251, "confirmed": "Swiping Left"}
+{"t": 26092.705012417, "prediction": "Swiping Left", "score": 0.9866276383399963, "confirmed": "Swiping Left"}
+{"t": 26092.905059054, "prediction": "Swiping Left", "score": 0.9484006762504578, "confirmed": "Swiping Left"}
+{"t": 26093.137050019, "prediction": "Swiping Left", "score": 0.9815878868103027, "confirmed": "Swiping Left"}
+{"t": 26093.340812441, "prediction": "Swiping Left", "score": 0.9820558428764343, "confirmed": "Swiping Left"}
+{"t": 26093.540910777, "prediction": "Swiping Left", "score": 0.9893150329589844, "confirmed": "Swiping Left"}
+{"t": 26093.772884914, "prediction": "Swiping Left", "score": 0.9857382774353027, "confirmed": "Swiping Left"}
+{"t": 26094.040781078, "loop_hz": 29.941899600222953}

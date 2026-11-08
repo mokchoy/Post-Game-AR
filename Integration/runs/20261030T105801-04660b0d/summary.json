@@ -1,0 +1,67 @@
+{
+  "frames": 4205,
+  "valid_pose_percent": 89.65517241379311,
+  "pose_source_counts": {
+    "none": 435,
+    "tag": 3770
+  },
+  "failure_durations_s": [
+    1.7392008979986713,
+    0.06813365500056534,
+    0.023482470998715144,
+    0.054389640001318185,
+    1.2360725629987428,
+    1.9999141379994398,
+    1.5184698670018406,
+    0.025335742000606842,
+    0.08021908899900154,
+    0.034697139002673794,
+    0.2852921480007353,
+    0.48779607899996336,
+    0.5731973279980593,
+    0.0826150350003445,
+    0.08602821500244318,
+    0.07724138500270783,
+    0.049596524997468805,
+    0.5157301219987858,
+    0.2070199509980739,
+    13.457396230001905,
+    0.05134949600324035,
+    1.7793232769981842
+  ],
+  "median_processing_ms": 20.598810002411483,
+  "p95_processing_ms": 32.22621279928717,
+  "throughput_fps": 4.030014961759361,
+  "throughput_note": "processing including video encoding, not capture-to-display latency",
+  "map": null,
+  "bootstrap_at_last_frame": {
+    "bootstrap_reason": "map refinement solver_failed; will retry after next keyframe",
+    "bootstrap_refinement": {
+      "outcome": "solver_failed",
+      "keyframes": 82,
+      "landmarks": 377,
+      "feature_observations": 1879,
+      "max_evaluations": 40000,
+      "optimizer_status": 0,
+      "message": "The maximum number of function evaluations is exceeded.",
+      "nfev": 400,
+      "njev": 400,
+      "residual_evaluations": 12400,
+      "elapsed_ms": 46653.80855999683,
+      "cost": 266.2431167631371,
+      "optimality": 209.3872216330882
+    },
+    "bootstrap_worker": {
+      "background": false,
+      "running": false,
+      "pending": false,
+      "snapshot_keyframes": 0,
+      "queued_keyframes": 0,
+      "retry_in_s": 0.0
+    },
+    "stable_landmarks": 377,
+    "keyframes": 82,
+    "map_ready": false
+  },
+  "exit_reason": "failed"
+}

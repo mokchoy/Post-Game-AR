@@ -1,0 +1,30 @@
+{"t": 10606.880807136, "loop_hz": 27.320518020775797}
+{"t": 10608.888990592, "loop_hz": 29.877748380366853}
+{"t": 10610.893010748, "loop_hz": 29.939818629269375}
+{"t": 10612.900889062, "loop_hz": 29.88228897219565}
+{"t": 10614.909063247, "loop_hz": 29.87788631494119}
+{"t": 10616.913754349, "loop_hz": 29.929798132062675}
+{"t": 10617.817062858, "prediction": "No gesture", "score": 0.34244969487190247, "confirmed": null}
+{"t": 10618.017068084, "prediction": "Doing other things", "score": 0.5736050009727478, "confirmed": null}
+{"t": 10618.217344013, "prediction": "Doing other things", "score": 0.7421110272407532, "confirmed": null}
+{"t": 10618.421094199, "prediction": "Doing other things", "score": 0.8721928596496582, "confirmed": null}
+{"t": 10618.621363294, "prediction": "Doing other things", "score": 0.953772246837616, "confirmed": null}
+{"t": 10618.853077004, "prediction": "Doing other things", "score": 0.9761151671409607, "confirmed": null}
+{"t": 10618.921108178, "loop_hz": 29.89009667014952}
+{"t": 10619.053493344, "prediction": "Doing other things", "score": 0.9854456186294556, "confirmed": null}
+{"t": 10619.257136291, "prediction": "Doing other things", "score": 0.994472324848175, "confirmed": null}
+{"t": 10619.457276564, "prediction": "Doing other things", "score": 0.9963591694831848, "confirmed": null}
+{"t": 10619.689137789, "prediction": "Doing other things", "score": 0.9947860240936279, "confirmed": null}
+{"t": 10619.925148488, "prediction": "Doing other things", "score": 0.9924991726875305, "confirmed": null}
+{"t": 10620.929252349, "loop_hz": 29.878332873927626}
+{"t": 10622.933265265, "loop_hz": 29.939926794381538}
+{"t": 10624.941297945, "loop_hz": 29.879991793734742}
+{"t": 10626.949261097, "loop_hz": 29.881026422365093}
+{"t": 10628.953403146, "loop_hz": 29.937997673314722}
+{"t": 10630.961349561, "loop_hz": 29.881275492127312}
+{"t": 10632.965496564, "loop_hz": 29.93792367034797}
+{"t": 10634.973403782, "loop_hz": 29.881858814060887}
+{"t": 10636.981613476, "loop_hz": 29.877358016570728}
+{"t": 10638.985468746, "loop_hz": 29.942282208850898}
+{"t": 10640.993573331, "loop_hz": 29.878921868999434}
+{"t": 10643.001726668, "loop_hz": 29.878196497483913}
